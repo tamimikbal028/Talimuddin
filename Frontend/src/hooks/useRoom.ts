@@ -14,7 +14,7 @@ import { commentHooks } from "./common/useComment";
 
 const useCreateRoom = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (roomData: {
@@ -25,15 +25,13 @@ const useCreateRoom = () => {
       allowComments: boolean;
     }) => roomService.createRoom(roomData),
     onSuccess: (data) => {
-      toast.success(data.message);
+      toast.success(`Room "${data.data.roomName}" created successfully!`);
 
       queryClient.invalidateQueries({ queryKey: ["myRooms"] });
       queryClient.invalidateQueries({ queryKey: ["allRooms"] });
 
-      const roomId = data.data.room._id;
-      if (roomId) {
-        navigate(`/classroom/rooms/${roomId}`);
-      }
+      // const roomId = data.data.roomId;
+      // navigate(`/classroom/rooms/${roomId}`);
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message || "Failed to create room");

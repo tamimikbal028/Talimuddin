@@ -11,11 +11,11 @@ import {
 // 🚀 1. CREATE ROOM
 // ==========================================
 const createRoom = asyncHandler(async (req, res) => {
-  const { room } = await roomActions.createRoomService(req.body, req.user._id);
+  const result = await roomActions.createRoomService(req.body, req.user._id);
 
   return res
     .status(201)
-    .json(new ApiResponse(201, { room }, "Room created successfully"));
+    .json(new ApiResponse(201, result, "Room created successfully"));
 });
 
 // ==========================================

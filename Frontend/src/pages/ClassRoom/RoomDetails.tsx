@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { roomHooks } from "../../hooks/useRoom";
 import RoomHeader from "../../components/ClassRoom/details-page/RoomHeader";
@@ -48,9 +48,40 @@ const RoomDetails: React.FC = () => {
       <div className="mx-auto max-w-5xl">
         <div className="space-y-3 rounded-xl shadow">
           <Routes>
-            <Route index element={<RoomPosts />} />
-            <Route path="members" element={<RoomMembersTab />} />
-            <Route path="files" element={<RoomFiles />} />
+            <Route
+              index
+              element={
+                meta.isMember || meta.isAdmin ? (
+                  <RoomPosts />
+                ) : (
+                  <Navigate to="about" replace />
+                )
+              }
+            />
+            <Route
+              path="members"
+              element={
+                meta.isMember || meta.isAdmin ? (
+                  <RoomMembersTab />
+                ) : (
+                  <div className="p-10 text-center text-gray-500">
+                    You must be a member to view this content.
+                  </div>
+                )
+              }
+            />
+            <Route
+              path="files"
+              element={
+                meta.isMember || meta.isAdmin ? (
+                  <RoomFiles />
+                ) : (
+                  <div className="p-10 text-center text-gray-500">
+                    You must be a member to view this content.
+                  </div>
+                )
+              }
+            />
             <Route path="about" element={<RoomAbout room={room} />} />
           </Routes>
         </div>

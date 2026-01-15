@@ -23,14 +23,7 @@ const roomMembershipSchema = new Schema(
       index: true,
     },
 
-    // CR (Class Representative): Student can be promoted to CR
-    isCR: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Admin: Can manage room (archive, edit settings)
-    isAdmin: {
+    isTeacher: {
       type: Boolean,
       default: false,
     },

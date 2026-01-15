@@ -12,9 +12,8 @@ interface RoomMemberItem {
     memberId: string;
     role: string;
     isSelf: boolean;
-    isCR: boolean;
-    isAdmin: boolean;
     isCreator: boolean;
+    isTeacher: boolean;
   };
 }
 
@@ -35,20 +34,15 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({ member }) => {
         </span>
       );
     }
-    if (meta.isAdmin) {
+
+    if (meta.isTeacher) {
       return (
         <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
-          Admin
+          Teacher
         </span>
       );
     }
-    if (meta.isCR) {
-      return (
-        <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-          CR
-        </span>
-      );
-    }
+
     return null;
   };
 

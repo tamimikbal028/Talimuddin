@@ -2,12 +2,7 @@ import type { User } from "./user.types";
 import type { Pagination } from "./common.types";
 
 // Room Types
-export type RoomType =
-  | "UNIVERSITY"
-  | "COLLEGE"
-  | "COACHING"
-  | "SCHOOL"
-  | "GENERAL";
+export type RoomType = "MAIN_BRANCH" | "SUB_BRANCH";
 
 // Room Settings
 export interface RoomSettings {
@@ -26,37 +21,24 @@ export interface Room {
   creator: User;
   membersCount: number;
   postsCount: number;
-  isArchived: boolean;
   isDeleted: boolean;
   settings: RoomSettings;
   createdAt: string;
   updatedAt: string;
 }
 
-// Room in list (getMyRooms response) - includes isCR from membership
+// Room in list (getMyRooms response)
 export interface RoomListItem {
   _id: string;
   name: string;
-  description?: string;
   coverImage: string;
-  roomType: RoomType;
-  creator: User;
-  membersCount: number;
-  postsCount: number;
-  joinCode: string;
-  isCR: boolean; // From membership
-  isArchived: boolean;
-  createdAt: string;
 }
 
 // Room Meta (from getRoomDetails)
 export interface RoomMeta {
   isMember: boolean;
   isTeacher: boolean;
-  isCreator: boolean;
   isAdmin: boolean;
-  isCR: boolean;
-  isHidden: boolean;
   joinCode: string | null;
 }
 
@@ -86,7 +68,8 @@ export interface CreateRoomResponse {
   success: boolean;
   message: string;
   data: {
-    room: Room;
+    roomId: string;
+    roomName: string;
   };
 }
 

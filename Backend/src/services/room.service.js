@@ -19,12 +19,10 @@ const roomActions = {
       throw new ApiError(404, "User not found");
     }
 
-    // Only owner can create rooms
-    if (user.userType !== USER_TYPES.OWNER) {
-      throw new ApiError(403, "Only owner can create rooms");
+    if (user.userType !== USER_TYPES.ADMIN) {
+      throw new ApiError(403, "Only admin can create rooms");
     }
 
-    // Generate unique 6-character alphanumeric join code
     const generateJoinCode = () => {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed confusing chars: 0,O,1,I
       let code = "";
@@ -68,7 +66,7 @@ const roomActions = {
       throw new ApiError(500, "Failed to create room");
     }
 
-    return { room };
+    return { roomId: room._id, roomName: room.name };
   },
 
   // 🚀 JOIN ROOM (via join code only) - Creates PENDING request
@@ -103,8 +101,9 @@ const roomActions = {
       room: room._id,
       user: userId,
       isPending: true,
-      isCR: false,
-      isAdmin: false,
+      room: room._id,
+      user: userId,
+      isPending: true,
     });
 
     return {
@@ -156,9 +155,12 @@ const roomActions = {
       throw new ApiError(404, "Room already deleted");
     }
 
-    // Only creator can delete
-    if (room.creator.toString() !== userId.toString()) {
-      throw new ApiError(403, "Only room creator can delete room");
+    // Only Owner or Admin can delete
+    const user = await User.findById(userId);
+    const isAdmin = user?.userType === USER_TYPES.ADMIN;
+
+    if (!isAdmin) {
+      throw new ApiError(403, "Only admin can delete room");
     }
 
     room.isDeleted = true;
@@ -181,18 +183,17 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if user is creator or admin
-    const isCreator = room.creator.toString() === userId.toString();
+    // Check if user is admin (global or room) or owner
+    const user = await User.findById(userId);
+    const isGlobalAdmin = user?.userType === USER_TYPES.ADMIN;
+
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
-    if (!isCreator && !membership?.isAdmin) {
-      throw new ApiError(
-        403,
-        "Only room creator or admin can update room details"
-      );
+    if (!isGlobalAdmin && !membership?.isTeacher) {
+      throw new ApiError(403, "Only admin or teacher can update room details");
     }
 
     // Update allowed fields
@@ -223,14 +224,16 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if user is creator or admin
-    const isCreator = room.creator.toString() === userId.toString();
+    // Check if user is admin (global or room) or owner
+    const user = await User.findById(userId);
+    const isGlobalAdmin = user?.userType === USER_TYPES.ADMIN;
+
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
-    if (!isCreator && !membership?.isAdmin) {
+    if (!isGlobalAdmin && !membership?.isTeacher) {
       throw new ApiError(403, "Permission denied");
     }
 
@@ -260,23 +263,20 @@ const roomActions = {
     if (!currentUser) throw new ApiError(404, "User not found");
 
     // Check if user has permission: OWNER, ADMIN, or TEACHER (who is member)
-    const isOwner = currentUser.userType === USER_TYPES.OWNER;
-    const isAdmin = currentUser.userType === USER_TYPES.ADMIN;
+    const isGlobalAdmin = currentUser.userType === USER_TYPES.ADMIN; // Renamed to clarify global role
 
-    let isTeacher = false;
-    if (currentUser.userType === USER_TYPES.TEACHER) {
-      const userMembership = await RoomMembership.findOne({
-        room: roomId,
-        user: userId,
-        isPending: false,
-      });
-      isTeacher = !!userMembership;
-    }
+    const userMembership = await RoomMembership.findOne({
+      room: roomId,
+      user: userId,
+      isPending: false,
+    });
 
-    if (!isOwner && !isAdmin && !isTeacher) {
+    const isTeacher = userMembership?.isTeacher || false;
+
+    if (!isGlobalAdmin && !isTeacher) {
       throw new ApiError(
         403,
-        "Only teachers (who are members), admins, or owners can accept join requests"
+        "Only teachers or admins can accept join requests"
       );
     }
 
@@ -318,23 +318,20 @@ const roomActions = {
     if (!currentUser) throw new ApiError(404, "User not found");
 
     // Check if user has permission: OWNER, ADMIN, or TEACHER (who is member)
-    const isOwner = currentUser.userType === USER_TYPES.OWNER;
-    const isAdmin = currentUser.userType === USER_TYPES.ADMIN;
+    const isGlobalAdmin = currentUser.userType === USER_TYPES.ADMIN;
 
-    let isTeacher = false;
-    if (currentUser.userType === USER_TYPES.TEACHER) {
-      const userMembership = await RoomMembership.findOne({
-        room: roomId,
-        user: userId,
-        isPending: false,
-      });
-      isTeacher = !!userMembership;
-    }
+    const userMembership = await RoomMembership.findOne({
+      room: roomId,
+      user: userId,
+      isPending: false,
+    });
 
-    if (!isOwner && !isAdmin && !isTeacher) {
+    const isTeacher = userMembership?.isTeacher || false;
+
+    if (!isGlobalAdmin && !isTeacher) {
       throw new ApiError(
         403,
-        "Only teachers (who are members), admins, or owners can reject join requests"
+        "Only teachers or admins can reject join requests"
       );
     }
 
@@ -373,7 +370,6 @@ const roomServices = {
     const rooms = await Room.find({
       isDeleted: false,
     })
-      .populate("creator", "fullName userName avatar")
       .skip(skip)
       .limit(parseInt(limit))
       .sort({ createdAt: -1 });
@@ -381,18 +377,7 @@ const roomServices = {
     const formattedRooms = rooms.map((room) => ({
       _id: room._id,
       name: room.name,
-      description: room.description,
       coverImage: room.coverImage,
-      roomType: room.roomType,
-      creator: {
-        _id: room.creator._id,
-        fullName: room.creator.fullName,
-        userName: room.creator.userName,
-        avatar: room.creator.avatar,
-      },
-      membersCount: room.membersCount,
-      postsCount: room.postsCount,
-      createdAt: room.createdAt,
     }));
 
     const totalDocs = await Room.countDocuments({
@@ -426,13 +411,7 @@ const roomServices = {
       isPending: false,
       room: { $in: validRooms },
     })
-      .populate({
-        path: "room",
-        populate: {
-          path: "creator",
-          select: "fullName userName avatar",
-        },
-      })
+      .populate("room")
       .skip(skip)
       .limit(parseInt(limit))
       .sort({ createdAt: -1 });
@@ -442,20 +421,7 @@ const roomServices = {
       return {
         _id: room._id,
         name: room.name,
-        description: room.description,
         coverImage: room.coverImage,
-        roomType: room.roomType,
-        creator: {
-          _id: room.creator._id,
-          fullName: room.creator.fullName,
-          userName: room.creator.userName,
-          avatar: room.creator.avatar,
-        },
-        membersCount: room.membersCount,
-        postsCount: room.postsCount,
-        joinCode: room.joinCode,
-        isCR: membership.isCR,
-        createdAt: room.createdAt,
       };
     });
 
@@ -493,32 +459,24 @@ const roomServices = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check membership
+    // Check membership or Access Rights
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
     const user = await User.findById(userId);
-
-    const isCreator = room.creator._id.toString() === userId.toString();
-    const isOwner = user?.userType === USER_TYPES.OWNER;
     const isAdmin = user?.userType === USER_TYPES.ADMIN;
+    const isTeacher = membership?.isTeacher || false;
+    const isCreator = room.creator._id.toString() === userId.toString();
 
     const meta = {
       isMember: !!membership,
-      isOwner,
       isAdmin,
+      isTeacher,
       isCreator,
-      isRoomAdmin: membership?.isAdmin || false,
-      isCR: membership?.isCR || false,
-      joinCode: membership ? room.joinCode : null, // Only show to members
-      // Button visibility logic:
-      // - Owner: Can create rooms (show create button on room list)
-      // - Admin: Already member of all rooms (no join button needed)
-      // - Normal/Teacher: Show join button if not member
-      canJoin: !isOwner && !isAdmin && !membership,
-      canCreate: isOwner,
+      canJoin: !isAdmin && !membership, // Admins don't need to join, but teachers are members so !membership handles them
+      canCreate: isAdmin,
     };
 
     return { room, meta };
@@ -535,16 +493,21 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
+    const user = await User.findById(userId);
+    const isAdmin = user?.userType === USER_TYPES.ADMIN;
+
     // Check membership
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
-    if (!membership) {
+
+    const isTeacher = membership?.isTeacher || false;
+
+    // Allow if Admin OR Member (Teacher is a member)
+    if (!membership && !isAdmin) {
       throw new ApiError(403, "You must be a member to post in this room");
     }
-
-    const user = await User.findById(userId);
 
     // Check if student posting is allowed
     if (
@@ -573,12 +536,18 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Check membership
+    // Check membership or Access Rights
+    const user = await User.findById(userId);
+    const isAdmin = user?.userType === USER_TYPES.ADMIN;
+
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
-    if (!membership) {
+
+    const isTeacher = membership?.isTeacher || false;
+
+    if (!membership && !isAdmin) {
       throw new ApiError(403, "You are not a member of this room");
     }
 
@@ -604,19 +573,17 @@ const roomPostsAndMembers = {
 
     const readMap = new Map(readStatuses.map((r) => [r.post.toString(), true]));
 
-    const isCreator = room.creator.toString() === userId.toString();
-    const isAdmin = membership.isAdmin;
-
     const postsWithMeta = posts.map((post) => ({
       post: post,
       meta: {
-        isSaved: false, // Bookmark feature not implemented yet
+        // ... existing meta
+        isSaved: false,
         isRead: readMap.has(post._id.toString()),
         isMine: post.author._id.toString() === userId.toString(),
         canDelete:
-          isCreator ||
-          isAdmin ||
-          post.author._id.toString() === userId.toString(),
+          isAdmin || // Global Admin
+          isTeacher || // Teacher of this room
+          post.author._id.toString() === userId.toString(), // Post Author
       },
     }));
 
@@ -644,12 +611,18 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Check membership
+    // Check membership or Access Rights
+    const user = await User.findById(userId);
+    const isAdmin = user?.userType === USER_TYPES.ADMIN;
+
     const currentUserMembership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
-    if (!currentUserMembership) {
+
+    const isTeacher = currentUserMembership?.isTeacher || false;
+
+    if (!currentUserMembership && !isAdmin) {
       throw new ApiError(403, "You are not a member of this room");
     }
 
@@ -662,7 +635,6 @@ const roomPostsAndMembers = {
       .limit(parseInt(limit));
 
     const isCreator = room.creator.toString() === userId.toString();
-    const isAdmin = currentUserMembership.isAdmin;
 
     const members = memberships.map((membership) => {
       const user = membership.user;
@@ -673,10 +645,8 @@ const roomPostsAndMembers = {
       let role = "MEMBER";
       if (room.creator.toString() === userIdStr) {
         role = "CREATOR";
-      } else if (membership.isAdmin) {
-        role = "ADMIN";
-      } else if (membership.isCR) {
-        role = "CR";
+      } else if (membership.isTeacher) {
+        role = "TEACHER";
       }
 
       return {
@@ -690,8 +660,7 @@ const roomPostsAndMembers = {
           memberId: membership._id,
           role,
           isSelf,
-          isCR: membership.isCR,
-          isAdmin: membership.isAdmin,
+          isTeacher: membership.isTeacher,
           isCreator: room.creator.toString() === userIdStr,
         },
       };
@@ -726,29 +695,21 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Get current user info
     const currentUser = await User.findById(userId);
     if (!currentUser) throw new ApiError(404, "User not found");
 
-    // Check if user has permission: OWNER, ADMIN, or TEACHER (who is member)
-    const isOwner = currentUser.userType === USER_TYPES.OWNER;
-    const isAdmin = currentUser.userType === USER_TYPES.ADMIN;
+    const isGlobalAdmin = currentUser.userType === USER_TYPES.ADMIN;
 
-    let isTeacher = false;
-    if (currentUser.userType === USER_TYPES.TEACHER) {
-      const userMembership = await RoomMembership.findOne({
-        room: roomId,
-        user: userId,
-        isPending: false,
-      });
-      isTeacher = !!userMembership;
-    }
+    const userMembership = await RoomMembership.findOne({
+      room: roomId,
+      user: userId,
+      isPending: false,
+    });
 
-    if (!isOwner && !isAdmin && !isTeacher) {
-      throw new ApiError(
-        403,
-        "Only teachers (who are members), admins, or owners can view join requests"
-      );
+    const isTeacher = userMembership?.isTeacher || false;
+
+    if (!isGlobalAdmin && !isTeacher) {
+      throw new ApiError(403, "Only teachers or admins can view join requests");
     }
 
     const skip = (page - 1) * limit;

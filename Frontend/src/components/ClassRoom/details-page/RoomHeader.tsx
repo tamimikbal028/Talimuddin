@@ -40,12 +40,12 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                   </div>
 
                   {/* Join Code Display */}
-                  {meta.joinCode && (
+                  {room.joinCode && (
                     <div className="flex items-center gap-2">
                       <button
                         onClick={async () => {
                           try {
-                            await navigator.clipboard.writeText(meta.joinCode!);
+                            await navigator.clipboard.writeText(room.joinCode!);
                             // You can add toast notification here if needed
                           } catch (error) {
                             console.error("Failed to copy:", error);
@@ -55,7 +55,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                         title="Click to copy join code"
                       >
                         <span className="font-mono text-sm font-semibold text-gray-700">
-                          {meta.joinCode}
+                          {room.joinCode}
                         </span>
                       </button>
                     </div>
@@ -65,7 +65,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                 {room.description && (
                   <p className="mt-4 text-gray-700">{room.description}</p>
                 )}
-                <RoomDetailsNavBar />
+                <RoomDetailsNavBar meta={meta} />
               </div>
             </div>
           </div>
