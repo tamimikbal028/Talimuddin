@@ -17,9 +17,9 @@ export const RELIGIONS = {
   OTHERS: "Others",
 };
 
+// Account Status
 export const ACCOUNT_STATUS = {
   ACTIVE: "ACTIVE",
-  SUSPENDED: "SUSPENDED",
   BANNED: "BANNED",
   DELETED: "DELETED",
 };
