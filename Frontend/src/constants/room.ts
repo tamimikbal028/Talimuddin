@@ -1,0 +1,4 @@
+export const ROOM_TYPES = {
+  MAIN_BRANCH: "MAIN_BRANCH",
+  SUB_BRANCH: "SUB_BRANCH",
+} as const;
