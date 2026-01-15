@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FaPlus, FaSignInAlt } from "react-icons/fa";
+import { FaSignInAlt } from "react-icons/fa";
 import { authHooks } from "../../hooks/useAuth";
 import { USER_TYPES } from "../../constants/user";
 
@@ -23,15 +23,6 @@ const Header: React.FC = () => {
         <p className="text-gray-600">Join and manage your classes.</p>
       </div>
       <div>
-        {showButtons && canCreateRoom && (
-          <Link
-            to="/classroom/createroom"
-            className="flex items-center gap-2 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition-colors hover:border-blue-400 hover:bg-blue-100"
-          >
-            <FaPlus className="h-4 w-4" />
-            Create Room
-          </Link>
-        )}
         {showButtons && !canCreateRoom && (
           <Link
             to="/classroom/joinroom"
