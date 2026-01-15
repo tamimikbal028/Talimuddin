@@ -34,13 +34,15 @@ import { authHooks } from "../hooks/useAuth";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
+  allowedRoles?: string[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAuth = true,
+  allowedRoles = [],
 }) => {
-  const { isAuthenticated, isCheckingAuth } = authHooks.useUser();
+  const { user, isAuthenticated, isCheckingAuth } = authHooks.useUser();
   const location = useLocation();
 
   // ⏳ Auth check চলছে - Loading দেখাও
@@ -50,22 +52,39 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="flex flex-col items-center space-y-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
           <p className="text-gray-600">Loading...</p>
-          <p className="text-gray-600">User is Not Authenticated</p>
         </div>
       </div>
     );
   }
 
   // 🔒 Auth required but not logged in → Login page এ পাঠাও
-  // location.state এ current path save করো যাতে login এর পর ফেরত আসতে পারে
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 🚫 Already logged in but trying to access login/register → Home এ পাঠাও
-  // Logged in user এর login page দেখার দরকার নেই
+  // 🚫 Already logged in but trying to access login/register → appropriate Home এ পাঠাও
   if (!requireAuth && isAuthenticated) {
+    if (user?.userType === "owner" || user?.userType === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
     return <Navigate to="/" replace />;
+  }
+
+  // 🛑 Role check - If role is not allowed, redirect to appropriate home
+  if (isAuthenticated && allowedRoles.length > 0 && user) {
+    if (!allowedRoles.includes(user.userType)) {
+      // If a normal user tries to access admin page
+      if (location.pathname.startsWith("/admin")) {
+        return <Navigate to="/" replace />;
+      }
+      // If an admin tries to access normal home (optional, based on your requirement)
+      if (
+        location.pathname === "/" &&
+        (user.userType === "owner" || user.userType === "admin")
+      ) {
+        return <Navigate to="/admin/dashboard" replace />;
+      }
+    }
   }
 
   // ✅ All checks passed - Content দেখাও
@@ -73,5 +92,3 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
-
-

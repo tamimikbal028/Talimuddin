@@ -65,7 +65,13 @@ const useRegister = (): UseMutationResult<
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       toast.success(response.message);
-      navigate("/");
+
+      const user = response.data.user;
+      if (user.userType === "owner" || user.userType === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Registration failed");
@@ -88,7 +94,13 @@ const useLogin = (): UseMutationResult<
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       toast.success(response.message);
-      navigate("/");
+
+      const user = response.data.user;
+      if (user.userType === "owner" || user.userType === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Internal server error");
