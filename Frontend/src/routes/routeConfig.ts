@@ -132,6 +132,16 @@ export const routes: RouteConfig[] = [
     meta: { description: "Find blood donors and save lives" },
   },
 
+  // Admin Routes
+  {
+    path: "/admin/dashboard",
+    component: lazy(() => import("../pages/Admin/AdminDashboard")),
+    requireAuth: true,
+    title: "Admin Dashboard",
+    category: "admin",
+    meta: { description: "Administrative tools" },
+  },
+
   // 404 route
   {
     path: "*",

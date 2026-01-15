@@ -64,26 +64,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // 🚫 Already logged in but trying to access login/register → appropriate Home এ পাঠাও
   if (!requireAuth && isAuthenticated) {
-    if (user?.userType === "owner" || user?.userType === "admin") {
-      return <Navigate to="/admin/dashboard" replace />;
-    }
     return <Navigate to="/" replace />;
   }
 
-  // 🛑 Role check - If role is not allowed, redirect to appropriate home
+  // 🛑 Role check - If role is not allowed, redirect to Home
   if (isAuthenticated && allowedRoles.length > 0 && user) {
     if (!allowedRoles.includes(user.userType)) {
-      // If a normal user tries to access admin page
-      if (location.pathname.startsWith("/admin")) {
-        return <Navigate to="/" replace />;
-      }
-      // If an admin tries to access normal home (optional, based on your requirement)
-      if (
-        location.pathname === "/" &&
-        (user.userType === "owner" || user.userType === "admin")
-      ) {
-        return <Navigate to="/admin/dashboard" replace />;
-      }
+      return <Navigate to="/" replace />;
     }
   }
 

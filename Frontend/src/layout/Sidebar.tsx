@@ -9,6 +9,7 @@ import {
   FaBookmark,
   FaHome,
   FaTint,
+  FaUserShield,
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
@@ -17,6 +18,9 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const { mutate: logout, isPending: isLoggingOut } = authHooks.useLogout();
   const { user } = authHooks.useUser();
+
+  const isOwnerOrAdmin =
+    user?.userType === "owner" || user?.userType === "admin";
 
   // Dynamic profile path - uses username
   const profilePath = user?.userName ? `/profile/${user.userName}` : "/profile";
@@ -65,6 +69,16 @@ const Sidebar: React.FC = () => {
       path: "/settings",
       active: location.pathname.startsWith("/settings"),
     },
+    ...(isOwnerOrAdmin
+      ? [
+          {
+            icon: FaUserShield,
+            label: "Admin Dashboard",
+            path: "/admin/dashboard",
+            active: location.pathname.startsWith("/admin/dashboard"),
+          },
+        ]
+      : []),
   ];
 
   return (
