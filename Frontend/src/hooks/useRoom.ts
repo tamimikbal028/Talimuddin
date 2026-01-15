@@ -21,16 +21,18 @@ const useCreateRoom = () => {
       name: string;
       description?: string;
       roomType: string;
-      allowStudentPosting?: boolean;
-      allowComments?: boolean;
+      allowStudentPosting: boolean;
+      allowComments: boolean;
     }) => roomService.createRoom(roomData),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
 
-      const roomId = data.data.room?._id;
+      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["allRooms"] });
+
+      const roomId = data.data.room._id;
       if (roomId) {
-        navigate(`/rooms/${roomId}`);
+        navigate(`/classroom/rooms/${roomId}`);
       }
     },
     onError: (error: AxiosError<ApiError>) => {

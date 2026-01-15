@@ -8,19 +8,17 @@ import type {
 } from "../types";
 
 export const roomService = {
-  // Create Room (Teachers only)
   createRoom: async (roomData: {
     name: string;
     description?: string;
     roomType: string;
-    allowStudentPosting?: boolean;
-    allowComments?: boolean;
+    allowStudentPosting: boolean;
+    allowComments: boolean;
   }): Promise<CreateRoomResponse> => {
     const response = await api.post<CreateRoomResponse>("/rooms", roomData);
     return response.data;
   },
 
-  // Get All Rooms
   getAllRooms: async (page = 1): Promise<MyRoomsResponse> => {
     const limit = ROOM_LIMIT;
     const response = await api.get<MyRoomsResponse>("/rooms/all", {
@@ -29,7 +27,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Get My Rooms
   getMyRooms: async (page = 1): Promise<MyRoomsResponse> => {
     const limit = ROOM_LIMIT;
     const response = await api.get<MyRoomsResponse>("/rooms/my", {
@@ -38,13 +35,11 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Room Details
   getRoomDetails: async (roomId: string): Promise<RoomDetailsResponse> => {
     const response = await api.get<RoomDetailsResponse>(`/rooms/${roomId}`);
     return response.data;
   },
 
-  // Join Room (by join code only)
   joinRoom: async (joinCode: string): Promise<JoinRoomResponse> => {
     const response = await api.post<JoinRoomResponse>("/rooms/join", {
       joinCode,
@@ -52,7 +47,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Leave Room
   leaveRoom: async (roomId: string) => {
     const response = await api.post(`/rooms/${roomId}/leave`);
     return response.data;
@@ -64,7 +58,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Pending Join Requests (Owner, Admin, Teacher members)
   getPendingJoinRequests: async (roomId: string, page = 1) => {
     const response = await api.get(`/rooms/${roomId}/requests/pending`, {
       params: { page, limit: 20 },
@@ -72,7 +65,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Accept Join Request
   acceptJoinRequest: async (roomId: string, requestId: string) => {
     const response = await api.post(
       `/rooms/${roomId}/requests/${requestId}/accept`
@@ -80,7 +72,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Reject Join Request
   rejectJoinRequest: async (roomId: string, requestId: string) => {
     const response = await api.post(
       `/rooms/${roomId}/requests/${requestId}/reject`
@@ -88,7 +79,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Update Room (Creator or Admin)
   updateRoom: async (
     roomId: string,
     updateData: {
@@ -105,7 +95,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Update Room Cover Image (Creator or Admin)
   updateRoomCoverImage: async (roomId: string, coverImage: File) => {
     const formData = new FormData();
     formData.append("coverImage", coverImage);

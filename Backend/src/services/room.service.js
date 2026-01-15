@@ -49,18 +49,18 @@ const roomActions = {
     // Create Room
     const room = await Room.create({
       name: roomData.name,
-      description: roomData.description || "",
+      description: roomData.description || "No description provided",
       roomType: roomData.roomType,
       coverImage:
-        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=800&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=800&h=400&fit=crop",
       creator: userId,
       joinCode,
       isDeleted: false,
       membersCount: 0,
       postsCount: 0,
       settings: {
-        allowStudentPosting: roomData.allowStudentPosting ?? true,
-        allowComments: roomData.allowComments ?? true,
+        allowStudentPosting: roomData.allowStudentPosting,
+        allowComments: roomData.allowComments,
       },
     });
 
@@ -68,15 +68,7 @@ const roomActions = {
       throw new ApiError(500, "Failed to create room");
     }
 
-    // Owner doesn't become a member, but has full access
-
-    const meta = {
-      isMember: false,
-      isCreator: true,
-      joinCode,
-    };
-
-    return { room, meta };
+    return { room };
   },
 
   // 🚀 JOIN ROOM (via join code only) - Creates PENDING request

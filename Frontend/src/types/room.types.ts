@@ -87,11 +87,6 @@ export interface CreateRoomResponse {
   message: string;
   data: {
     room: Room;
-    meta: {
-      isMember: boolean;
-      isCreator: boolean;
-      joinCode: string;
-    };
   };
 }
 
