@@ -1,14 +1,16 @@
 import React from "react";
-import RoomCard from "../RoomCard";
-import RoomCardSkeleton from "../../shared/skeletons/RoomCardSkeleton";
-import ErrorState from "../../shared/ErrorState";
-import EmptyState from "../../shared/EmptyState";
-import { roomHooks } from "../../../hooks/useRoom";
-import { ROOM_LIMIT } from "../../../constants";
-import type { RoomListItem } from "../../../types";
+import RoomCard from "../../components/ClassRoom/RoomCard";
+import RoomCardSkeleton from "../../components/shared/skeletons/RoomCardSkeleton";
+import ErrorState from "../../components/shared/ErrorState";
+import EmptyState from "../../components/shared/EmptyState";
+import { roomHooks } from "../../hooks/useRoom";
+import { authHooks } from "../../hooks/useAuth";
+import { USER_TYPES } from "../../constants/user";
+import { ROOM_LIMIT } from "../../constants";
+import type { RoomListItem } from "../../types";
 import { FaDoorOpen } from "react-icons/fa";
 
-const AllRooms: React.FC = () => {
+const Rooms: React.FC = () => {
   const {
     data,
     fetchNextPage,
@@ -16,7 +18,8 @@ const AllRooms: React.FC = () => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = roomHooks.useAllRooms();
+  } = roomHooks.useMyRooms();
+  const { user } = authHooks.useUser();
 
   const rooms: RoomListItem[] =
     data?.pages.flatMap((page) => page.data.rooms) || [];
@@ -46,20 +49,27 @@ const AllRooms: React.FC = () => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          All Rooms {totalDocs ? `(${totalDocs})` : ""}
+          Joined Rooms {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 
       {/* no rooms message */}
       {rooms.length === 0 ? (
-        <EmptyState icon={FaDoorOpen} message="No rooms found in the system." />
+        <EmptyState
+          icon={FaDoorOpen}
+          message={
+            user?.userType === USER_TYPES.TEACHER
+              ? "Create or join a room to get started."
+              : "Join a room to get started."
+          }
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {rooms.map((r) => (
               <RoomCard key={r._id} room={r} />
             ))}
-            {/* Loading Skeleton for Next Page */}
+            {/* Loading Skeleton for Next Page inside the same grid */}
             {isFetchingNextPage &&
               [...Array(ROOM_LIMIT)].map((_, i) => (
                 <RoomCardSkeleton key={`skeleton-${i}`} />
@@ -84,4 +94,4 @@ const AllRooms: React.FC = () => {
   );
 };
 
-export default AllRooms;
+export default Rooms;
