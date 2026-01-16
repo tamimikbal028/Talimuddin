@@ -44,19 +44,10 @@ const RoomDetails: React.FC = () => {
     return (
       <div className="space-y-5">
         <RoomHeader room={room} meta={meta} />
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-center gap-5 rounded-2xl border border-gray-200 bg-white p-5 text-center shadow-sm">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-gray-900">
-              You are not a member of this room.
-            </h2>
-          </div>
-          <Link
-            to="/classroom"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-blue-200"
-          >
-            Back to Classroom
-          </Link>
-        </div>
+
+        <h2 className="rounded-2xl border-2 border-gray-200 bg-gray-50 p-5 py-10 text-center text-2xl font-bold text-gray-900">
+          You are not a member of this room.
+        </h2>
       </div>
     );
   }

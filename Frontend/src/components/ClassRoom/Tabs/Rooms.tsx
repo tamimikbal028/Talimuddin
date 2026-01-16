@@ -49,7 +49,7 @@ const Rooms: React.FC = () => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          Rooms {totalDocs ? `(${totalDocs})` : ""}
+          Joined Rooms {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 

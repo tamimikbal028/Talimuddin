@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 import Header from "../components/ClassRoom/Header";
-import ClassRoomNavBar from "../components/ClassRoom/ClassRoomNavBar";
 import Rooms from "../components/ClassRoom/Tabs/Rooms";
 import PageLoader from "./Fallbacks/PageLoader";
 
@@ -16,11 +15,10 @@ const AllRooms = lazy(() => import("../components/ClassRoom/Tabs/AllRooms"));
 
 const ClassRoomLayout: React.FC = () => {
   return (
-    <>
+    <div className="max-w-7xl space-y-5">
       <Header />
-      <ClassRoomNavBar />
       <Outlet />
-    </>
+    </div>
   );
 };
 

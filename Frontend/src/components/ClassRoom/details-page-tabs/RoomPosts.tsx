@@ -66,7 +66,9 @@ const RoomPosts: React.FC = () => {
         </div>
       ) : (
         <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow">
-          <p className="text-gray-500">No posts yet. Be the first to post!</p>
+          <p className="text-xl font-semibold text-gray-500">
+            No posts available.
+          </p>
         </div>
       )}
       {/* Load More Button */}
