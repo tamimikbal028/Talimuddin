@@ -72,10 +72,8 @@ export interface RoomDetailsResponse {
 }
 
 export interface RoomDetailsMeta {
-  isMember: boolean;
-  isAdmin: boolean;
-  isAppAdmin: boolean;
-  isAppOwner: boolean;
+  canPost: boolean;
+  hasAccess: boolean;
 }
 
 export interface CreateRoomResponse {

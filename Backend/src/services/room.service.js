@@ -226,17 +226,22 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if requester is creator or admin
-    const isCreator = room.creator.toString() === creatorOrAdminId.toString();
+    // Check if requester is room admin or app admin
+    const requester = await User.findById(creatorOrAdminId);
     const requesterMembership = await RoomMembership.findOne({
       room: roomId,
       user: creatorOrAdminId,
     });
 
-    if (!isCreator && !requesterMembership?.isAdmin) {
+    const hasPermission =
+      requesterMembership?.isAdmin ||
+      requester.userType === USER_TYPES.OWNER ||
+      requester.userType === USER_TYPES.ADMIN;
+
+    if (!hasPermission) {
       throw new ApiError(
         403,
-        "Only room creator or admin can accept join requests"
+        "Only room admins or app admins can accept join requests"
       );
     }
 
@@ -274,17 +279,22 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if requester is creator or admin
-    const isCreator = room.creator.toString() === creatorOrAdminId.toString();
+    // Check if requester is room admin or app admin
+    const requester = await User.findById(creatorOrAdminId);
     const requesterMembership = await RoomMembership.findOne({
       room: roomId,
       user: creatorOrAdminId,
     });
 
-    if (!isCreator && !requesterMembership?.isAdmin) {
+    const hasPermission =
+      requesterMembership?.isAdmin ||
+      requester.userType === USER_TYPES.OWNER ||
+      requester.userType === USER_TYPES.ADMIN;
+
+    if (!hasPermission) {
       throw new ApiError(
         403,
-        "Only room creator or admin can reject join requests"
+        "Only room admins or app admins can reject join requests"
       );
     }
 
@@ -312,20 +322,32 @@ const roomActions = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Check if requester is creator or admin
-    const isCreator = room.creator.toString() === creatorOrAdminId.toString();
+    // Check if requester is room admin or app admin
+    const requester = await User.findById(creatorOrAdminId);
     const requesterMembership = await RoomMembership.findOne({
       room: roomId,
       user: creatorOrAdminId,
     });
 
-    if (!isCreator && !requesterMembership?.isAdmin) {
-      throw new ApiError(403, "Only room creator or admin can remove members");
+    const hasPermission =
+      requesterMembership?.isAdmin ||
+      requester.userType === USER_TYPES.OWNER ||
+      requester.userType === USER_TYPES.ADMIN;
+
+    if (!hasPermission) {
+      throw new ApiError(
+        403,
+        "Only room admins or app admins can remove members"
+      );
     }
 
-    // Cannot remove creator
-    if (room.creator.toString() === targetUserId.toString()) {
-      throw new ApiError(400, "Cannot remove the room creator");
+    // Cannot remove admins (only app admins can)
+    if (
+      targetMembership.isAdmin &&
+      requester.userType !== USER_TYPES.OWNER &&
+      requester.userType !== USER_TYPES.ADMIN
+    ) {
+      throw new ApiError(403, "Only app admins can remove room admins");
     }
 
     const targetMembership = await RoomMembership.findOne({
@@ -337,9 +359,17 @@ const roomActions = {
       throw new ApiError(404, "User is not a member of this room");
     }
 
-    // Admin cannot remove another Admin (only Creator can)
-    if (!isCreator && targetMembership.isAdmin) {
-      throw new ApiError(403, "Admins cannot remove other admins");
+    // Permission check for removing another admin
+    if (
+      targetMembership.isAdmin &&
+      !requesterMembership?.isAdmin &&
+      requester.userType !== USER_TYPES.OWNER &&
+      requester.userType !== USER_TYPES.ADMIN
+    ) {
+      throw new ApiError(
+        403,
+        "You don't have permission to remove this member"
+      );
     }
 
     // Hard delete membership
@@ -352,14 +382,18 @@ const roomActions = {
   },
 
   // 🚀 PROMOTE TO ADMIN (Creator only)
-  promoteMemberService: async (roomId, creatorId, targetUserId) => {
+  promoteMemberService: async (roomId, adminId, targetUserId) => {
     const room = await Room.findById(roomId);
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Only creator can promote to admin
-    if (room.creator.toString() !== creatorId.toString()) {
-      throw new ApiError(403, "Only room creator can promote members to admin");
+    // Only app admins can promote
+    const requester = await User.findById(adminId);
+    if (
+      requester.userType !== USER_TYPES.OWNER &&
+      requester.userType !== USER_TYPES.ADMIN
+    ) {
+      throw new ApiError(403, "Only app admins can promote members to admin");
     }
 
     const membership = await RoomMembership.findOne({
@@ -381,15 +415,19 @@ const roomActions = {
     return { roomId: room._id, userId: targetUserId };
   },
 
-  // 🚀 DEMOTE TO MEMBER (Creator only)
-  demoteMemberService: async (roomId, creatorId, targetUserId) => {
+  // 🚀 DEMOTE ADMIN (App Admin only)
+  demoteMemberService: async (roomId, adminId, targetUserId) => {
     const room = await Room.findById(roomId);
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Only creator can demote admin
-    if (room.creator.toString() !== creatorId.toString()) {
-      throw new ApiError(403, "Only room creator can demote admins");
+    // Only app admins can demote
+    const requester = await User.findById(adminId);
+    if (
+      requester.userType !== USER_TYPES.OWNER &&
+      requester.userType !== USER_TYPES.ADMIN
+    ) {
+      throw new ApiError(403, "Only app admins can demote admins");
     }
 
     const membership = await RoomMembership.findOne({
@@ -423,9 +461,13 @@ const roomActions = {
       throw new ApiError(404, "Room already deleted");
     }
 
-    // Only creator can delete
-    if (room.creator.toString() !== userId.toString()) {
-      throw new ApiError(403, "Only room creator can delete room");
+    // Only app admins can delete room
+    const requester = await User.findById(userId);
+    if (
+      requester.userType !== USER_TYPES.OWNER &&
+      requester.userType !== USER_TYPES.ADMIN
+    ) {
+      throw new ApiError(403, "Only app admins can delete the room");
     }
 
     // 1. Soft Delete Room
@@ -470,18 +512,20 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if user is creator or admin
-    const isCreator = room.creator.toString() === userId.toString();
+    // Check if user is teacher or app admin
+    const user = await User.findById(userId);
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
-    if (!isCreator && !membership?.isAdmin) {
-      throw new ApiError(
-        403,
-        "Only room creator or admin can update room details"
-      );
+    const hasAccess =
+      membership?.isAdmin ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
+      throw new ApiError(403, "Only admins can update room details");
     }
 
     // Update allowed fields
@@ -513,14 +557,19 @@ const roomActions = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if user is creator or admin
-    const isCreator = room.creator.toString() === userId.toString();
+    // Check if user is teacher or app admin
+    const user = await User.findById(userId);
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
-    if (!isCreator && !membership?.isAdmin) {
+    const hasAccess =
+      membership?.isAdmin ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
       throw new ApiError(403, "Permission denied");
     }
 
@@ -563,12 +612,9 @@ const roomActions = {
       throw new ApiError(404, "You are not a member of this room");
     }
 
-    // 3. Check if Owner
-    if (room.creator.toString() === userId.toString()) {
-      throw new ApiError(
-        400,
-        "Owner cannot leave the room. Please archive or delete the room instead."
-      );
+    // 3. Admin warning (Optional: could prevent last admin from leaving)
+    if (membership.isAdmin) {
+      // Allow leaving for now, or add specific logic for "last admin"
     }
 
     // 4. Remove membership (Admin or Member)
@@ -659,11 +705,11 @@ const roomServices = {
       false;
 
     const meta = {
-      isMember: membership?.status === ROOM_MEMBERSHIP_STATUS.JOINED,
-      isAdmin,
-      isAppAdmin: user.userType === USER_TYPES.ADMIN,
-      isAppOwner: user.userType === USER_TYPES.OWNER,
-      canPost: isAdmin || room.settings.allowStudentPosting,
+      canPost: isAdmin,
+      hasAccess:
+        membership?.status === ROOM_MEMBERSHIP_STATUS.JOINED ||
+        user.userType === USER_TYPES.OWNER ||
+        user.userType === USER_TYPES.ADMIN,
     };
 
     return { room, meta };
@@ -685,17 +731,22 @@ const roomServices = {
       throw new ApiError(404, "Room not found");
     }
 
-    // Check if user is creator or admin
-    const isCreator = room.creator.toString() === userId.toString();
+    // Check if user is teacher or app admin
+    const user = await User.findById(userId);
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
     });
 
-    if (!isCreator && !membership?.isAdmin) {
+    const hasAccess =
+      membership?.isAdmin ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
       throw new ApiError(
         403,
-        "Only room creator or admin can view pending requests"
+        "Only room teacher or app admins can view pending requests"
       );
     }
 
@@ -912,12 +963,16 @@ const roomPostsAndMembers = {
 
     const user = await User.findById(userId);
 
-    // Check if student posting is allowed
-    if (
-      user.userType === "STUDENT" &&
-      room.settings?.allowStudentPosting === false
-    ) {
-      throw new ApiError(403, "Student posting is disabled in this room");
+    const canPost =
+      membership?.isAdmin ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!canPost) {
+      throw new ApiError(
+        403,
+        "Only the room teacher or app admins can post here"
+      );
     }
 
     // Prepare post data
@@ -944,13 +999,20 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Check membership - must be JOINED
+    // Check membership - must be JOINED (unless App Owner/Admin)
+    const user = await User.findById(userId);
     const membership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
       status: ROOM_MEMBERSHIP_STATUS.JOINED,
     });
-    if (!membership) {
+
+    const hasAccess =
+      membership ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
       throw new ApiError(403, "You are not a member of this room");
     }
 
@@ -1022,13 +1084,20 @@ const roomPostsAndMembers = {
     if (!room) throw new ApiError(404, "Room not found");
     if (room.isDeleted) throw new ApiError(404, "Room not found");
 
-    // Check membership - must be JOINED
+    // Check membership - must be JOINED (unless App Owner/Admin)
+    const user = await User.findById(userId);
     const currentUserMembership = await RoomMembership.findOne({
       room: roomId,
       user: userId,
       status: ROOM_MEMBERSHIP_STATUS.JOINED,
     });
-    if (!currentUserMembership) {
+
+    const hasAccess =
+      currentUserMembership ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
       throw new ApiError(403, "You are not a member of this room");
     }
 
