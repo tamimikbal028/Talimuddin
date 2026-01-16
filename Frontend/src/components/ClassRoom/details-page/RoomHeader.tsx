@@ -2,35 +2,30 @@ import React from "react";
 import {
   FaEllipsisH,
   FaEdit,
-  FaArchive,
   FaTrash,
-  FaEyeSlash,
-  FaVideo,
   FaSignOutAlt,
   FaArrowLeft,
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import type { Room, RoomMeta } from "../../../types";
+import type { Room } from "../../../types";
 import { roomHooks } from "../../../hooks/useRoom";
 import confirm from "../../../utils/sweetAlert";
 import RoomDetailsNavBar from "./RoomDetailsNavBar";
 import { useDropdown } from "../../../hooks/useDropdown";
+import type { RoomDetailsMeta } from "../../../types/room.types";
 
 interface RoomHeaderProps {
   room: Room;
-  meta: RoomMeta;
+  meta: RoomDetailsMeta;
 }
 
 const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
   const navigate = useNavigate();
 
-  const { mutate: toggleArchive, isPending: isArchiving } =
-    roomHooks.useToggleArchiveRoom();
   const { mutate: deleteRoom, isPending: isDeleting } =
     roomHooks.useDeleteRoom();
   const { mutate: leaveRoom, isPending: isLeaving } = roomHooks.useLeaveRoom();
-  const { mutate: hideRoom, isPending: isHiding } = roomHooks.useHideRoom();
 
   const {
     isOpen: showMenu,
@@ -42,29 +37,14 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
   } = useDropdown();
 
   const handleCopyJoinCode = async () => {
-    if (meta.joinCode) {
+    if (room.joinCode) {
       try {
-        await navigator.clipboard.writeText(meta.joinCode);
+        await navigator.clipboard.writeText(room.joinCode);
         toast.success("Join code copied to clipboard");
       } catch (error) {
         toast.error(`Failed to copy join code: ${error}`);
       }
       closeMenu();
-    }
-  };
-
-  const handleToggleArchive = async () => {
-    closeMenu();
-    const ok = await confirm({
-      title: room.isArchived ? "Unarchive Room?" : "Archive Room?",
-      text: room.isArchived
-        ? "Are you sure you want to unarchive this room?"
-        : "Are you sure you want to archive this room? Members won't be able to post.",
-      confirmButtonText: room.isArchived ? "Yes, unarchive" : "Yes, archive",
-    });
-
-    if (ok) {
-      toggleArchive(room._id);
     }
   };
 
@@ -80,21 +60,6 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
 
     if (ok) {
       deleteRoom(room._id);
-    }
-  };
-
-  const handleHide = async () => {
-    closeMenu();
-    const ok = await confirm({
-      title: meta.isHidden ? "Unhide Room?" : "Hide Room?",
-      text: meta.isHidden
-        ? "This room will be shown in your main room list again."
-        : "This room will be hidden from your room list. You can unhide it later.",
-      confirmButtonText: meta.isHidden ? "Yes, unhide" : "Yes, hide",
-    });
-
-    if (ok) {
-      hideRoom(room._id);
     }
   };
 
@@ -145,40 +110,10 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                 <h1 className="text-3xl font-bold text-gray-900">
                   {room.name}
                 </h1>
-                {meta.isHidden && (
-                  <span className="rounded-full bg-purple-100 px-3 py-1.5 text-sm font-semibold text-purple-700">
-                    Hidden
-                  </span>
-                )}
-                {room.isArchived && (
-                  <span className="rounded-full bg-yellow-100 px-3 py-1.5 text-sm font-semibold text-yellow-700">
-                    Archived
-                  </span>
-                )}
               </div>
 
               {/* Member and Post Count */}
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                {/* Privacy Badge */}
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-                    room.privacy === "PUBLIC"
-                      ? "bg-blue-100 text-blue-700"
-                      : room.privacy === "CLOSED"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {room.privacy === "PUBLIC"
-                    ? "Public"
-                    : room.privacy === "CLOSED"
-                      ? "Closed"
-                      : "Private"}
-                </span>
-
-                {/* Separator */}
-                <span className="text-gray-400">•</span>
-
                 {/* Members Count */}
                 <span className="text-sm font-medium text-gray-600">
                   <span className="font-semibold text-gray-900">
@@ -202,27 +137,21 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
 
             {/* Right: Action Buttons */}
             <div className="flex items-center gap-2">
-              {(meta.isCreator || meta.isAdmin) && (
-                <Link
-                  to={`/classroom/rooms/${room._id}/live`}
-                  className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
-                >
-                  <FaVideo className="h-4 w-4" />
-                  <span>Go Live</span>
-                </Link>
-              )}
-
               {/* Join Code Display */}
-              {meta.joinCode && (
+              {meta.isAppOwner || meta.isAppAdmin || meta.isAdmin ? (
                 <button
                   onClick={handleCopyJoinCode}
                   className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
                   title="Click to copy join code"
                 >
                   <span className="font-mono text-sm font-semibold text-gray-700">
-                    {meta.joinCode}
+                    {room.joinCode}
                   </span>
                 </button>
+              ) : (
+                <p className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600">
+                  Ask your teacher for the join code
+                </p>
               )}
 
               <div
@@ -245,23 +174,8 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                     }`}
                   >
                     <div className="py-1">
-                      {!meta.isCreator && !meta.isAdmin && meta.isMember && (
+                      {!meta.isAppOwner && !meta.isAdmin && meta.isMember && (
                         <>
-                          <button
-                            onClick={handleHide}
-                            disabled={isHiding}
-                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <FaEyeSlash className="h-4 w-4 flex-shrink-0" />
-                            <span className="font-medium">
-                              {isHiding
-                                ? "Processing..."
-                                : meta.isHidden
-                                  ? "Unhide Room"
-                                  : "Hide Room"}
-                            </span>
-                          </button>
-
                           <button
                             onClick={handleLeave}
                             disabled={isLeaving}
@@ -275,7 +189,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                         </>
                       )}
 
-                      {(meta.isCreator || meta.isAdmin) && (
+                      {(meta.isAppOwner || meta.isAppAdmin || meta.isAdmin) && (
                         <>
                           <Link
                             to={`/classroom/rooms/${room._id}/edit`}
@@ -285,25 +199,10 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                             <FaEdit className="h-4 w-4 flex-shrink-0" />
                             <span className="font-medium">Edit Room</span>
                           </Link>
-
-                          <button
-                            onClick={handleToggleArchive}
-                            disabled={isArchiving}
-                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <FaArchive className="h-4 w-4 flex-shrink-0" />
-                            <span className="font-medium">
-                              {isArchiving
-                                ? "Processing..."
-                                : room.isArchived
-                                  ? "Unarchive Room"
-                                  : "Archive Room"}
-                            </span>
-                          </button>
                         </>
                       )}
 
-                      {meta.isCreator && (
+                      {meta.isAppOwner && (
                         <button
                           onClick={handleDelete}
                           disabled={isDeleting}
@@ -338,7 +237,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
 
         {/* Navigation Tabs */}
         <div className="mx-auto max-w-5xl px-6">
-          <RoomDetailsNavBar meta={meta} />
+          <RoomDetailsNavBar />
         </div>
       </div>
     </div>

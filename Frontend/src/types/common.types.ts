@@ -1,4 +1,3 @@
-// API Response Types
 export interface ApiResponse<T> {
   statusCode: number;
   data: T;
@@ -12,6 +11,7 @@ export interface ApiError {
   message: string;
   success: false;
   errors: string[];
+  stack?: string;
 }
 
 export interface Pagination {
@@ -21,5 +21,4 @@ export interface Pagination {
   totalPages: number;
   hasNextPage: boolean;
   hasPrevPage: boolean;
-  hasMore?: boolean;
 }

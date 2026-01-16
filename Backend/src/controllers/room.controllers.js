@@ -7,14 +7,11 @@ import { roomActions, roomServices } from "../services/room.service.js";
 // 🚀 1. CREATE ROOM
 // ==========================================
 const createRoom = asyncHandler(async (req, res) => {
-  const { room, meta } = await roomActions.createRoomService(
-    req.body,
-    req.user._id
-  );
+  const room = await roomActions.createRoomService(req.body, req.user._id);
 
   return res
     .status(201)
-    .json(new ApiResponse(201, { room, meta }, "Room created successfully"));
+    .json(new ApiResponse(201, { room }, "Room created successfully"));
 });
 
 // ==========================================
@@ -35,28 +32,6 @@ const getMyRooms = asyncHandler(async (req, res) => {
         200,
         { rooms, pagination },
         "My rooms fetched successfully"
-      )
-    );
-});
-
-// ==========================================
-// 🚀 2.1. GET HIDDEN ROOMS
-// ==========================================
-const getHiddenRooms = asyncHandler(async (req, res) => {
-  const { page, limit } = req.query;
-  const { rooms, pagination } = await roomServices.getHiddenRoomsService(
-    req.user._id,
-    page,
-    limit
-  );
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { rooms, pagination },
-        "Hidden rooms fetched successfully"
       )
     );
 });

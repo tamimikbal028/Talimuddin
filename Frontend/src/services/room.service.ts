@@ -17,13 +17,12 @@ import type {
 } from "../types";
 
 export const roomService = {
-  // Create Room (Teachers only)
+  // Create Room (owner only)
   createRoom: async (roomData: {
     name: string;
     description?: string;
     roomType: string;
-    allowStudentPosting: boolean;
-    allowComments: boolean;
+    parentRoomJoinCode?: string;
   }): Promise<CreateRoomResponse> => {
     const response = await api.post<CreateRoomResponse>("/rooms", roomData);
     return response.data;

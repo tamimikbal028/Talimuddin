@@ -3,15 +3,13 @@ import { FaChalkboardTeacher, FaChevronDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { roomHooks } from "../../hooks/useRoom";
 import { useState, useRef, useEffect } from "react";
-import { ROOM_PRIVACY, ROOM_TYPES } from "../../constants";
+import { ROOM_TYPES } from "../../constants";
 
 export type RoomFormValues = {
   name: string;
   description?: string;
   roomType: string;
-  privacy: string;
-  allowStudentPosting: boolean;
-  allowComments: boolean;
+  parentRoomJoinCode?: string;
 };
 
 const CreateRoomForm = () => {
@@ -22,25 +20,20 @@ const CreateRoomForm = () => {
   const { mutate: createRoom, isPending } = roomHooks.useCreateRoom();
 
   const handleCreate = (data: RoomFormValues) => {
-    createRoom(data, {
-      onSuccess: () => {
-        navigate("/classroom");
-      },
-    });
+    createRoom(data);
   };
 
-  const { register, handleSubmit, formState, control } =
+  const { register, handleSubmit, formState, control, watch } =
     useForm<RoomFormValues>({
       defaultValues: {
         name: "",
         description: "",
         roomType: ROOM_TYPES.MAIN_ROOM,
-        privacy: ROOM_PRIVACY.PUBLIC,
-        allowStudentPosting: true,
-        allowComments: true,
+        parentRoomJoinCode: "",
       },
     });
 
+  const selectedRoomType = watch("roomType");
   const { errors } = formState;
 
   const roomTypes = [
@@ -182,40 +175,40 @@ const CreateRoomForm = () => {
         </div>
       </div>
 
-      {/* Settings */}
-      <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <h4 className="text-xl font-semibold text-gray-700">Room Settings</h4>
-
-        <label className="flex items-center gap-3">
+      {/* Sub Room Join Code */}
+      {selectedRoomType === ROOM_TYPES.SUB_ROOM && (
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Main Room Join Code <span className="text-red-500">*</span>
+          </label>
           <input
-            type="checkbox"
-            {...register("allowStudentPosting")}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600"
+            type="text"
+            {...register("parentRoomJoinCode", {
+              required:
+                selectedRoomType === ROOM_TYPES.SUB_ROOM
+                  ? "Main room join code is required"
+                  : false,
+              pattern: {
+                value: /^[A-Z0-9]{6}$/,
+                message: "Join code must be 6 alphanumeric characters",
+              },
+            })}
+            placeholder="Enter the 6-digit join code of the main room"
+            className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 font-mono text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
-          <span className="text-sm font-medium text-gray-700">
-            Allow students to create posts
-          </span>
-        </label>
-
-        <label className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            {...register("allowComments")}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600"
-          />
-          <span className="text-sm font-medium text-gray-700">
-            Allow comments on posts
-          </span>
-        </label>
-      </div>
+          {errors.parentRoomJoinCode?.message && (
+            <p className="mt-1.5 text-sm text-red-600">
+              {errors.parentRoomJoinCode.message}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-5">
         <button
           type="button"
-          onClick={() => {
-            navigate("/classroom");
-          }}
+          onClick={() => navigate("/classroom")}
           className="cursor-pointer rounded-lg border border-red-500 bg-white px-5 py-2.5 text-sm font-semibold text-red-500 shadow-sm transition-colors hover:bg-red-50"
         >
           Cancel

@@ -1,95 +1,19 @@
 import type { User } from "./user.types";
 import type { Pagination } from "./common.types";
-import { ROOM_TYPES, ROOM_PRIVACY, ROOM_ROLES } from "../constants/room";
+import { ROOM_TYPES, ROOM_ROLES } from "../constants/room";
 
-// Room (full object from backend)
 export interface Room {
   _id: string;
   name: string;
   description?: string;
   coverImage: string;
   roomType: (typeof ROOM_TYPES)[keyof typeof ROOM_TYPES];
-  privacy: (typeof ROOM_PRIVACY)[keyof typeof ROOM_PRIVACY];
   joinCode: string;
+  isDeleted: boolean;
   membersCount: number;
   postsCount: number;
-  isDeleted: boolean;
   createdAt: string;
   updatedAt: string;
-}
-
-// Room in list (getMyRooms response) - minimal fields for card display
-export interface RoomListItem {
-  _id: string;
-  name: string;
-  coverImage: string;
-}
-
-// Room Meta (from getRoomDetails)
-export interface RoomMeta {
-  isMember: boolean;
-  hasPendingRequest: boolean;
-  isRejected: boolean;
-  isBanned: boolean;
-  isTeacher: boolean;
-  isCreator: boolean;
-  isAdmin: boolean;
-  isCR: boolean;
-  isHidden: boolean;
-  canPost: boolean;
-  canComment: boolean;
-  pendingRequestsCount: number;
-  pendingPostsCount: number;
-  joinCode: string;
-}
-
-// Room Member (from getRoomMembers)
-export interface RoomMember {
-  user: User;
-  meta: {
-    memberId: string;
-    role: (typeof ROOM_ROLES)[keyof typeof ROOM_ROLES];
-    isSelf: boolean;
-    isCR: boolean;
-    isAdmin: boolean;
-    isCreator: boolean;
-    joinedAt: string;
-    user_relation_status: string;
-    canManage: boolean;
-  };
-}
-
-// Update Room Data (for updateRoom API)
-export interface UpdateRoomData {
-  name: string;
-  description?: string;
-  roomType: string;
-  privacy: string;
-  settings: {
-    allowStudentPosting: boolean;
-    allowComments: boolean;
-    requirePostApproval: boolean;
-  };
-}
-
-// Room Request (from getRoomPendingRequests)
-export interface RoomRequest {
-  user: User;
-  meta: {
-    memberId: string;
-    requestedAt: string;
-  };
-}
-
-// API Response Types
-export interface RoomDetailsResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    room: Room;
-    meta: RoomMeta;
-  };
 }
 
 export interface MyRoomsResponse {
@@ -102,18 +26,63 @@ export interface MyRoomsResponse {
   };
 }
 
-export interface CreateRoomResponse {
+export interface RoomListItem {
+  _id: string;
+  name: string;
+  coverImage: string;
+}
+
+// Room Member (from getRoomMembers)
+export interface RoomMember {
+  user: User;
+  meta: {
+    memberId: string;
+    role: (typeof ROOM_ROLES)[keyof typeof ROOM_ROLES];
+    isSelf: boolean;
+    isAdmin: boolean;
+    joinedAt: string;
+    canManage: boolean;
+  };
+}
+
+// Update Room Data (for updateRoom API)
+export interface UpdateRoomData {
+  name: string;
+  description?: string;
+  roomType: string;
+}
+
+// Room Request (from getRoomPendingRequests)
+export interface RoomRequest {
+  user: User;
+  meta: {
+    memberId: string;
+    requestedAt: string;
+  };
+}
+
+export interface RoomDetailsResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
     room: Room;
-    meta: {
-      isMember: boolean;
-      isCreator: boolean;
-      isAdmin: boolean;
-    };
+    meta: RoomDetailsMeta;
   };
+}
+
+export interface RoomDetailsMeta {
+  isMember: boolean;
+  isAdmin: boolean;
+  isAppAdmin: boolean;
+  isAppOwner: boolean;
+}
+
+export interface CreateRoomResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: null;
 }
 
 export interface JoinRoomResponse {

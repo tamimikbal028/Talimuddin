@@ -34,14 +34,18 @@ const roomSchema = new Schema(
       default: false,
       index: true,
     },
-
-    settings: {
-      allowStudentPosting: { type: Boolean, default: true },
-      requirePostApproval: { type: Boolean, default: false },
-    },
-
     membersCount: { type: Number, default: 0 },
     postsCount: { type: Number, default: 0 },
+
+    settings: {
+      allowStudentPosting: { type: Boolean, default: false },
+      requirePostApproval: { type: Boolean, default: true },
+    },
+
+    parentRoom: {
+      type: Schema.Types.ObjectId,
+      ref: "Room",
+    },
   },
   { timestamps: true }
 );

@@ -9,15 +9,7 @@ export const ROOM_ROLES = {
   MEMBER: "MEMBER",
 } as const;
 
-export const ROOM_PRIVACY = {
-  PUBLIC: "PUBLIC",
-  PRIVATE: "PRIVATE",
-  CLOSED: "CLOSED",
-} as const;
-
 export const ROOM_MEMBERSHIP_STATUS = {
   JOINED: "JOINED",
   PENDING: "PENDING",
-  REJECTED: "REJECTED",
-  BANNED: "BANNED",
 } as const;

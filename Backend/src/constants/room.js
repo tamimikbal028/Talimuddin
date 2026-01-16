@@ -18,6 +18,4 @@ export const ROOM_PRIVACY = {
 export const ROOM_MEMBERSHIP_STATUS = {
   JOINED: "JOINED",
   PENDING: "PENDING",
-  // REJECTED: "REJECTED",
-  BANNED: "BANNED",
 };

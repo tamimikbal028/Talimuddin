@@ -6,7 +6,8 @@ import { USER_TYPES } from "../../constants";
 
 const Header: React.FC = () => {
   const { user } = authHooks.useUser();
-  const isTeacher = user?.userType === USER_TYPES.TEACHER;
+  const isAppOwner = user?.userType === USER_TYPES.OWNER;
+  const isAppAdmin = user?.userType === USER_TYPES.ADMIN;
 
   return (
     <header className="flex items-center justify-between">
@@ -15,7 +16,7 @@ const Header: React.FC = () => {
         <p className="text-gray-600">Join and manage your classes.</p>
       </div>
       <div>
-        {isTeacher && (
+        {isAppOwner && (
           <Link
             to="/classroom/createroom"
             className="flex items-center gap-2 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition-colors hover:border-blue-400 hover:bg-blue-100"
@@ -24,7 +25,7 @@ const Header: React.FC = () => {
             Create Room
           </Link>
         )}
-        {!isTeacher && (
+        {!(isAppOwner || isAppAdmin) && (
           <Link
             to="/classroom/joinroom"
             className="flex items-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 px-4 py-2 text-sm font-semibold text-green-600 transition-colors hover:border-green-400 hover:bg-green-100"
