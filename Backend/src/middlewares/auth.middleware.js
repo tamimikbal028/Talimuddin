@@ -15,10 +15,11 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    // Get user without institution/department (removed features)
-    const user = await User.findById(decodedToken?._id).select(
-      "-password -refreshToken"
-    );
+    // ✅ Populated query for academic data
+    const user = await User.findById(decodedToken?._id)
+      .select("-password -refreshToken")
+      .populate("institution", "name code logo")
+      .populate("academicInfo.department", "name code logo");
 
     if (!user) {
       throw new ApiError(401, "Invalid Access Token. User does not exist.");
@@ -49,16 +50,4 @@ const verifyJWT = asyncHandler(async (req, _, next) => {
   }
 });
 
-const restrictTo = (...roles) => {
-  return (req, _, next) => {
-    if (!roles.includes(req.user.userType)) {
-      throw new ApiError(
-        403,
-        "You do not have permission to perform this action"
-      );
-    }
-    next();
-  };
-};
-
-export { verifyJWT, restrictTo };
+export { verifyJWT };

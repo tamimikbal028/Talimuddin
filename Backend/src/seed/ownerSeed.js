@@ -1,7 +1,8 @@
+import mongoose from "mongoose";
 import dotenv from "dotenv";
-import connectDB from "../db/index.js";
 import { User } from "../models/user.model.js";
 import { USER_TYPES } from "../constants/index.js";
+import connectDB from "../db/index.js";
 
 dotenv.config({ path: "./.env" });
 
@@ -9,36 +10,31 @@ const seedOwner = async () => {
   try {
     await connectDB();
 
-    const existingOwner = await User.findOne({ userType: USER_TYPES.OWNER });
+    // Check if owner already exists
+    const ownerExists = await User.findOne({ userType: USER_TYPES.OWNER });
 
-    if (existingOwner) {
-      console.log("Owner account already exists!");
-      console.log(`Email: ${existingOwner.email}`);
-      console.log(`Username: ${existingOwner.userName}`);
-      console.log(
-        "If you need to reset the owner account, please delete it manually first."
-      );
+    if (ownerExists) {
+      console.log("⚠️ Owner already exists!");
       process.exit(0);
     }
 
-    const ownerData = {
-      fullName: "Talimuddin Academy",
-      userName: "talimuddin_tamim",
-      email: "owner@gmail.com",
-      password: "qqqqqqQ1",
+    // Create owner account
+    await User.create({
+      fullName: "System Owner",
+      email: process.env.OWNER_EMAIL,
+      password: process.env.OWNER_PASSWORD,
       userType: USER_TYPES.OWNER,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=owner",
-      bio: "Platform Owner - Technical Administrator",
-      agreedToTerms: true,
-    };
+      userName: "owner", // ⚠️ UPDATED from nickName
+    });
 
-    const owner = await User.create(ownerData);
-    console.log(`Done owner create`);
+    console.log("✅ Owner Account Created Successfully!");
     process.exit(0);
   } catch (error) {
-    console.error("Owner Seeding Failed:", error);
+    console.error("❌ Seeding Failed:", error);
     process.exit(1);
   }
 };
 
 seedOwner();
+
+// To run: node src/seed/ownerSeed.js

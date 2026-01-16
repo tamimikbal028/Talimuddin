@@ -25,10 +25,9 @@ export const authService = {
   login: async (
     credentials: LoginCredentials
   ): Promise<ApiResponse<{ user: User }>> => {
-    const payload = {
-      phoneNumber: credentials.phoneNumber,
-      password: credentials.password,
-    };
+    const payload = credentials.email?.includes("@")
+      ? { email: credentials.email, password: credentials.password }
+      : { userName: credentials.email, password: credentials.password };
 
     const response = await api.post<ApiResponse<{ user: User }>>(
       "/users/login",
@@ -38,8 +37,8 @@ export const authService = {
   },
 
   // Logout user
-  logout: async (): Promise<ApiResponse<null>> => {
-    const response = await api.post<ApiResponse<null>>("/users/logout");
+  logout: async (): Promise<ApiResponse<object>> => {
+    const response = await api.post<ApiResponse<object>>("/users/logout");
     return response.data;
   },
 

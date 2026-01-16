@@ -1,46 +1,24 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
-import {
-  roomActions,
-  roomServices,
-  roomPostsAndMembers,
-} from "../services/room.service.js";
+import { roomActions, roomServices } from "../services/room.service.js";
 
 // ==========================================
 // 🚀 1. CREATE ROOM
 // ==========================================
 const createRoom = asyncHandler(async (req, res) => {
-  const result = await roomActions.createRoomService(req.body, req.user._id);
-
-  return res
-    .status(201)
-    .json(new ApiResponse(201, result, "Room created successfully"));
-});
-
-// ==========================================
-// 🚀 2. GET ALL ROOMS (Public)
-// ==========================================
-const getAllRooms = asyncHandler(async (req, res) => {
-  const { page, limit } = req.query;
-  const { rooms, pagination } = await roomServices.getAllRoomsService(
-    page,
-    limit
+  const { room, meta } = await roomActions.createRoomService(
+    req.body,
+    req.user._id
   );
 
   return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { rooms, pagination },
-        "All rooms fetched successfully"
-      )
-    );
+    .status(201)
+    .json(new ApiResponse(201, { room, meta }, "Room created successfully"));
 });
 
 // ==========================================
-// 🚀 3. GET MY ROOMS (Joined rooms only)
+// 🚀 2. GET MY ROOMS
 // ==========================================
 const getMyRooms = asyncHandler(async (req, res) => {
   const { page, limit } = req.query;
@@ -62,7 +40,51 @@ const getMyRooms = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 4. GET ROOM DETAILS
+// 🚀 2.1. GET HIDDEN ROOMS
+// ==========================================
+const getHiddenRooms = asyncHandler(async (req, res) => {
+  const { page, limit } = req.query;
+  const { rooms, pagination } = await roomServices.getHiddenRoomsService(
+    req.user._id,
+    page,
+    limit
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { rooms, pagination },
+        "Hidden rooms fetched successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 2.2. GET ARCHIVED ROOMS
+// ==========================================
+const getArchivedRooms = asyncHandler(async (req, res) => {
+  const { page, limit } = req.query;
+  const { rooms, pagination } = await roomServices.getArchivedRoomsService(
+    req.user._id,
+    page,
+    limit
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { rooms, pagination },
+        "Archived rooms fetched successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 3. GET ROOM DETAILS
 // ==========================================
 const getRoomDetails = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -79,7 +101,7 @@ const getRoomDetails = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 5. JOIN ROOM (by join code)
+// 🚀 4. JOIN ROOM (by join code only)
 // ==========================================
 const joinRoom = asyncHandler(async (req, res) => {
   const { joinCode } = req.body;
@@ -88,24 +110,112 @@ const joinRoom = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Join code is required");
   }
 
-  const result = await roomActions.joinRoomService(req.user._id, joinCode);
+  const { roomId, roomName, isPending } = await roomActions.joinRoomService(
+    req.user._id,
+    joinCode
+  );
 
-  return res.status(200).json(new ApiResponse(200, result, result.message));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId, roomName, isPending },
+        isPending
+          ? "Join request sent successfully"
+          : "Joined room successfully"
+      )
+    );
 });
 
 // ==========================================
-// 🚀 6. LEAVE ROOM
+// 🚀 4.1. CANCEL JOIN REQUEST
 // ==========================================
-const leaveRoom = asyncHandler(async (req, res) => {
+const cancelJoinRequest = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
-  const result = await roomActions.leaveRoomService(roomId, req.user._id);
+  const { roomId: id } = await roomActions.cancelJoinRequestService(
+    roomId,
+    req.user._id
+  );
 
-  return res.status(200).json(new ApiResponse(200, result, result.message));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id },
+        "Join request cancelled successfully"
+      )
+    );
 });
 
 // ==========================================
-// 🚀 7. DELETE ROOM (Owner only)
+// 🚀 4.2. ACCEPT JOIN REQUEST
+// ==========================================
+const acceptJoinRequest = asyncHandler(async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  const { roomId: id, userId: acceptedUserId } =
+    await roomActions.acceptJoinRequestService(roomId, req.user._id, userId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, userId: acceptedUserId },
+        "Join request accepted successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 4.3. REJECT JOIN REQUEST
+// ==========================================
+const rejectJoinRequest = asyncHandler(async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  const { roomId: id, userId: rejectedUserId } =
+    await roomActions.rejectJoinRequestService(roomId, req.user._id, userId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, userId: rejectedUserId },
+        "Join request rejected successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 5. TOGGLE ARCHIVE ROOM (Creator or Admin)
+// ==========================================
+const toggleArchiveRoom = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
+
+  const { roomId: id, isArchived } = await roomActions.toggleArchiveRoomService(
+    roomId,
+    req.user._id
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, isArchived },
+        isArchived
+          ? "Room archived successfully"
+          : "Room unarchived successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 6. DELETE ROOM (Creator only)
 // ==========================================
 const deleteRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -121,7 +231,29 @@ const deleteRoom = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 8. UPDATE ROOM
+// 🚀 7. HIDE ROOM (Member only)
+// ==========================================
+const hideRoom = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
+
+  const { roomId: id, isHidden } = await roomActions.hideRoomService(
+    roomId,
+    req.user._id
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, isHidden },
+        isHidden ? "Room hidden from your list" : "Room unhidden"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 8. UPDATE ROOM (Creator or Admin)
 // ==========================================
 const updateRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -138,7 +270,7 @@ const updateRoom = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 9. UPDATE ROOM COVER IMAGE
+// 🚀 9. UPDATE ROOM COVER IMAGE (Creator or Admin)
 // ==========================================
 const updateRoomCoverImage = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -168,6 +300,7 @@ const getRoomPosts = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
   const { page, limit } = req.query;
 
+  const { roomPostsAndMembers } = await import("../services/room.service.js");
   const { posts, pagination } = await roomPostsAndMembers.getRoomPostsService(
     roomId,
     req.user._id,
@@ -193,6 +326,7 @@ const getRoomMembers = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
   const { page, limit } = req.query;
 
+  const { roomPostsAndMembers } = await import("../services/room.service.js");
   const { members, pagination, meta } =
     await roomPostsAndMembers.getRoomMembersService(
       roomId,
@@ -213,14 +347,15 @@ const getRoomMembers = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 12. GET PENDING JOIN REQUESTS
+// 🚀 11.1. GET ROOM PENDING REQUESTS
 // ==========================================
-const getPendingJoinRequests = asyncHandler(async (req, res) => {
+const getRoomPendingRequests = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
   const { page, limit } = req.query;
 
+  const { roomServices } = await import("../services/room.service.js");
   const { requests, pagination } =
-    await roomPostsAndMembers.getPendingJoinRequestsService(
+    await roomServices.getRoomPendingRequestsService(
       roomId,
       req.user._id,
       page,
@@ -233,54 +368,171 @@ const getPendingJoinRequests = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         { requests, pagination },
-        "Pending join requests fetched successfully"
+        "Pending requests fetched successfully"
       )
     );
 });
 
 // ==========================================
-// 🚀 13. ACCEPT JOIN REQUEST
+// 🚀 LEAVE ROOM
 // ==========================================
-const acceptJoinRequest = asyncHandler(async (req, res) => {
-  const { roomId, membershipId } = req.params;
+const leaveRoom = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
 
-  const result = await roomActions.acceptJoinRequestService(
+  const { roomId: leftRoomId } = await roomActions.leaveRoomService(
     roomId,
-    membershipId,
     req.user._id
   );
 
-  return res.status(200).json(new ApiResponse(200, result, result.message));
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { roomId: leftRoomId }, "Left room successfully")
+    );
 });
 
 // ==========================================
-// 🚀 14. REJECT JOIN REQUEST
+// 🚀 12. GET ROOM PENDING POSTS
 // ==========================================
-const rejectJoinRequest = asyncHandler(async (req, res) => {
-  const { roomId, membershipId } = req.params;
+const getRoomPendingPosts = asyncHandler(async (req, res) => {
+  const { roomId } = req.params;
+  const { page, limit } = req.query;
 
-  const result = await roomActions.rejectJoinRequestService(
+  const { posts, pagination } = await roomServices.getRoomPendingPostsService(
     roomId,
-    membershipId,
+    req.user._id,
+    page,
+    limit
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { posts, pagination },
+        "Pending posts fetched successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 13. APPROVE POST
+// ==========================================
+const approvePost = asyncHandler(async (req, res) => {
+  const { roomId, postId } = req.params;
+
+  const { status } = await roomServices.approveRoomPostService(
+    roomId,
+    postId,
     req.user._id
   );
 
-  return res.status(200).json(new ApiResponse(200, result, result.message));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { status }, "Post approved successfully"));
+});
+
+// ==========================================
+// 🚀 14. REJECT POST
+// ==========================================
+const rejectPost = asyncHandler(async (req, res) => {
+  const { roomId, postId } = req.params;
+
+  const { status } = await roomServices.rejectRoomPostService(
+    roomId,
+    postId,
+    req.user._id
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { status }, "Post rejected successfully"));
+});
+
+// ==========================================
+// 🚀 15. REMOVE MEMBER
+// ==========================================
+const removeMember = asyncHandler(async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  const { roomId: id, userId: removedUserId } =
+    await roomActions.removeMemberService(roomId, req.user._id, userId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, userId: removedUserId },
+        "Member removed successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 16. PROMOTE TO ADMIN
+// ==========================================
+const promoteMember = asyncHandler(async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  const { roomId: id, userId: promotedUserId } =
+    await roomActions.promoteMemberService(roomId, req.user._id, userId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, userId: promotedUserId },
+        "Member promoted to admin successfully"
+      )
+    );
+});
+
+// ==========================================
+// 🚀 17. DEMOTE TO MEMBER
+// ==========================================
+const demoteMember = asyncHandler(async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  const { roomId: id, userId: demotedUserId } =
+    await roomActions.demoteMemberService(roomId, req.user._id, userId);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { roomId: id, userId: demotedUserId },
+        "Admin demoted to member successfully"
+      )
+    );
 });
 
 export {
   createRoom,
-  getAllRooms,
   getMyRooms,
+  getHiddenRooms,
+  getArchivedRooms,
   getRoomDetails,
   joinRoom,
-  leaveRoom,
+  cancelJoinRequest,
+  acceptJoinRequest,
+  rejectJoinRequest,
+  removeMember,
+  promoteMember,
+  demoteMember,
+  toggleArchiveRoom,
   deleteRoom,
+  hideRoom,
   updateRoom,
   updateRoomCoverImage,
   getRoomPosts,
   getRoomMembers,
-  getPendingJoinRequests,
-  acceptJoinRequest,
-  rejectJoinRequest,
+  getRoomPendingRequests,
+  leaveRoom,
+  getRoomPendingPosts,
+  approvePost,
+  rejectPost,
 };

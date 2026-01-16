@@ -13,7 +13,7 @@ const RoomGeneralTab: React.FC<RoomGeneralTabProps> = ({ room }) => {
   const { roomId } = useParams();
   const [formData, setFormData] = useState({
     name: room.name,
-    description: room.description || "",
+    description: room.description,
     roomType: room.roomType,
   });
 
@@ -23,8 +23,8 @@ const RoomGeneralTab: React.FC<RoomGeneralTabProps> = ({ room }) => {
     e.preventDefault();
     updateDetails(
       {
-        roomId: roomId as string,
-        updateData: formData,
+        ...room,
+        ...formData,
       },
       {
         onSuccess: () => {

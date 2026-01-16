@@ -1,15 +1,16 @@
 import React from "react";
 import RoomCard from "../RoomCard";
+import RoomCardSkeleton from "../../shared/skeletons/RoomCardSkeleton";
+import ErrorState from "../../shared/ErrorState";
+import EmptyState from "../../shared/EmptyState";
 import { roomHooks } from "../../../hooks/useRoom";
 import { authHooks } from "../../../hooks/useAuth";
 import { USER_TYPES } from "../../../constants/user";
+import { ROOM_LIMIT } from "../../../constants";
 import type { RoomListItem } from "../../../types";
+import { FaDoorOpen } from "react-icons/fa";
 
-interface RoomsProps {
-  type: "all" | "my";
-}
-
-const Rooms: React.FC<RoomsProps> = ({ type }) => {
+const Rooms: React.FC = () => {
   const {
     data,
     fetchNextPage,
@@ -17,8 +18,7 @@ const Rooms: React.FC<RoomsProps> = ({ type }) => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = type === "all" ? roomHooks.useAllRooms() : roomHooks.useMyRooms();
-
+  } = roomHooks.useMyRooms();
   const { user } = authHooks.useUser();
 
   const rooms: RoomListItem[] =
@@ -27,18 +27,21 @@ const Rooms: React.FC<RoomsProps> = ({ type }) => {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-300 bg-white p-6 shadow">
-        <p className="text-sm text-gray-600">Loading rooms...</p>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-7 w-32 animate-pulse rounded bg-gray-200"></div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(ROOM_LIMIT)].map((_, i) => (
+            <RoomCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (isError) {
-    return (
-      <div className="rounded-xl border border-red-300 bg-red-50 p-6 shadow">
-        <p className="text-sm text-red-600">Failed to load rooms</p>
-      </div>
-    );
+    return <ErrorState message="Failed to load rooms" />;
   }
 
   return (
@@ -46,28 +49,31 @@ const Rooms: React.FC<RoomsProps> = ({ type }) => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          {type === "all" ? "All Rooms" : "My Rooms"}{" "}
-          {totalDocs ? `(${totalDocs})` : ""}
+          Rooms {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 
       {/* no rooms message */}
       {rooms.length === 0 ? (
-        <div className="rounded-xl border border-gray-300 bg-white p-6 shadow">
-          <p className="text-center text-sm font-medium text-gray-600">
-            {type === "all"
-              ? "No rooms available yet."
-              : user?.userType === USER_TYPES.TEACHER
-                ? "Create or join a room to get started."
-                : "Join a room to get started."}
-          </p>
-        </div>
+        <EmptyState
+          icon={FaDoorOpen}
+          message={
+            user?.userType === USER_TYPES.TEACHER
+              ? "Create or join a room to get started."
+              : "Join a room to get started."
+          }
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {rooms.map((r) => (
               <RoomCard key={r._id} room={r} />
             ))}
+            {/* Loading Skeleton for Next Page inside the same grid */}
+            {isFetchingNextPage &&
+              [...Array(ROOM_LIMIT)].map((_, i) => (
+                <RoomCardSkeleton key={`skeleton-${i}`} />
+              ))}
           </div>
 
           {/* Load More Button */}
@@ -80,18 +86,6 @@ const Rooms: React.FC<RoomsProps> = ({ type }) => {
               >
                 {isFetchingNextPage ? "Loading..." : "Load More"}
               </button>
-            </div>
-          )}
-
-          {/* Loading Skeleton for Next Page */}
-          {isFetchingNextPage && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={`skeleton-${i}`}
-                  className="h-64 animate-pulse rounded-xl bg-gray-100"
-                ></div>
-              ))}
             </div>
           )}
         </>

@@ -20,7 +20,18 @@ const RoomCard: React.FC<Props> = ({ room }) => {
         />
 
         <div className="absolute top-0 left-0 w-full bg-black/85 p-2">
-          <p className="truncate text-sm font-medium text-white">{room.name}</p>
+          <p className="truncate font-medium text-white">{room.name}</p>
+          {room.creator && (
+            <p className="mt-0.5 truncate text-xs text-gray-200">
+              <Link
+                onClick={(e) => e.stopPropagation()}
+                to={`/profile/${room.creator.userName}`}
+                className="font-medium text-blue-300 hover:underline"
+              >
+                {room.creator.fullName}
+              </Link>
+            </p>
+          )}
         </div>
       </Link>
     </div>

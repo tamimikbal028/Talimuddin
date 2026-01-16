@@ -8,13 +8,13 @@ import { roomService } from "../services/room.service";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
-import type { ApiError } from "../types";
+import type { ApiError, UpdateRoomData } from "../types";
 import { postHooks } from "./common/usePost";
 import { commentHooks } from "./common/useComment";
 
 const useCreateRoom = () => {
   const queryClient = useQueryClient();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (roomData: {
@@ -25,30 +25,17 @@ const useCreateRoom = () => {
       allowComments: boolean;
     }) => roomService.createRoom(roomData),
     onSuccess: (data) => {
-      toast.success(`Room "${data.data.roomName}" created successfully!`);
-
+      toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["allRooms"] });
 
-      // const roomId = data.data.roomId;
-      // navigate(`/classroom/rooms/${roomId}`);
+      const roomId = data.data.room._id;
+      if (roomId) {
+        navigate(`/rooms/${roomId}`);
+      }
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message || "Failed to create room");
     },
-  });
-};
-
-const useAllRooms = () => {
-  return useInfiniteQuery({
-    queryKey: ["allRooms", "infinite"],
-    queryFn: ({ pageParam }) => roomService.getAllRooms(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.data.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 };
 
@@ -65,7 +52,35 @@ const useMyRooms = () => {
   });
 };
 
-const useRoomDetails = (roomId: string | undefined) => {
+const useHiddenRooms = () => {
+  return useInfiniteQuery({
+    queryKey: ["hiddenRooms", "infinite"],
+    queryFn: ({ pageParam }) => roomService.getHiddenRooms(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+const useArchivedRooms = () => {
+  return useInfiniteQuery({
+    queryKey: ["archivedRooms", "infinite"],
+    queryFn: ({ pageParam }) =>
+      roomService.getArchivedRooms(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
+const useRoomDetails = () => {
+  const { roomId } = useParams();
   return useQuery({
     queryKey: ["roomDetails", roomId],
     queryFn: () => roomService.getRoomDetails(roomId as string),
@@ -77,13 +92,20 @@ const useRoomDetails = (roomId: string | undefined) => {
 
 const useJoinRoom = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: (joinCode: string) => roomService.joinRoom(joinCode),
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["allRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
+
+      // Navigate to room details
+      const roomId = data.data.roomId;
+      if (roomId) {
+        navigate(`/classroom/rooms/${roomId}`);
+      }
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message || "Failed to join room");
@@ -91,21 +113,28 @@ const useJoinRoom = () => {
   });
 };
 
-const useLeaveRoom = () => {
+const useToggleArchiveRoom = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (roomId: string) => roomService.leaveRoom(roomId),
+    mutationFn: (roomId: string) => roomService.toggleArchiveRoom(roomId),
     onSuccess: (data) => {
       toast.success(data.message);
+
+      // Invalidate all 3 tabs
       queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["allRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
       queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
-      navigate("/classroom/my");
+
+      // Redirect based on archive status
+      navigate(data.data.isArchived ? "/classroom/archived" : "/classroom");
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to leave room");
+      toast.error(
+        error?.response?.data?.message || "Failed to archive/unarchive room"
+      );
     },
   });
 };
@@ -119,7 +148,6 @@ const useDeleteRoom = () => {
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["allRooms"] });
       navigate("/classroom");
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -128,25 +156,62 @@ const useDeleteRoom = () => {
   });
 };
 
+const useLeaveRoom = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (roomId: string) => roomService.leaveRoom(roomId),
+    onSuccess: (data) => {
+      toast.success(data.message);
+
+      // Invalidate all room queries
+      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
+
+      // Navigate back to classroom
+      navigate("/classroom");
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to leave room");
+    },
+  });
+};
+
+const useHideRoom = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (roomId: string) => roomService.hideRoom(roomId),
+    onSuccess: (data) => {
+      toast.success(data.message);
+
+      // Invalidate all 3 tabs
+      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
+
+      // Redirect based on hide status
+      navigate(data.data.isHidden ? "/classroom/hidden" : "/classroom");
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error?.response?.data?.message || "Failed to hide/unhide room"
+      );
+    },
+  });
+};
+
 const useUpdateRoomDetails = () => {
+  const { roomId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      roomId,
-      updateData,
-    }: {
-      roomId: string;
-      updateData: {
-        name?: string;
-        description?: string;
-        roomType?: string;
-        settings?: {
-          allowStudentPosting?: boolean;
-          allowComments?: boolean;
-        };
-      };
-    }) => roomService.updateRoom(roomId, updateData),
+    mutationFn: (updateData: UpdateRoomData) =>
+      roomService.updateRoom(roomId as string, updateData),
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
@@ -161,16 +226,12 @@ const useUpdateRoomDetails = () => {
 };
 
 const useUpdateRoomCoverImage = () => {
+  const { roomId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      roomId,
-      coverImage,
-    }: {
-      roomId: string;
-      coverImage: File;
-    }) => roomService.updateRoomCoverImage(roomId, coverImage),
+    mutationFn: (coverImage: File) =>
+      roomService.updateRoomCoverImage(roomId as string, coverImage),
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
@@ -246,7 +307,7 @@ const useUpdateRoomPost = () => {
   const { roomId } = useParams();
   return postHooks.useUpdatePost({
     queryKey: ["roomPosts", roomId],
-    invalidateKey: [["roomPosts", roomId]],
+    invalidateKey: ["roomPosts", roomId],
   });
 };
 
@@ -262,7 +323,7 @@ const useToggleBookmarkRoomPost = () => {
   const { roomId } = useParams();
   return postHooks.useToggleBookmark({
     queryKey: ["roomPosts", roomId],
-    invalidateKey: [["roomPosts", roomId]],
+    invalidateKey: ["roomPosts", roomId],
   });
 };
 
@@ -271,7 +332,7 @@ const useAddRoomComment = ({ postId }: { postId: string }) => {
   const { roomId } = useParams();
   return commentHooks.useAddComment({
     postId,
-    invalidateKey: [["roomPosts", roomId]],
+    invalidateKey: ["roomPosts", roomId],
   });
 };
 
@@ -279,24 +340,247 @@ const useDeleteRoomComment = ({ postId }: { postId: string }) => {
   const { roomId } = useParams();
   return commentHooks.useDeleteComment({
     postId,
-    invalidateKey: [["roomPosts", roomId]],
+    invalidateKey: ["roomPosts", roomId],
+  });
+};
+
+// ====================================
+// Join Request Management
+// ====================================
+
+const useCancelJoinRequest = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (roomId: string) => roomService.cancelJoinRequest(roomId),
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(
+        error?.response?.data?.message || "Failed to cancel join request"
+      );
+    },
+  });
+};
+
+const useAcceptJoinRequest = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.acceptJoinRequest(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomPendingRequests", roomId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["roomDetails", roomId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["roomMembers", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to accept request");
+    },
+  });
+};
+
+const useRejectJoinRequest = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.rejectJoinRequest(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomPendingRequests", roomId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["roomDetails", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to reject request");
+    },
+  });
+};
+
+const useBanMember = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.banMember(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomMembers", roomId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["roomDetails", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to ban member");
+    },
+  });
+};
+
+const useRemoveRoomMember = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.removeMember(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomMembers", roomId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["roomDetails", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to remove member");
+    },
+  });
+};
+
+const usePromoteRoomMember = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.promoteMember(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomMembers", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to promote member");
+    },
+  });
+};
+
+const useDemoteRoomMember = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId }: { userId: string }) =>
+      roomService.demoteMember(roomId as string, userId),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({
+        queryKey: ["roomMembers", roomId],
+      });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to demote member");
+    },
+  });
+};
+
+const useRoomPendingRequests = () => {
+  const { roomId } = useParams();
+  return useInfiniteQuery({
+    queryKey: ["roomPendingRequests", roomId],
+    queryFn: ({ pageParam }) =>
+      roomService.getRoomPendingRequests(roomId as string, pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: !!roomId,
+    staleTime: Infinity,
+  });
+};
+
+const useRoomPendingPosts = () => {
+  const { roomId } = useParams();
+  return useInfiniteQuery({
+    queryKey: ["roomPendingPosts", roomId],
+    queryFn: ({ pageParam }) =>
+      roomService.getRoomPendingPosts(roomId as string, pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: !!roomId,
+    staleTime: 1000 * 60 * 1, // 1 minute
+  });
+};
+
+const useApproveRoomPost = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postId: string) =>
+      roomService.approveRoomPost(roomId as string, postId),
+    onSuccess: () => {
+      toast.success("Post approved successfully");
+      queryClient.invalidateQueries({ queryKey: ["roomPendingPosts", roomId] });
+      queryClient.invalidateQueries({ queryKey: ["roomPosts", roomId] });
+      queryClient.invalidateQueries({ queryKey: ["roomDetails", roomId] });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to approve post");
+    },
+  });
+};
+
+const useRejectRoomPost = () => {
+  const { roomId } = useParams();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (postId: string) =>
+      roomService.rejectRoomPost(roomId as string, postId),
+    onSuccess: () => {
+      toast.success("Post rejected successfully");
+      queryClient.invalidateQueries({ queryKey: ["roomPendingPosts", roomId] });
+      queryClient.invalidateQueries({ queryKey: ["roomDetails", roomId] });
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message || "Failed to reject post");
+    },
   });
 };
 
 const roomHooks = {
   useCreateRoom,
-  useAllRooms,
   useMyRooms,
+  useHiddenRooms,
+  useArchivedRooms,
   useRoomDetails,
   useJoinRoom,
-  useLeaveRoom,
+  useToggleArchiveRoom,
   useDeleteRoom,
+  useLeaveRoom,
+  useHideRoom,
   useUpdateRoomDetails,
   useUpdateRoomCoverImage,
 
   // Posts & Members
   useRoomPosts,
   useRoomMembers,
+  useRoomPendingRequests,
 
   // Post Actions
   useCreateRoomPost,
@@ -308,6 +592,20 @@ const roomHooks = {
   // Comments
   useAddRoomComment,
   useDeleteRoomComment,
+
+  // Join Request Management
+  useCancelJoinRequest,
+  useAcceptJoinRequest,
+  useRejectJoinRequest,
+  useBanMember,
+  useRemoveRoomMember,
+  usePromoteRoomMember,
+  useDemoteRoomMember,
+
+  // Post Moderation
+  useRoomPendingPosts,
+  useApproveRoomPost,
+  useRejectRoomPost,
 } as const;
 
 export { roomHooks };

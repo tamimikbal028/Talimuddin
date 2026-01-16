@@ -1,15 +1,24 @@
 import { Post } from "../../models/post.model.js";
 import { Comment } from "../../models/comment.model.js";
+import { Reaction } from "../../models/reaction.model.js";
 import { ReadPost } from "../../models/readPost.model.js";
+import { Group } from "../../models/group.model.js";
 import { User } from "../../models/user.model.js";
+import { Department } from "../../models/department.model.js";
+import { Institution } from "../../models/institution.model.js";
+import { GroupMembership } from "../../models/groupMembership.model.js";
 import {
   POST_TARGET_MODELS,
   POST_TYPES,
   POST_VISIBILITY,
+  REACTION_TARGET_MODELS,
+  GROUP_ROLES,
+  GROUP_MEMBERSHIP_STATUS,
   POST_STATUS,
 } from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Room } from "../../models/room.model.js";
+import { RoomMembership } from "../../models/roomMembership.model.js";
 
 export const createPostService = async (postData, authorId) => {
   const {
@@ -98,6 +107,28 @@ export const createPostService = async (postData, authorId) => {
       [GROUP_ROLES.OWNER, GROUP_ROLES.ADMIN].includes(membership.role);
 
     if (group.settings?.requirePostApproval && !isAdminOrOwner) {
+      initialStatus = POST_STATUS.PENDING;
+    }
+  } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
+    const room = await Room.findById(postOnId);
+    if (!room) throw new ApiError(404, "Room not found");
+
+    // Check if user is admin/creator (they don't need approval/restriction)
+    const membership = await RoomMembership.findOne({
+      room: postOnId,
+      user: authorId,
+    });
+
+    const isCreatorOrAdmin =
+      room.creator.toString() === authorId.toString() ||
+      (membership && membership.isAdmin);
+
+    // Enforce student posting restriction
+    if (!room.settings.allowStudentPosting && !isCreatorOrAdmin) {
+      throw new ApiError(403, "Posting is disabled for students in this room");
+    }
+
+    if (room.settings.requirePostApproval && !isCreatorOrAdmin) {
       initialStatus = POST_STATUS.PENDING;
     }
   }

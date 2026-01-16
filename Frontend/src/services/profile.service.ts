@@ -7,6 +7,7 @@ import type {
   User,
   ApiResponse,
   UpdateGeneralData,
+  UpdateAcademicData,
   ProfileHeaderData,
 } from "../types";
 
@@ -21,12 +22,33 @@ export const profileService = {
     return response.data;
   },
 
+  // Get Profile Details by Username
+  getProfileDetails: async (
+    username: string
+  ): Promise<ApiResponse<{ user: User }>> => {
+    const response = await api.get<ApiResponse<{ user: User }>>(
+      `/profile/details/${username}`
+    );
+    return response.data;
+  },
+
   // Update General Info
   updateGeneral: async (
     data: UpdateGeneralData
   ): Promise<ApiResponse<{ user: User }>> => {
     const response = await api.patch<ApiResponse<{ user: User }>>(
       "/profile/update-general",
+      data
+    );
+    return response.data;
+  },
+
+  // Update Academic Info
+  updateAcademic: async (
+    data: UpdateAcademicData
+  ): Promise<ApiResponse<{ user: User }>> => {
+    const response = await api.patch<ApiResponse<{ user: User }>>(
+      "/profile/update-academic",
       data
     );
     return response.data;

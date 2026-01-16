@@ -17,15 +17,12 @@ const RoomPhotosTab: React.FC<RoomPhotosTabProps> = ({ coverImage }) => {
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && roomId) {
-      updateCover(
-        { roomId, coverImage: file },
-        {
-          onSuccess: () => {
-            navigate(`/classroom/rooms/${roomId}`);
-          },
-        }
-      );
+    if (file) {
+      updateCover(file, {
+        onSuccess: () => {
+          navigate(`/classroom/rooms/${roomId}`);
+        },
+      });
     }
   };
 

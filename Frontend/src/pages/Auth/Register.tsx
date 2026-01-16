@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authHooks } from "../../hooks/useAuth";
-import { GENDERS } from "../../constants/user";
+import { USER_TYPES } from "../../constants";
 
 // ✅ Zod Schema - Backend validation এর সাথে match করে
 const registerSchema = z.object({
@@ -14,12 +14,7 @@ const registerSchema = z.object({
     .min(3, "Full Name must be at least 3 characters")
     .max(50, "Full Name must be at most 50 characters"),
 
-  phoneNumber: z
-    .string()
-    .regex(
-      /^01[3-9]\d{8}$/,
-      "Phone number must be a valid Bangladeshi number (e.g., 01712345678)"
-    ),
+  email: z.string().email("Please enter a valid email address"),
 
   userName: z
     .string()
@@ -30,16 +25,16 @@ const registerSchema = z.object({
       "Username can only contain letters, numbers, and underscores"
     ),
 
-  gender: z.enum([GENDERS.MALE, GENDERS.FEMALE] as const, {
-    message: "Please select your gender",
-  }),
-
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
     .regex(/(?=.*[a-z])/, "Password must contain at least one lowercase letter")
     .regex(/(?=.*[A-Z])/, "Password must contain at least one uppercase letter")
     .regex(/(?=.*\d)/, "Password must contain at least one number"),
+
+  userType: z.enum([USER_TYPES.STUDENT, USER_TYPES.TEACHER], {
+    message: "User Type is required",
+  }),
 
   // 📝 agreeToTerms: শুধু Frontend এর জন্য, Backend এ যাবে না
   agreeToTerms: z.literal(true, "You must agree to the terms"),
@@ -61,10 +56,10 @@ const Register = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
-      phoneNumber: "",
+      email: "",
       userName: "",
-      gender: undefined,
       password: "",
+      userType: undefined,
       agreeToTerms: undefined,
     },
   });
@@ -72,18 +67,18 @@ const Register = () => {
   // ✅ Form submit handler - much cleaner now!
   const onSubmit = (data: RegisterFormData) => {
     // 📝 Real World Safety: Backend এও এখন agreeToTerms পাঠানো হচ্ছে
-    register({ userData: data as any });
+    register({ userData: data });
   };
 
   return (
     <div className="flex h-screen items-center justify-center space-x-15 overflow-hidden">
       {/* Header - Left Side */}
       <div className="text-center">
-        <h1 className="mb-2 text-4xl font-bold text-green-600">Talimuddin</h1>
+        <h1 className="mb-2 text-4xl font-bold text-gray-900">SocialHub</h1>
         <h2 className="mb-2 text-2xl font-semibold text-gray-700">
           Create Account
         </h2>
-        <p className="text-gray-600">Join Islamic Academy today</p>
+        <p className="text-gray-600">Join our community today</p>
       </div>
 
       {/* Register Form - Right Side */}
@@ -117,28 +112,28 @@ const Register = () => {
               )}
             </div>
 
-            {/* Phone Number Field */}
+            {/* Email Field */}
             <div>
               <label
-                htmlFor="phoneNumber"
+                htmlFor="email"
                 className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Phone Number
+                Email Address
               </label>
               <input
-                id="phoneNumber"
-                type="tel"
-                {...registerField("phoneNumber")}
+                id="email"
+                type="email"
+                {...registerField("email")}
                 className={`w-full rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
-                  errors.phoneNumber
+                  errors.email
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 }`}
-                placeholder="Enter your phone number"
+                placeholder="Enter your email"
               />
-              {errors.phoneNumber && (
+              {errors.email && (
                 <p className="mt-1 text-sm text-red-500">
-                  {errors.phoneNumber.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -158,7 +153,7 @@ const Register = () => {
                 className={`w-full rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
                   errors.userName
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 }`}
                 placeholder="Choose a username (e.g., user_123)"
               />
@@ -169,30 +164,30 @@ const Register = () => {
               )}
             </div>
 
-            {/* Gender Field */}
+            {/* User Type Field */}
             <div>
               <label
-                htmlFor="gender"
+                htmlFor="userType"
                 className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Gender
+                I am a
               </label>
               <select
-                id="gender"
-                {...registerField("gender")}
+                id="userType"
+                {...registerField("userType")}
                 className={`w-full appearance-none rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
-                  errors.gender
+                  errors.userType
                     ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-green-500 focus:ring-green-500"
+                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 }`}
               >
-                <option value="">Select gender</option>
-                <option value={GENDERS.MALE}>Male</option>
-                <option value={GENDERS.FEMALE}>Female</option>
+                <option value="">Select user type</option>
+                <option value={USER_TYPES.STUDENT}>Student</option>
+                <option value={USER_TYPES.TEACHER}>Teacher</option>
               </select>
-              {errors.gender && (
+              {errors.userType && (
                 <p className="mt-1 text-sm text-red-500">
-                  {errors.gender.message}
+                  {errors.userType.message}
                 </p>
               )}
             </div>
@@ -244,7 +239,7 @@ const Register = () => {
                 id="agreeToTerms"
                 type="checkbox"
                 {...registerField("agreeToTerms")}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label
                 htmlFor="agreeToTerms"
@@ -253,14 +248,14 @@ const Register = () => {
                 I agree to the{" "}
                 <NavLink
                   to="/terms"
-                  className="text-green-600 hover:text-green-500"
+                  className="text-blue-600 hover:text-blue-500"
                 >
                   Terms of Service
                 </NavLink>{" "}
                 and{" "}
                 <NavLink
                   to="/privacy"
-                  className="text-green-600 hover:text-green-500"
+                  className="text-blue-600 hover:text-blue-500"
                 >
                   Privacy Policy
                 </NavLink>
@@ -277,7 +272,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-lg bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700 disabled:opacity-60"
+            className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
           >
             {isPending ? (
               <div className="flex items-center justify-center">
@@ -296,7 +291,7 @@ const Register = () => {
             Already have an account?{" "}
             <NavLink
               to="/login"
-              className="font-medium text-green-600 hover:text-green-500"
+              className="font-medium text-blue-600 hover:text-blue-500"
             >
               Sign in here
             </NavLink>
@@ -308,3 +303,5 @@ const Register = () => {
 };
 
 export default Register;
+
+

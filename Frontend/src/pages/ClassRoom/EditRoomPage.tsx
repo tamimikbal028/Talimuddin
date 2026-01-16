@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaCamera, FaCog, FaArrowLeft, FaInfoCircle } from "react-icons/fa";
 import PageLoader from "../Fallbacks/PageLoader";
 import { roomHooks } from "../../hooks/useRoom";
@@ -23,8 +23,7 @@ const TABS: Tab[] = [
 
 const EditRoomPage: React.FC = () => {
   const navigate = useNavigate();
-  const { roomId } = useParams();
-  const { data: roomData, isLoading, error } = roomHooks.useRoomDetails(roomId);
+  const { data: roomData, isLoading, error } = roomHooks.useRoomDetails();
   const [activeTab, setActiveTab] = useState<TabType>("photos");
 
   if (isLoading) return <PageLoader />;
@@ -54,7 +53,7 @@ const EditRoomPage: React.FC = () => {
 
   // Security: Only creator and admin can access
   if (!meta.isCreator && !meta.isAdmin) {
-    navigate(`/classroom/rooms/${roomId}`);
+    navigate(`/classroom/rooms/${room._id}`);
     return null;
   }
 
@@ -67,7 +66,7 @@ const EditRoomPage: React.FC = () => {
           <div className="flex items-center justify-between border-b border-gray-100 py-5">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate(`/classroom/rooms/${roomId}`)}
+                onClick={() => navigate(`/classroom/rooms/${room._id}`)}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 hover:text-gray-900 active:scale-95"
                 aria-label="Go back"
               >

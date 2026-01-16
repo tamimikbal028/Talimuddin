@@ -18,6 +18,23 @@ const Home: React.FC = () => {
 
   return (
     <>
+      {/* TODO: Add DailyXPClaim component when gaming features are connected */}
+
+      {/* Create Post Section - Shared Component */}
+      {/*user?._id && (
+        <CreatePost
+          key={isCreatingPost ? "submitting" : "idle"} // Simple hack: re-mount or re-render? No, this might cause focus loss.
+          // Better: Use a dedicated key state that increments on success.
+          // But for now, let's stick to just passing props.
+          targetModel={POST_TARGET_MODELS.USER}
+          targetId={user._id}
+          placeholder={`What's on your mind, ${user.fullName.split(" ")[0]}?`}
+          showPoll={true}
+          onSubmit={handleCreatePost}
+          isPending={isCreatingPost}
+        />
+      )*/}
+
       {/* Feed Header */}
       <h2 className="text-xl font-semibold text-gray-900">Latest Posts</h2>
 

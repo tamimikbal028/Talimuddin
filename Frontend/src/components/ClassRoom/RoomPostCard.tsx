@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -11,11 +11,7 @@ import {
   FaLink,
   FaCheckDouble,
 } from "react-icons/fa";
-import {
-  formatPostDate,
-  formatPostClock,
-  formatPostDateTime,
-} from "../../utils/dateUtils";
+import { formatPostDate, formatPostClock } from "../../utils/dateUtils";
 import SeparatorDot from "../shared/SeparatorDot";
 import CommentItem from "../shared/CommentItem";
 import CommentSkeleton from "../shared/skeletons/CommentSkeleton";
@@ -24,6 +20,7 @@ import type { Attachment, Post, PostMeta } from "../../types";
 import { authHooks } from "../../hooks/useAuth";
 import { roomHooks } from "../../hooks/useRoom";
 import { commentHooks } from "../../hooks/common/useComment";
+import { useDropdown } from "../../hooks/useDropdown";
 import { ATTACHMENT_TYPES } from "../../constants";
 import confirm from "../../utils/sweetAlert";
 
@@ -34,28 +31,16 @@ interface RoomPostCardProps {
 
 const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
   const [commentText, setCommentText] = useState("");
 
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const {
+    isOpen: showMenu,
+    openUpward,
+    menuRef,
+    triggerRef: buttonRef,
+    toggle: toggleMenu,
+    close: closeMenu,
+  } = useDropdown(300);
 
   // Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
@@ -104,6 +89,11 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
     setShowCommentBox(!showCommentBox);
   };
 
+  // Room details for settings
+  const { data: roomResponse } = roomHooks.useRoomDetails();
+  const roomMeta = roomResponse?.data.meta;
+  const canComment = roomMeta?.canComment;
+
   // Ref for textarea
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
@@ -129,11 +119,11 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
 
   const handleToggleBookmark = () => {
     toggleBookmark({ postId: post._id });
-    setShowMenu(false);
+    closeMenu();
   };
 
   const handleDelete = async () => {
-    setShowMenu(false);
+    closeMenu();
     const isConfirmed = await confirm({
       title: "Delete Post?",
       text: "This action cannot be undone.",
@@ -151,7 +141,7 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
       const link = `${window.location.origin}/post/${post._id}`;
       await navigator.clipboard.writeText(link);
       toast.success("Post link copied to clipboard");
-      setShowMenu(false);
+      closeMenu();
     } catch {
       toast.error("Failed to copy link");
     }
@@ -202,9 +192,7 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
               {post.isEdited && post.editedAt && (
                 <>
                   <SeparatorDot ariaHidden />
-                  <span className="text-gray-400 italic">
-                    Edited {formatPostDateTime(post.editedAt)}
-                  </span>
+                  <span className="text-gray-400 italic">Edited</span>
                 </>
               )}
             </p>
@@ -213,17 +201,19 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
 
         <div className="flex items-center space-x-2">
           {/* Reply button */}
-          <button
-            onClick={handleToggleCommentBox}
-            className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-              showCommentBox
-                ? "border-blue-500 bg-blue-50 text-blue-600"
-                : "border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-gray-50"
-            }`}
-          >
-            <FaRegComment className="h-4 w-4" />
-            <span>Reply</span>
-          </button>
+          {canComment && (
+            <button
+              onClick={handleToggleCommentBox}
+              className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                showCommentBox
+                  ? "border-blue-500 bg-blue-50 text-blue-600"
+                  : "border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-gray-50"
+              }`}
+            >
+              <FaRegComment className="h-4 w-4" />
+              <span>Reply</span>
+            </button>
+          )}
 
           <button
             onClick={() => toggleReadStatus({ postId: post._id })}
@@ -242,14 +232,7 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
           <div className="relative" ref={menuRef}>
             <button
               ref={buttonRef}
-              onClick={() => {
-                if (!showMenu && buttonRef.current) {
-                  const rect = buttonRef.current.getBoundingClientRect();
-                  const spaceBelow = window.innerHeight - rect.bottom;
-                  setOpenUpward(spaceBelow < 300);
-                }
-                setShowMenu(!showMenu);
-              }}
+              onClick={toggleMenu}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-200"
               title="More actions"
             >
@@ -297,7 +280,7 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
                       {/* edit button */}
                       <button
                         onClick={() => {
-                          setShowMenu(false);
+                          closeMenu();
                           setIsEditing(true);
                         }}
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
@@ -416,98 +399,111 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
       {/* Comments Section & Input - Show only when reply button is clicked */}
       {showCommentBox && (
         <div className="border-t border-gray-100">
-          {/* Loading State */}
-          {isLoadingComments && (
-            <div className="space-y-1 px-2.5 py-2">
-              <CommentSkeleton />
-              <CommentSkeleton />
-              <CommentSkeleton />
+          {!canComment && (
+            <div className="bg-gray-50 p-4 text-center text-sm font-medium text-gray-500">
+              Commenting is disabled in this room.
             </div>
           )}
 
-          {/* Comments List - Scrollable */}
-          {!isLoadingComments && postComments.length > 0 && (
-            <div className="px-2.5 py-2">
-              <div className="max-h-[400px] space-y-1 overflow-y-auto">
-                {/* Display all comments - Newest first */}
-                {postComments.map((item) => (
-                  <CommentItem
-                    key={item.comment._id}
-                    comment={item.comment}
-                    meta={item.meta}
-                    currentUserId={currentUser?._id}
-                    onDeleteComment={(commentId) => deleteComment(commentId)}
-                    onUpdateComment={(commentId, content) =>
-                      updateComment({ commentId, content })
-                    }
-                    hideLike={true}
-                  />
-                ))}
-                {/* Load More Button */}
-                {hasNextPage && (
-                  <button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="w-full rounded-lg border border-blue-600 p-2 text-center text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white disabled:opacity-50"
-                  >
-                    {isFetchingNextPage
-                      ? "Loading more..."
-                      : "Load more comments"}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+          {canComment && (
+            <>
+              {/* Loading State */}
+              {isLoadingComments && (
+                <div className="space-y-1 px-2.5 py-2">
+                  <CommentSkeleton />
+                  <CommentSkeleton />
+                  <CommentSkeleton />
+                </div>
+              )}
 
-          {/* Create Comment Input */}
-          <div className="border-t border-gray-100 p-4">
-            {currentUser?.restrictions.isCommentBlocked ? (
-              <div className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
-                You are restricted from commenting.
-                {currentUser.restrictions.commentRestriction?.reason && (
-                  <span className="block text-xs text-red-500">
-                    Reason: {currentUser.restrictions.commentRestriction.reason}
-                  </span>
+              {/* Comments List - Scrollable */}
+              {!isLoadingComments && postComments.length > 0 && (
+                <div className="px-2.5 py-2">
+                  <div className="max-h-[400px] space-y-1 overflow-y-auto">
+                    {/* Display all comments - Newest first */}
+                    {postComments.map((item) => (
+                      <CommentItem
+                        key={item.comment._id}
+                        comment={item.comment}
+                        meta={item.meta}
+                        currentUserId={currentUser?._id}
+                        onDeleteComment={(commentId) =>
+                          deleteComment(commentId)
+                        }
+                        onUpdateComment={(commentId, content) =>
+                          updateComment({ commentId, content })
+                        }
+                        hideLike={true}
+                      />
+                    ))}
+                    {/* Load More Button */}
+                    {hasNextPage && (
+                      <button
+                        onClick={() => fetchNextPage()}
+                        disabled={isFetchingNextPage}
+                        className="w-full rounded-lg border border-blue-600 p-2 text-center text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white disabled:opacity-50"
+                      >
+                        {isFetchingNextPage
+                          ? "Loading more..."
+                          : "Load more comments"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Create Comment Input */}
+              <div className="border-t border-gray-100 p-4">
+                {currentUser?.restrictions.isCommentBlocked ? (
+                  <div className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
+                    You are restricted from commenting.
+                    {currentUser.restrictions.commentRestriction?.reason && (
+                      <span className="block text-xs text-red-500">
+                        Reason:{" "}
+                        {currentUser.restrictions.commentRestriction.reason}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3">
+                    <img
+                      src={currentUser?.avatar}
+                      alt="Your avatar"
+                      className="h-8 w-8 rounded-full bg-gray-300 object-cover"
+                    />
+                    <textarea
+                      ref={textareaRef}
+                      value={commentText}
+                      onChange={(e) => {
+                        setCommentText(e.target.value);
+                        // Auto-resize
+                        e.target.style.height = "auto";
+                        e.target.style.height = e.target.scrollHeight + "px";
+                      }}
+                      placeholder="Write a comment (max 1000 chars)..."
+                      className="max-h-32 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      rows={1}
+                      style={{ minHeight: "38px" }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddComment(e);
+                        }
+                      }}
+                      maxLength={1000}
+                    />
+                    <button
+                      onClick={handleAddComment}
+                      disabled={!commentText.trim() || isAddingComment}
+                      className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isAddingComment ? "Sending..." : "Send"}
+                    </button>
+                  </div>
                 )}
               </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <img
-                  src={currentUser?.avatar}
-                  alt="Your avatar"
-                  className="h-8 w-8 rounded-full bg-gray-300 object-cover"
-                />
-                <textarea
-                  ref={textareaRef}
-                  value={commentText}
-                  onChange={(e) => {
-                    setCommentText(e.target.value);
-                    // Auto-resize
-                    e.target.style.height = "auto";
-                    e.target.style.height = e.target.scrollHeight + "px";
-                  }}
-                  placeholder="Write a comment (max 1000 chars)..."
-                  className="max-h-32 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  rows={1}
-                  style={{ minHeight: "38px" }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleAddComment(e);
-                    }
-                  }}
-                  maxLength={1000}
-                />
-                <button
-                  onClick={handleAddComment}
-                  disabled={!commentText.trim() || isAddingComment}
-                  className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isAddingComment ? "Sending..." : "Send"}
-                </button>
-              </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       )}
     </div>

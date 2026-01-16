@@ -34,15 +34,13 @@ import { authHooks } from "../hooks/useAuth";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAuth?: boolean;
-  allowedRoles?: string[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAuth = true,
-  allowedRoles = [],
 }) => {
-  const { user, isAuthenticated, isCheckingAuth } = authHooks.useUser();
+  const { isAuthenticated, isCheckingAuth } = authHooks.useUser();
   const location = useLocation();
 
   // ⏳ Auth check চলছে - Loading দেখাও
@@ -52,26 +50,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="flex flex-col items-center space-y-4">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
           <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">User is Not Authenticated</p>
         </div>
       </div>
     );
   }
 
   // 🔒 Auth required but not logged in → Login page এ পাঠাও
+  // location.state এ current path save করো যাতে login এর পর ফেরত আসতে পারে
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 🚫 Already logged in but trying to access login/register → appropriate Home এ পাঠাও
+  // 🚫 Already logged in but trying to access login/register → Home এ পাঠাও
+  // Logged in user এর login page দেখার দরকার নেই
   if (!requireAuth && isAuthenticated) {
     return <Navigate to="/" replace />;
-  }
-
-  // 🛑 Role check - If role is not allowed, redirect to Home
-  if (isAuthenticated && allowedRoles.length > 0 && user) {
-    if (!allowedRoles.includes(user.userType)) {
-      return <Navigate to="/" replace />;
-    }
   }
 
   // ✅ All checks passed - Content দেখাও
@@ -79,3 +73,5 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 };
 
 export default ProtectedRoute;
+
+

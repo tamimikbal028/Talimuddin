@@ -7,11 +7,8 @@ import type {
   AuthState,
   ApiError,
   RegisterData,
-  User,
-  ApiResponse,
 } from "../types";
 import type { AxiosError } from "axios";
-import type { UseMutationResult } from "@tanstack/react-query";
 
 // Query Keys
 const AUTH_KEYS = {
@@ -50,11 +47,7 @@ const useUser = (): AuthState => {
 };
 
 // Register
-const useRegister = (): UseMutationResult<
-  ApiResponse<{ user: User }>,
-  AxiosError<ApiError>,
-  { userData: RegisterData }
-> => {
+const useRegister = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -65,13 +58,7 @@ const useRegister = (): UseMutationResult<
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       toast.success(response.message);
-
-      const user = response.data.user;
-      if (user.userType === "owner" || user.userType === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Registration failed");
@@ -80,11 +67,7 @@ const useRegister = (): UseMutationResult<
 };
 
 // Login
-const useLogin = (): UseMutationResult<
-  ApiResponse<{ user: User }>,
-  AxiosError<ApiError>,
-  { credentials: LoginCredentials }
-> => {
+const useLogin = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -94,13 +77,7 @@ const useLogin = (): UseMutationResult<
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       toast.success(response.message);
-
-      const user = response.data.user;
-      if (user.userType === "owner" || user.userType === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Internal server error");
@@ -109,11 +86,7 @@ const useLogin = (): UseMutationResult<
 };
 
 // Logout
-const useLogout = (): UseMutationResult<
-  ApiResponse<null>,
-  AxiosError<ApiError>,
-  void
-> => {
+const useLogout = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -136,11 +109,7 @@ const useLogout = (): UseMutationResult<
 };
 
 // Change Password
-const useChangePassword = (): UseMutationResult<
-  ApiResponse<null>,
-  AxiosError<ApiError>,
-  { oldPassword: string; newPassword: string }
-> => {
+const useChangePassword = () => {
   return useMutation({
     mutationFn: (data: { oldPassword: string; newPassword: string }) =>
       authService.changePassword(data),

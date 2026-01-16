@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { profileService } from "../services/profile.service";
 import type {
   UpdateGeneralData,
+  UpdateAcademicData,
   ApiError,
   ProfilePostsResponse,
 } from "../types";
@@ -16,6 +17,7 @@ import type { AxiosError } from "axios";
 import { postHooks } from "./common/usePost";
 
 import { commentHooks } from "./common/useComment";
+import { followHooks } from "./common/useFollow";
 import { useParams } from "react-router-dom";
 import { AUTH_KEYS } from "./useAuth";
 
@@ -38,6 +40,16 @@ const useProfileHeader = (username: string) =>
     ...defaultProfileQueryOptions,
   });
 
+const useProfileDetails = (username: string) =>
+  useQuery({
+    queryKey: ["profileDetails", username],
+    queryFn: async () => {
+      const response = await profileService.getProfileDetails(username);
+      return response.data;
+    },
+    ...defaultProfileQueryOptions,
+  });
+
 // Update hooks
 const useUpdateGeneral = () => {
   const queryClient = useQueryClient();
@@ -48,11 +60,35 @@ const useUpdateGeneral = () => {
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       queryClient.invalidateQueries({ queryKey: ["profileHeader"] });
+      // Invalidate room queries since user name appears on room cards
+      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
       toast.success(response.message);
       navigate(`/profile/${response.data.user.userName}`);
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Update General failed");
+    },
+  });
+};
+
+const useUpdateAcademic = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: (data: UpdateAcademicData) =>
+      profileService.updateAcademic(data),
+    onSuccess: (response) => {
+      queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
+      queryClient.invalidateQueries({ queryKey: ["profileHeader"] });
+      toast.success(response.message);
+      navigate(`/profile/${response.data.user.userName}`);
+    },
+    onError: (error: AxiosError<ApiError>) => {
+      toast.error(error?.response?.data?.message ?? "Update Academic failed");
     },
   });
 };
@@ -100,11 +136,9 @@ const useUpdateCoverImage = () => {
 const useProfilePosts = (username?: string) =>
   useInfiniteQuery<ProfilePostsResponse>({
     queryKey: ["profilePosts", username],
-    queryFn: async ({ pageParam }) => {
+    queryFn: ({ pageParam }) => {
       if (!username) throw new Error("Username is required");
-      const page = Number(pageParam ?? 1);
-      const response = await profileService.getProfilePosts(username, page);
-      return response;
+      return profileService.getProfilePosts(username, pageParam as number);
     },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
@@ -186,9 +220,19 @@ const useDeleteProfileComment = ({ postId }: { postId: string }) => {
   });
 };
 
+// Follow hooks
+const useToggleFollowProfile = () => {
+  const { username } = useParams();
+  return followHooks.useToggleFollow({
+    invalidateKey: ["profileHeader", username],
+  });
+};
+
 const profileHooks = {
   useProfileHeader,
+  useProfileDetails,
   useUpdateGeneral,
+  useUpdateAcademic,
   useUpdateAvatar,
   useUpdateCoverImage,
   useProfilePosts,
@@ -201,6 +245,7 @@ const profileHooks = {
   useTogglePinProfilePost,
   useAddProfileComment,
   useDeleteProfileComment,
+  useToggleFollowProfile,
 } as const;
 
 export { profileHooks };

@@ -1,7 +1,12 @@
 import React from "react";
 import RoomCard from "../RoomCard";
+import RoomCardSkeleton from "../../shared/skeletons/RoomCardSkeleton";
+import ErrorState from "../../shared/ErrorState";
+import EmptyState from "../../shared/EmptyState";
 import { roomHooks } from "../../../hooks/useRoom";
+import { ROOM_LIMIT } from "../../../constants";
 import type { RoomListItem } from "../../../types";
+import { FaArchive } from "react-icons/fa";
 
 const ArchivedRooms: React.FC = () => {
   const {
@@ -19,18 +24,21 @@ const ArchivedRooms: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-300 bg-white p-6 shadow">
-        <p className="text-sm text-gray-600">Loading archived rooms...</p>
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-7 w-40 animate-pulse rounded bg-gray-200"></div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(ROOM_LIMIT)].map((_, i) => (
+            <RoomCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (isError) {
-    return (
-      <div className="rounded-xl border border-red-300 bg-red-50 p-6 shadow">
-        <p className="text-sm text-red-600">Failed to load archived rooms</p>
-      </div>
-    );
+    return <ErrorState message="Failed to load archived rooms" />;
   }
 
   return (
@@ -44,11 +52,7 @@ const ArchivedRooms: React.FC = () => {
 
       {/* no rooms message */}
       {rooms.length === 0 && (
-        <div className="rounded-xl border border-gray-300 bg-white p-6 shadow">
-          <p className="text-center text-sm font-medium text-gray-600">
-            No archived rooms found
-          </p>
-        </div>
+        <EmptyState icon={FaArchive} message="No archived rooms found" />
       )}
 
       {/* rooms */}
@@ -58,6 +62,11 @@ const ArchivedRooms: React.FC = () => {
             {rooms.map((r) => (
               <RoomCard key={r._id} room={r} />
             ))}
+            {/* Loading Skeleton for Next Page inside the same grid */}
+            {isFetchingNextPage &&
+              [...Array(ROOM_LIMIT)].map((_, i) => (
+                <RoomCardSkeleton key={`skeleton-${i}`} />
+              ))}
           </div>
 
           {/* Load More Button */}
@@ -72,29 +81,8 @@ const ArchivedRooms: React.FC = () => {
               </button>
             </div>
           )}
-
-          {/* Loading Skeleton for Next Page */}
-          {isFetchingNextPage && (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(3)].map((_, i) => (
-                <div
-                  key={`skeleton-${i}`}
-                  className="h-64 animate-pulse rounded-xl bg-gray-100"
-                ></div>
-              ))}
-            </div>
-          )}
         </>
       )}
-
-      {/* info message */}
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
-        <p className="text-sm font-medium text-blue-800">
-          <strong>Note:</strong> Archived rooms are read-only. No one can join
-          or post in these rooms until they are unarchived by the creator or
-          admin.
-        </p>
-      </div>
     </div>
   );
 };

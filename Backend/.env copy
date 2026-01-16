@@ -1,5 +1,5 @@
 PORT=8000
-DB_URL=mongodb://localhost:27017
+DB_URL=mongodb+srv://tamimpublicemail_db_user:tamim ikbal@cluster0.eerujqd.mongodb.net
 CORS_ORIGIN=http://localhost:5173
 
 NODE_ENV=development

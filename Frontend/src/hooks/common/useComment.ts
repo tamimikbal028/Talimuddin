@@ -23,13 +23,11 @@ const usePostComments = ({
 }) => {
   return useInfiniteQuery({
     queryKey: ["comments", postId],
-    queryFn: ({ pageParam = 1 }) =>
-      commentService.getPostComments(postId, Number(pageParam)),
+    queryFn: ({ pageParam }) =>
+      commentService.getPostComments(postId, pageParam as number),
     getNextPageParam: (lastPage) => {
-      if (lastPage.data.pagination.hasNextPage) {
-        return lastPage.data.pagination.page + 1;
-      }
-      return undefined;
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
     },
     initialPageParam: 1,
     enabled: !!postId && enabled,

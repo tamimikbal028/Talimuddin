@@ -3,24 +3,13 @@ import { FaSignOutAlt } from "react-icons/fa";
 import AccountSettings from "../components/Settings/AccountSettings";
 import PrivacySettings from "../components/Settings/PrivacySettings";
 import NotificationSettings from "../components/Settings/NotificationSettings";
-import { authHooks } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import AppearanceSettings from "../components/Settings/AppearanceSettings";
+import SupportSettings from "../components/Settings/SupportSettings";
 
 const Settings: React.FC = () => {
-  const navigate = useNavigate();
-  const { mutate: logout, isPending } = authHooks.useLogout();
-
   const handleSignOut = () => {
-    logout(undefined, {
-      onSuccess: () => {
-        toast.success("Logged out successfully");
-        navigate("/login");
-      },
-      onError: () => {
-        toast.error("Failed to logout");
-      },
-    });
+    console.log("Signing out...");
+    // In a real app, this would handle sign out logic
   };
 
   return (
@@ -37,18 +26,17 @@ const Settings: React.FC = () => {
         <AccountSettings />
         <PrivacySettings />
         <NotificationSettings />
+        <AppearanceSettings />
+        <SupportSettings />
 
         {/* Logout Section */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
           <button
             onClick={handleSignOut}
-            disabled={isPending}
-            className="flex items-center space-x-3 text-red-600 transition-colors hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center space-x-3 text-red-600 transition-colors hover:text-red-700"
           >
             <FaSignOutAlt />
-            <span className="font-medium">
-              {isPending ? "Signing out..." : "Sign Out"}
-            </span>
+            <span className="font-medium">Sign Out</span>
           </button>
         </div>
       </div>

@@ -1,12 +1,19 @@
 import { User } from "../models/user.model.js";
+import { Friendship } from "../models/friendship.model.js";
+import { Follow } from "../models/follow.model.js";
 import { Post } from "../models/post.model.js";
+import { Institution } from "../models/institution.model.js";
+import { Department } from "../models/department.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadFile, deleteFile } from "../utils/cloudinaryFileUpload.js";
+import { findInstitutionByEmailDomain } from "./academic.service.js";
 import {
   USER_TYPES,
+  USER_RELATION_STATUS,
   POST_TARGET_MODELS,
   POST_VISIBILITY,
-  GENDERS,
+  FRIENDSHIP_STATUS,
+  FOLLOW_TARGET_MODELS,
 } from "../constants/index.js";
 import jwt from "jsonwebtoken";
 
@@ -34,46 +41,47 @@ const generateAccessAndRefreshTokens = async (userId) => {
 // 🚀 1. REGISTER USER SERVICE
 // ==========================================
 export const registerUserService = async (userData) => {
-  const { fullName, phoneNumber, password, userName, gender, agreeToTerms } =
+  const { fullName, email, password, userName, userType, agreeToTerms } =
     userData;
 
-  const existedUser = await User.findOne({
-    $or: [{ phoneNumber }, { userName }],
-  });
-
+  const existedUser = await User.findOne({ $or: [{ email }, { userName }] });
   if (existedUser) {
-    throw new ApiError(
-      409,
-      "User with this phone number or username already exists"
-    );
+    throw new ApiError(409, "User with this email or username already exists");
   }
 
-  // Gender-based default avatar
-  const defaultAvatar =
-    gender === GENDERS.FEMALE
-      ? "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1768286667/girl_rok2ob.png"
-      : "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1768285953/u6eqtyialvxv1oaaymti.png";
+  if ([USER_TYPES.ADMIN, USER_TYPES.OWNER].includes(userType)) {
+    throw new ApiError(403, "Restricted user type.");
+  }
 
-  const defultCoverImage =
-    "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1768286305/e7hunutkggs4ewvvfuzk.png";
+  // 3. Check for institution using email domain
+  const institution = await findInstitutionByEmailDomain(email);
 
+  // 5. Create User Payload with conditional institution linking
   const userPayload = {
     fullName,
-    phoneNumber,
+    email,
     password,
     userName,
-    gender,
-    userType: USER_TYPES.NORMAL, // Always set to "normal" by default
-    avatar: defaultAvatar,
-    coverImage: defultCoverImage,
-    agreedToTerms: agreeToTerms,
-    termsAgreedAt: new Date(),
+    userType,
+    agreedToTerms: agreeToTerms, // Backend এ সেভ করছি
+    termsAgreedAt: new Date(), // রাজি হওয়ার সঠিক সময় টি সেভ করে রাখছি
+    // Default values
+    isStudentEmail: false,
   };
 
+  // If an institution was found, link it to the user
+
+  if (institution) {
+    userPayload.isStudentEmail = true;
+    userPayload.institution = institution._id;
+    userPayload.institutionType = institution.type;
+  }
+
   const user = await User.create(userPayload);
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  const createdUser = await User.findById(user._id)
+    .select("-password -refreshToken")
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo");
 
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
@@ -90,12 +98,14 @@ export const registerUserService = async (userData) => {
 // ==========================================
 // 🚀 2. LOGIN USER SERVICE
 // ==========================================
-export const loginUserService = async ({ phoneNumber, password }) => {
-  if (!phoneNumber) {
-    throw new ApiError(400, "Phone number is required");
+export const loginUserService = async ({ email, userName, password }) => {
+  if (!email && !userName) {
+    throw new ApiError(400, "Username or email is required");
   }
 
-  const user = await User.findOne({ phoneNumber });
+  const user = await User.findOne({
+    $or: [{ email }, { userName }],
+  });
 
   if (!user) {
     throw new ApiError(404, "User does not exist");
@@ -111,9 +121,10 @@ export const loginUserService = async ({ phoneNumber, password }) => {
     user._id
   );
 
-  const loggedInUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  const loggedInUser = await User.findById(user._id)
+    .select("-password -refreshToken")
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo");
 
   return { user: loggedInUser, accessToken, refreshToken };
 };
@@ -181,6 +192,82 @@ export const changePasswordService = async (
 };
 
 // ==========================================
+// 🚀 7. UPDATE ACADEMIC PROFILE SERVICE
+// ==========================================
+export const updateAcademicProfileService = async (
+  userId,
+  userType,
+  updateData
+) => {
+  const {
+    institution: institutionId,
+    department: departmentId,
+    session,
+    section,
+    studentId,
+    teacherId,
+    rank,
+    officeHours,
+  } = updateData;
+
+  const existingUser = await User.findById(userId);
+  if (!existingUser) throw new ApiError(404, "User not found");
+
+  // Verify and set Institution
+  let effectiveInstitution = existingUser.institution;
+  if (institutionId) {
+    const inst = await Institution.findById(institutionId);
+    if (!inst)
+      throw new ApiError(404, "Institution not found with provided ID");
+    effectiveInstitution = institutionId;
+  }
+
+  // Verify and set Department
+  let effectiveDepartment = existingUser.academicInfo?.department;
+  if (departmentId) {
+    const dept = await Department.findById(departmentId);
+    if (!dept) throw new ApiError(404, "Department not found with provided ID");
+    effectiveDepartment = departmentId;
+  }
+
+  if (!effectiveInstitution || !effectiveDepartment) {
+    throw new ApiError(400, "Institution and Department are required");
+  }
+
+  let academicInfoPayload = {
+    ...(existingUser.academicInfo ? existingUser.academicInfo.toObject() : {}),
+    department: effectiveDepartment,
+  };
+
+  if (userType === USER_TYPES.STUDENT) {
+    if (session) academicInfoPayload.session = session;
+    if (section !== undefined) academicInfoPayload.section = section;
+    if (studentId !== undefined) academicInfoPayload.studentId = studentId;
+  } else if (userType === USER_TYPES.TEACHER) {
+    if (teacherId !== undefined) academicInfoPayload.teacherId = teacherId;
+    if (rank !== undefined) academicInfoPayload.rank = rank;
+    if (officeHours !== undefined)
+      academicInfoPayload.officeHours = officeHours;
+  }
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      $set: {
+        institution: effectiveInstitution,
+        academicInfo: academicInfoPayload,
+      },
+    },
+    { new: true }
+  )
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo")
+    .select("-password -refreshToken");
+
+  return { user };
+};
+
+// ==========================================
 // 🚀 8. UPDATE AVATAR SERVICE
 // ==========================================
 export const updateUserAvatarService = async (userId, avatarLocalPath) => {
@@ -210,7 +297,10 @@ export const updateUserAvatarService = async (userId, avatarLocalPath) => {
     userId,
     { $set: { avatar: avatar.url } },
     { new: true }
-  ).select("-password");
+  )
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo")
+    .select("-password");
 
   return { user };
 };
@@ -251,7 +341,10 @@ export const updateUserCoverImageService = async (
     userId,
     { $set: { coverImage: coverImage.url } },
     { new: true }
-  ).select("-password");
+  )
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo")
+    .select("-password");
 
   return { user };
 };
@@ -272,7 +365,10 @@ export const updateAccountDetailsService = async (userId, updateData) => {
     userId,
     { $set: updateData },
     { new: true }
-  ).select("-password -refreshToken");
+  )
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo")
+    .select("-password -refreshToken");
 
   return { user };
 };
@@ -288,9 +384,10 @@ export const getUserProfileHeaderService = async (
     throw new ApiError(400, "Username is required");
   }
 
-  const user = await User.findOne({ userName: targetUsername }).select(
-    "-password -refreshToken"
-  );
+  const user = await User.findOne({ userName: targetUsername })
+    .select("-password -refreshToken")
+    .populate("institution", "name code logo")
+    .populate("academicInfo.department", "name code logo");
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -298,11 +395,77 @@ export const getUserProfileHeaderService = async (
 
   const isSelf =
     currentUserId && currentUserId.toString() === user._id.toString();
+  let relationStatus = USER_RELATION_STATUS.NONE;
+  let isFollowing = false;
+  let isBlockedByMe = false;
+  let isBlockedByTarget = false;
+
+  if (isSelf) {
+    relationStatus = USER_RELATION_STATUS.SELF;
+  } else if (currentUserId) {
+    // Friendship Status
+    const friendship = await Friendship.findOne({
+      $or: [
+        { requester: currentUserId, recipient: user._id },
+        { requester: user._id, recipient: currentUserId },
+      ],
+    });
+
+    if (friendship) {
+      if (friendship.status === FRIENDSHIP_STATUS.ACCEPTED) {
+        relationStatus = USER_RELATION_STATUS.FRIEND;
+      } else if (friendship.status === FRIENDSHIP_STATUS.BLOCKED) {
+        if (friendship.requester.toString() === currentUserId.toString()) {
+          relationStatus = USER_RELATION_STATUS.BLOCKED;
+          isBlockedByMe = true;
+        } else {
+          relationStatus = USER_RELATION_STATUS.BLOCKED_BY_THEM;
+          isBlockedByTarget = true;
+        }
+      } else if (friendship.status === FRIENDSHIP_STATUS.PENDING) {
+        if (friendship.requester.toString() === currentUserId.toString()) {
+          relationStatus = USER_RELATION_STATUS.REQUEST_SENT;
+        } else {
+          relationStatus = USER_RELATION_STATUS.REQUEST_RECEIVED;
+        }
+      }
+    }
+
+    // Follow Status
+    const follow = await Follow.findOne({
+      follower: currentUserId,
+      following: user._id,
+      followingModel: FOLLOW_TARGET_MODELS.USER,
+    });
+    if (follow) isFollowing = true;
+  }
 
   return {
     user,
     meta: {
+      user_relation_status: relationStatus,
+      isFollowing,
+      isBlockedByMe,
+      isBlockedByTarget,
       isOwnProfile: isSelf,
     },
   };
+};
+
+// ==========================================
+// 🚀 12. GET USER DETAILS SERVICE
+// ==========================================
+export const getUserDetailsService = async (username) => {
+  const user = await User.findOne({ userName: username })
+    .select("-password -refreshToken")
+    .populate([
+      { path: "institution", select: "name code logo" },
+      { path: "academicInfo.department", select: "name code logo" },
+    ]);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  return { user };
 };

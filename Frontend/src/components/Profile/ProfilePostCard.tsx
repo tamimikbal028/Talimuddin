@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import {
   FaHeart,
@@ -30,6 +30,7 @@ import { ATTACHMENT_TYPES } from "../../constants";
 import confirm from "../../utils/sweetAlert";
 import { profileHooks } from "../../hooks/useProfile";
 import { commentHooks } from "../../hooks/common/useComment";
+import { useDropdown } from "../../hooks/useDropdown";
 
 interface ProfilePostCardProps {
   post: Post;
@@ -38,28 +39,15 @@ interface ProfilePostCardProps {
 
 const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
   const [showCommentBox, setShowCommentBox] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [openUpward, setOpenUpward] = useState(false);
   const [commentText, setCommentText] = useState("");
-
-  const menuRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setShowMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const {
+    isOpen: showMenu,
+    openUpward,
+    menuRef,
+    triggerRef: buttonRef,
+    toggle: toggleMenu,
+    close: closeMenu,
+  } = useDropdown(300);
 
   // Edit Mode States
   const [isEditing, setIsEditing] = useState(false);
@@ -115,7 +103,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
 
   const handleLike = () => {
     likeMutate({ postId: post._id });
-    setShowMenu(false);
+    closeMenu();
   };
 
   const handleToggleCommentBox = () => {
@@ -147,11 +135,11 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
 
   const handleToggleBookmark = () => {
     toggleBookmark({ postId: post._id });
-    setShowMenu(false);
+    closeMenu();
   };
 
   const handleDelete = async () => {
-    setShowMenu(false);
+    closeMenu();
     const isConfirmed = await confirm({
       title: "Delete Post?",
       text: "This action cannot be undone.",
@@ -169,7 +157,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
       const link = `${window.location.origin}/post/${post._id}`;
       await navigator.clipboard.writeText(link);
       toast.success("Post link copied to clipboard");
-      setShowMenu(false);
+      closeMenu();
     } catch {
       toast.error("Failed to copy link");
     }
@@ -235,14 +223,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
           <div className="relative" ref={menuRef}>
             <button
               ref={buttonRef}
-              onClick={() => {
-                if (!showMenu && buttonRef.current) {
-                  const rect = buttonRef.current.getBoundingClientRect();
-                  const spaceBelow = window.innerHeight - rect.bottom;
-                  setOpenUpward(spaceBelow < 300);
-                }
-                setShowMenu(!showMenu);
-              }}
+              onClick={toggleMenu}
               className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-200"
               title="More actions"
             >
@@ -288,7 +269,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
                       {/* edit button */}
                       <button
                         onClick={() => {
-                          setShowMenu(false);
+                          closeMenu();
                           setIsEditing(true);
                         }}
                         className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
@@ -301,7 +282,7 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
                       <button
                         onClick={() => {
                           togglePin({ postId: post._id });
-                          setShowMenu(false);
+                          closeMenu();
                         }}
                         disabled={isPinning}
                         className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors hover:bg-gray-50 disabled:opacity-50 ${

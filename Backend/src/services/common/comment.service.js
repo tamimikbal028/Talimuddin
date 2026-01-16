@@ -1,5 +1,10 @@
 import { Comment } from "../../models/comment.model.js";
 import { Post } from "../../models/post.model.js";
+import { Reaction } from "../../models/reaction.model.js";
+import {
+  REACTION_TARGET_MODELS,
+  POST_TARGET_MODELS,
+} from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
 
 export const getPostCommentsService = async (
@@ -62,6 +67,30 @@ export const addCommentService = async (postId, content, userId) => {
   const post = await Post.findById(postId);
   if (!post) {
     throw new ApiError(404, "Post not found");
+  }
+
+  // If it's a Room post, check for allowComments setting
+  if (post.postOnModel === POST_TARGET_MODELS.ROOM) {
+    const { Room } = await import("../../models/room.model.js");
+    const { RoomMembership } = await import(
+      "../../models/roomMembership.model.js"
+    );
+
+    const room = await Room.findById(post.postOnId);
+    if (room) {
+      const membership = await RoomMembership.findOne({
+        room: post.postOnId,
+        user: userId,
+      });
+
+      const isCreatorOrAdmin =
+        room.creator.toString() === userId.toString() ||
+        (membership && membership.isAdmin);
+
+      if (!room.settings?.allowComments && !isCreatorOrAdmin) {
+        throw new ApiError(403, "Commenting is disabled in this room");
+      }
+    }
   }
 
   const newComment = await Comment.create({

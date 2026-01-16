@@ -1,4 +1,4 @@
-export const DB_NAME = "Talimuddin_Academy";
+export const DB_NAME = "Talimuddin-DB";
 
 export const REACTION_TARGET_MODELS = {
   POST: "Post",

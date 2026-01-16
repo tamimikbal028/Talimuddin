@@ -13,6 +13,7 @@ import {
   mockSuggestedConnections,
   mockUpcomingEvents,
 } from "./data/rightSidebarData";
+import DailyXPClaimMini from "../components/Gaming/shared/DailyXPClaimMini";
 
 const SidebarRight: React.FC = () => {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ const SidebarRight: React.FC = () => {
   return (
     <div className="h-full space-y-3 overflow-y-auto bg-blue-50 p-3">
       {/* Daily XP Claim Mini - Show on all pages, auto-hide after claim */}
+      <DailyXPClaimMini />
 
       {/* Active Polls */}
       <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">

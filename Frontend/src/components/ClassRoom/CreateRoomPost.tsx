@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { FaImage, FaPaperPlane, FaUserFriends, FaLock } from "react-icons/fa";
+import {
+  FaImage,
+  FaPaperPlane,
+  FaUserFriends,
+  FaLock,
+  FaPoll,
+  FaVideo,
+} from "react-icons/fa";
 import type { IconType } from "react-icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -111,6 +118,20 @@ const CreateRoomPost: React.FC = () => {
       Icon: FaImage,
       color: "text-green-500",
       onClick: () => alert("Photo upload coming soon!"),
+      show: true,
+    },
+    {
+      label: "Video",
+      Icon: FaVideo,
+      color: "text-red-500",
+      onClick: () => alert("Video upload coming soon!"),
+      show: true,
+    },
+    {
+      label: "Poll",
+      Icon: FaPoll,
+      color: "text-orange-500",
+      onClick: () => alert("Poll creation coming soon!"),
       show: true,
     },
   ];

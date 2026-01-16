@@ -1,5 +1,5 @@
 import React from "react";
-import RoomForm from "../../components/ClassRoom/RoomForm";
+import CreateRoomForm from "../../components/ClassRoom/CreateRoomForm";
 
 const CreateRoomPage: React.FC = () => {
   return (
@@ -9,7 +9,7 @@ const CreateRoomPage: React.FC = () => {
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <RoomForm />
+        <CreateRoomForm />
       </div>
     </>
   );

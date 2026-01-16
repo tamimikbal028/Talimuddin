@@ -9,9 +9,17 @@ import {
   updatePostService,
   togglePinPostService,
 } from "../../services/common/post.service.js";
+import { Group } from "../../models/group.model.js";
+import { GroupMembership } from "../../models/groupMembership.model.js";
 import { User } from "../../models/user.model.js";
-import { Room } from "../../models/room.model.js";
-import { POST_TARGET_MODELS } from "../../constants/index.js";
+
+import {
+  POST_TARGET_MODELS,
+  GROUP_ROLES,
+  GROUP_MEMBERSHIP_STATUS,
+} from "../../constants/index.js";
+import { Department } from "../../models/department.model.js";
+import { Institution } from "../../models/institution.model.js";
 
 const createPost = asyncHandler(async (req, res) => {
   const { postOnModel, postOnId } = req.body;
@@ -42,8 +50,10 @@ const createPost = asyncHandler(async (req, res) => {
         throw new ApiError(403, "You can only post on your own profile");
       }
 
-      // 2. Create Post (service handles postsCount increment)
+      // 2. Create Post
       result = await createPostService(req.body, userId);
+
+      // 3. Post-Creation Side Effects
       break;
     }
 
@@ -74,32 +84,40 @@ const createPost = asyncHandler(async (req, res) => {
         );
       }
 
-      // 2. Create Post (service handles postsCount increment)
+      // 2. Create Post
       result = await createPostService(req.body, userId);
+
+      // 3. Post-Creation Side Effects
       break;
     }
 
     case POST_TARGET_MODELS.DEPARTMENT: {
       // 1. TODO: Department specific validation (if any)
 
-      // 2. Create Post (service handles postsCount increment)
+      // 2. Create Post
       result = await createPostService(req.body, userId);
+
+      // 3. Post-Creation Side Effects
       break;
     }
 
     case POST_TARGET_MODELS.INSTITUTION: {
       // 1. TODO: Institution specific validation (if any)
 
-      // 2. Create Post (service handles postsCount increment)
+      // 2. Create Post
       result = await createPostService(req.body, userId);
+
+      // 3. Post-Creation Side Effects
       break;
     }
 
     case POST_TARGET_MODELS.ROOM: {
       // 1. TODO: Room specific validation
 
-      // 2. Create Post (service handles postsCount increment)
+      // 2. Create Post
       result = await createPostService(req.body, userId);
+
+      // 3. Post-Creation Side Effects (if any)
       break;
     }
 
