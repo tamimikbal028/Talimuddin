@@ -94,29 +94,14 @@ const RoomGeneralTab: React.FC<RoomGeneralTabProps> = ({ room }) => {
             <div className="mt-1.5 grid gap-3 sm:grid-cols-2">
               {[
                 {
-                  id: ROOM_TYPES.GENERAL,
-                  label: "General",
-                  desc: "For general purpose learning",
+                  id: ROOM_TYPES.MAIN_ROOM,
+                  label: "Main Room",
+                  desc: "Main Room",
                 },
                 {
-                  id: ROOM_TYPES.UNIVERSITY,
-                  label: "University",
-                  desc: "University level courses",
-                },
-                {
-                  id: ROOM_TYPES.COLLEGE,
-                  label: "College",
-                  desc: "College level courses",
-                },
-                {
-                  id: ROOM_TYPES.COACHING,
-                  label: "Coaching",
-                  desc: "Coaching center classes",
-                },
-                {
-                  id: ROOM_TYPES.SCHOOL,
-                  label: "School",
-                  desc: "School level classes",
+                  id: ROOM_TYPES.SUB_ROOM,
+                  label: "Sub Room",
+                  desc: "Sub Room",
                 },
               ].map((option) => (
                 <button

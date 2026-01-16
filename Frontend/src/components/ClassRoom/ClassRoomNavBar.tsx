@@ -1,18 +1,10 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { FaDoorOpen, FaEyeSlash, FaArchive, FaEllipsisH } from "react-icons/fa";
+import { FaDoorOpen } from "react-icons/fa";
 
 const ClassRoomNavBar: React.FC = () => {
   const tabs = [
     { path: "/classroom", label: "Rooms", icon: FaDoorOpen, end: true },
-    { path: "/classroom/hidden", label: "Hidden", icon: FaEyeSlash, end: true },
-    {
-      path: "/classroom/archived",
-      label: "Archived",
-      icon: FaArchive,
-      end: true,
-    },
-    { path: "/classroom/more", label: "More", icon: FaEllipsisH, end: true },
   ];
 
   return (

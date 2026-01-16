@@ -27,7 +27,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({
         </svg>
       </div>
       <p className="font-semibold text-red-800">{message}</p>
-      <p className="mt-1 text-sm text-red-600">{description}</p>
+      <p className="mt-1 text-sm font-medium text-gray-600">{description}</p>
     </div>
   );
 };

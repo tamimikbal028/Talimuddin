@@ -38,24 +38,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Hidden Rooms
-  getHiddenRooms: async (page: number): Promise<MyRoomsResponse> => {
-    const limit = ROOM_LIMIT;
-    const response = await api.get<MyRoomsResponse>("/rooms/hiddenRooms", {
-      params: { page, limit },
-    });
-    return response.data;
-  },
-
-  // Get Archived Rooms
-  getArchivedRooms: async (page: number): Promise<MyRoomsResponse> => {
-    const limit = ROOM_LIMIT;
-    const response = await api.get<MyRoomsResponse>("/rooms/archivedRooms", {
-      params: { page, limit },
-    });
-    return response.data;
-  },
-
   // Get Room Details
   getRoomDetails: async (roomId: string): Promise<RoomDetailsResponse> => {
     const response = await api.get<RoomDetailsResponse>(`/rooms/${roomId}`);

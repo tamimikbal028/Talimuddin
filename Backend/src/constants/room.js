@@ -5,11 +5,8 @@ export const ROOM_ROLES = {
 };
 
 export const ROOM_TYPES = {
-  UNIVERSITY: "UNIVERSITY",
-  COLLEGE: "COLLEGE",
-  COACHING: "COACHING",
-  SCHOOL: "SCHOOL",
-  GENERAL: "GENERAL",
+  MAIN_ROOM: "MAIN_ROOM",
+  SUB_ROOM: "SUB_ROOM",
 };
 
 export const ROOM_PRIVACY = {
@@ -21,6 +18,6 @@ export const ROOM_PRIVACY = {
 export const ROOM_MEMBERSHIP_STATUS = {
   JOINED: "JOINED",
   PENDING: "PENDING",
-  REJECTED: "REJECTED",
+  // REJECTED: "REJECTED",
   BANNED: "BANNED",
 };

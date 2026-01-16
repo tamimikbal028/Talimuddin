@@ -3,8 +3,6 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   createRoom,
   getMyRooms,
-  getHiddenRooms,
-  getArchivedRooms,
   getRoomDetails,
   joinRoom,
   cancelJoinRequest,
@@ -34,8 +32,6 @@ router.use(verifyJWT);
 // Room Routes
 router.post("/", createRoom);
 router.get("/myRooms", getMyRooms);
-router.get("/hiddenRooms", getHiddenRooms);
-router.get("/archivedRooms", getArchivedRooms);
 router.post("/join", joinRoom);
 router.get("/:roomId", getRoomDetails);
 router.get("/:roomId/posts", getRoomPosts);

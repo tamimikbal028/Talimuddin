@@ -29,18 +29,6 @@ const roomSchema = new Schema(
       index: true,
     },
 
-    creator: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-
-    isArchived: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -49,7 +37,6 @@ const roomSchema = new Schema(
 
     settings: {
       allowStudentPosting: { type: Boolean, default: true },
-      allowComments: { type: Boolean, default: true },
       requirePostApproval: { type: Boolean, default: false },
     },
 
@@ -58,9 +45,5 @@ const roomSchema = new Schema(
   },
   { timestamps: true }
 );
-
-// --- Indexes ---
-roomSchema.index({ isArchived: 1, isDeleted: 1 });
-roomSchema.index({ privacy: 1, isDeleted: 1 });
 
 export const Room = mongoose.model("Room", roomSchema);

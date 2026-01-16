@@ -1,9 +1,6 @@
 export const ROOM_TYPES = {
-  UNIVERSITY: "UNIVERSITY",
-  COLLEGE: "COLLEGE",
-  COACHING: "COACHING",
-  SCHOOL: "SCHOOL",
-  GENERAL: "GENERAL",
+  MAIN_ROOM: "MAIN_ROOM",
+  SUB_ROOM: "SUB_ROOM",
 } as const;
 
 export const ROOM_ROLES = {

@@ -33,10 +33,11 @@ app.use("/api/v1/users", authRouter);
 import { errorHandler } from "./middlewares/error.middleware.js";
 import profileRouter from "./routes/profile.routes.js";
 import postRouter from "./routes/common/post.routes.js";
+import roomRouter from "./routes/room.routes.js";
 
 app.use("/api/v1/posts", postRouter);
-
 app.use("/api/v1/profile", profileRouter);
+app.use("/api/v1/rooms", roomRouter);
 
 // Global Error Handling Middleware
 app.use(errorHandler);

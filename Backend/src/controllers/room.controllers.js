@@ -62,28 +62,6 @@ const getHiddenRooms = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 2.2. GET ARCHIVED ROOMS
-// ==========================================
-const getArchivedRooms = asyncHandler(async (req, res) => {
-  const { page, limit } = req.query;
-  const { rooms, pagination } = await roomServices.getArchivedRoomsService(
-    req.user._id,
-    page,
-    limit
-  );
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { rooms, pagination },
-        "Archived rooms fetched successfully"
-      )
-    );
-});
-
-// ==========================================
 // 🚀 3. GET ROOM DETAILS
 // ==========================================
 const getRoomDetails = asyncHandler(async (req, res) => {
@@ -513,8 +491,6 @@ const demoteMember = asyncHandler(async (req, res) => {
 export {
   createRoom,
   getMyRooms,
-  getHiddenRooms,
-  getArchivedRooms,
   getRoomDetails,
   joinRoom,
   cancelJoinRequest,

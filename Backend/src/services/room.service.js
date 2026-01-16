@@ -2,7 +2,6 @@ import { Room } from "../models/room.model.js";
 import { RoomMembership } from "../models/roomMembership.model.js";
 import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
-import { Comment } from "../models/comment.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { POST_TARGET_MODELS } from "../constants/index.js";
 
@@ -480,9 +479,6 @@ const roomActions = {
     if (postIds.length > 0) {
       // Soft delete posts
       await Post.updateMany({ _id: { $in: postIds } }, { isDeleted: true });
-
-      // Soft delete comments
-      await Comment.updateMany({ post: { $in: postIds } }, { isDeleted: true });
     }
 
     return {
@@ -661,22 +657,17 @@ const roomServices = {
     // Get all room IDs that are not deleted and not archived
     const validRooms = await Room.find({
       isDeleted: false,
-      isArchived: false,
     }).distinct("_id");
 
     // Find memberships for valid rooms only (JOINED status)
     const memberships = await RoomMembership.find({
       user: userId,
-      isHidden: false,
       status: ROOM_MEMBERSHIP_STATUS.JOINED,
       room: { $in: validRooms },
     })
       .populate({
         path: "room",
-        populate: {
-          path: "creator",
-          select: "fullName userName avatar",
-        },
+        select: "name coverImage",
       })
       .skip(skip)
       .limit(parseInt(limit))
@@ -688,17 +679,12 @@ const roomServices = {
         _id: room._id,
         name: room.name,
         coverImage: room.coverImage,
-        creator: {
-          fullName: room.creator.fullName,
-          userName: room.creator.userName,
-        },
       };
     });
 
     // Get total count
     const totalDocs = await RoomMembership.countDocuments({
       user: userId,
-      isHidden: false,
       status: ROOM_MEMBERSHIP_STATUS.JOINED,
       room: { $in: validRooms },
     });
@@ -723,22 +709,17 @@ const roomServices = {
     // Get all room IDs that are not deleted and not archived
     const validRooms = await Room.find({
       isDeleted: false,
-      isArchived: false, // Only non-archived rooms
     }).distinct("_id");
 
     // Find memberships for valid rooms only (JOINED status)
     const memberships = await RoomMembership.find({
       user: userId,
-      isHidden: true,
       status: ROOM_MEMBERSHIP_STATUS.JOINED,
       room: { $in: validRooms },
     })
       .populate({
         path: "room",
-        populate: {
-          path: "creator",
-          select: "fullName userName avatar",
-        },
+        select: "name coverImage",
       })
       .skip(skip)
       .limit(parseInt(limit))
@@ -750,71 +731,6 @@ const roomServices = {
         _id: room._id,
         name: room.name,
         coverImage: room.coverImage,
-        creator: {
-          fullName: room.creator.fullName,
-          userName: room.creator.userName,
-        },
-      };
-    });
-
-    // Get total count
-    const totalDocs = await RoomMembership.countDocuments({
-      user: userId,
-      isHidden: true,
-      status: ROOM_MEMBERSHIP_STATUS.JOINED,
-      room: { $in: validRooms },
-    });
-
-    const pagination = {
-      totalDocs,
-      limit: parseInt(limit),
-      page: parseInt(page),
-      totalPages: Math.ceil(totalDocs / limit),
-      hasNextPage: parseInt(page) < Math.ceil(totalDocs / limit),
-      hasPrevPage: parseInt(page) > 1,
-    };
-
-    return { rooms, pagination };
-  },
-
-  // 🚀 GET ARCHIVED ROOMS
-  getArchivedRoomsService: async (userId, page = 1, limit = 10) => {
-    const { ROOM_MEMBERSHIP_STATUS } = await import("../constants/index.js");
-    const skip = (page - 1) * limit;
-
-    // Get all room IDs that are not deleted and are archived
-    const validRooms = await Room.find({
-      isDeleted: false,
-      isArchived: true,
-    }).distinct("_id");
-
-    // Find memberships for valid rooms (both hidden and non-hidden, JOINED status)
-    const memberships = await RoomMembership.find({
-      user: userId,
-      status: ROOM_MEMBERSHIP_STATUS.JOINED,
-      room: { $in: validRooms },
-    })
-      .populate({
-        path: "room",
-        populate: {
-          path: "creator",
-          select: "fullName userName avatar",
-        },
-      })
-      .skip(skip)
-      .limit(parseInt(limit))
-      .sort({ createdAt: -1 });
-
-    const rooms = memberships.map((membership) => {
-      const room = membership.room;
-      return {
-        _id: room._id,
-        name: room.name,
-        coverImage: room.coverImage,
-        creator: {
-          fullName: room.creator.fullName,
-          userName: room.creator.userName,
-        },
       };
     });
 

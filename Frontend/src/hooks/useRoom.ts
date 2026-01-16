@@ -51,33 +51,6 @@ const useMyRooms = () => {
   });
 };
 
-const useHiddenRooms = () => {
-  return useInfiniteQuery({
-    queryKey: ["hiddenRooms", "infinite"],
-    queryFn: ({ pageParam }) => roomService.getHiddenRooms(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.data.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-};
-
-const useArchivedRooms = () => {
-  return useInfiniteQuery({
-    queryKey: ["archivedRooms", "infinite"],
-    queryFn: ({ pageParam }) =>
-      roomService.getArchivedRooms(pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.data.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-};
-
 const useRoomDetails = () => {
   const { roomId } = useParams();
   return useQuery({
@@ -548,8 +521,6 @@ const useRejectRoomPost = () => {
 const roomHooks = {
   useCreateRoom,
   useMyRooms,
-  useHiddenRooms,
-  useArchivedRooms,
   useRoomDetails,
   useJoinRoom,
   useToggleArchiveRoom,

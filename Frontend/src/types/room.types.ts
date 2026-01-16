@@ -11,16 +11,9 @@ export interface Room {
   roomType: (typeof ROOM_TYPES)[keyof typeof ROOM_TYPES];
   privacy: (typeof ROOM_PRIVACY)[keyof typeof ROOM_PRIVACY];
   joinCode: string;
-  creator: User;
   membersCount: number;
   postsCount: number;
-  isArchived: boolean;
   isDeleted: boolean;
-  settings: {
-    allowStudentPosting: boolean;
-    allowComments: boolean;
-    requirePostApproval: boolean;
-  };
   createdAt: string;
   updatedAt: string;
 }
@@ -30,10 +23,6 @@ export interface RoomListItem {
   _id: string;
   name: string;
   coverImage: string;
-  creator: {
-    fullName: string;
-    userName: string;
-  };
 }
 
 // Room Meta (from getRoomDetails)

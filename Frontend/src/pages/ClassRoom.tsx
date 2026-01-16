@@ -3,9 +3,6 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import Header from "../components/ClassRoom/Header";
 import ClassRoomNavBar from "../components/ClassRoom/ClassRoomNavBar";
 import Rooms from "../components/ClassRoom/Tabs/Rooms";
-import HiddenRooms from "../components/ClassRoom/Tabs/HiddenRooms";
-import ArchivedRooms from "../components/ClassRoom/Tabs/ArchivedRooms";
-import MoreTab from "../components/ClassRoom/Tabs/MoreTab";
 import PageLoader from "./Fallbacks/PageLoader";
 
 // Lazy load pages
@@ -31,9 +28,6 @@ const ClassRoom: React.FC = () => {
       <Routes>
         <Route element={<ClassRoomLayout />}>
           <Route index element={<Rooms />} />
-          <Route path="hidden" element={<HiddenRooms />} />
-          <Route path="archived" element={<ArchivedRooms />} />
-          <Route path="more" element={<MoreTab />} />
         </Route>
 
         {/* Standalone Routes (No Header/Tabs) */}
