@@ -1,10 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import {
-  POST_TYPES,
   ATTACHMENT_TYPES,
   POST_TARGET_MODELS,
   POST_VISIBILITY,
-  POST_STATUS,
 } from "../constants/index.js";
 
 const postSchema = new Schema(
@@ -30,14 +28,6 @@ const postSchema = new Schema(
         size: { type: Number },
       },
     ],
-
-    // (general, event, poll, link, image, video, pdf, doc)
-    type: {
-      type: String,
-      enum: Object.values(POST_TYPES),
-      required: true,
-      index: true,
-    },
 
     postOnModel: {
       type: String,

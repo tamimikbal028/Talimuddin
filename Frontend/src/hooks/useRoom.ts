@@ -51,6 +51,19 @@ const useMyRooms = () => {
   });
 };
 
+const useAllRooms = () => {
+  return useInfiniteQuery<MyRoomsResponse, AxiosError<ApiError>>({
+    queryKey: ["allRooms", "infinite"],
+    queryFn: ({ pageParam }) => roomService.getAllRooms(pageParam as number),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.data.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+};
+
 const useRoomDetails = () => {
   const { roomId } = useParams();
   return useQuery<RoomDetailsResponse, AxiosError<ApiError>>({
@@ -377,6 +390,7 @@ const useRoomPendingRequests = () => {
 const roomHooks = {
   useCreateRoom,
   useMyRooms,
+  useAllRooms,
   useRoomDetails,
   useJoinRoom,
   useDeleteRoom,

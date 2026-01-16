@@ -11,11 +11,7 @@ import type { IconType } from "react-icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  POST_VISIBILITY,
-  POST_TYPES,
-  POST_TARGET_MODELS,
-} from "../../constants/post";
+import { POST_VISIBILITY, POST_TARGET_MODELS } from "../../constants/post";
 import { authHooks } from "../../hooks/useAuth";
 import { roomHooks } from "../../hooks/useRoom";
 import { useParams } from "react-router-dom";
@@ -72,9 +68,7 @@ const CreateRoomPost: React.FC = () => {
         ...data,
         postOnId: roomId,
         postOnModel: POST_TARGET_MODELS.ROOM,
-        type: POST_TYPES.GENERAL,
         attachments: [],
-        pollOptions: [],
         tags: processedTags,
       },
       {

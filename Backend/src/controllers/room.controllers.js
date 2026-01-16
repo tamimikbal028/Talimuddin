@@ -37,6 +37,27 @@ const getMyRooms = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
+// 🚀 2.1. GET ALL ROOMS
+// ==========================================
+const getAllRooms = asyncHandler(async (req, res) => {
+  const { page, limit } = req.query;
+  const { rooms, pagination } = await roomServices.getAllRoomsService(
+    page,
+    limit
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { rooms, pagination },
+        "All rooms fetched successfully"
+      )
+    );
+});
+
+// ==========================================
 // 🚀 3. GET ROOM DETAILS
 // ==========================================
 const getRoomDetails = asyncHandler(async (req, res) => {
@@ -345,65 +366,6 @@ const leaveRoom = asyncHandler(async (req, res) => {
 });
 
 // ==========================================
-// 🚀 12. GET ROOM PENDING POSTS
-// ==========================================
-const getRoomPendingPosts = asyncHandler(async (req, res) => {
-  const { roomId } = req.params;
-  const { page, limit } = req.query;
-
-  const { posts, pagination } = await roomServices.getRoomPendingPostsService(
-    roomId,
-    req.user._id,
-    page,
-    limit
-  );
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { posts, pagination },
-        "Pending posts fetched successfully"
-      )
-    );
-});
-
-// ==========================================
-// 🚀 13. APPROVE POST
-// ==========================================
-const approvePost = asyncHandler(async (req, res) => {
-  const { roomId, postId } = req.params;
-
-  const { status } = await roomServices.approveRoomPostService(
-    roomId,
-    postId,
-    req.user._id
-  );
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { status }, "Post approved successfully"));
-});
-
-// ==========================================
-// 🚀 14. REJECT POST
-// ==========================================
-const rejectPost = asyncHandler(async (req, res) => {
-  const { roomId, postId } = req.params;
-
-  const { status } = await roomServices.rejectRoomPostService(
-    roomId,
-    postId,
-    req.user._id
-  );
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { status }, "Post rejected successfully"));
-});
-
-// ==========================================
 // 🚀 15. REMOVE MEMBER
 // ==========================================
 const removeMember = asyncHandler(async (req, res) => {
@@ -483,7 +445,5 @@ export {
   getRoomMembers,
   getRoomPendingRequests,
   leaveRoom,
-  getRoomPendingPosts,
-  approvePost,
-  rejectPost,
+  getAllRooms,
 };

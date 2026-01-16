@@ -138,7 +138,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
             {/* Right: Action Buttons */}
             <div className="flex items-center gap-2">
               {/* Join Code Display */}
-              {meta.isAppOwner || meta.isAppAdmin || meta.isAdmin ? (
+              {meta.isAppOwner || meta.isAppAdmin || meta.isRoomAdmin ? (
                 <button
                   onClick={handleCopyJoinCode}
                   className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
@@ -174,7 +174,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                     }`}
                   >
                     <div className="py-1">
-                      {!meta.isAppOwner && !meta.isAdmin && meta.isMember && (
+                      {!(meta.isAppOwner || meta.isAppAdmin) && (
                         <>
                           <button
                             onClick={handleLeave}
@@ -189,7 +189,9 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                         </>
                       )}
 
-                      {(meta.isAppOwner || meta.isAppAdmin || meta.isAdmin) && (
+                      {(meta.isAppOwner ||
+                        meta.isAppAdmin ||
+                        meta.isRoomAdmin) && (
                         <>
                           <Link
                             to={`/classroom/rooms/${room._id}/edit`}
@@ -202,7 +204,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                         </>
                       )}
 
-                      {meta.isAppOwner && (
+                      {(meta.isAppOwner || meta.isAppAdmin) && (
                         <button
                           onClick={handleDelete}
                           disabled={isDeleting}

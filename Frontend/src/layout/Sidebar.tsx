@@ -7,6 +7,7 @@ import {
   FaSchool,
   FaEllipsisH,
   FaSignOutAlt,
+  FaDoorOpen,
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
@@ -24,8 +25,15 @@ const Sidebar: React.FC = () => {
       icon: FaSchool,
       label: "ClassRoom",
       path: "/classroom",
-      active: location.pathname.startsWith("/classroom"),
+      active: location.pathname === "/classroom",
     },
+    {
+      icon: FaDoorOpen,
+      label: "All Rooms",
+      path: "/classroom/all",
+      active: location.pathname === "/classroom/all",
+    },
+
     {
       icon: FaBell,
       label: "Notifications",

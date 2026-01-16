@@ -6,9 +6,9 @@ import EmptyState from "../../shared/EmptyState";
 import { roomHooks } from "../../../hooks/useRoom";
 import { ROOM_LIMIT } from "../../../constants";
 import type { RoomListItem } from "../../../types";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaDoorOpen } from "react-icons/fa";
 
-const HiddenRooms: React.FC = () => {
+const AllRooms: React.FC = () => {
   const {
     data,
     fetchNextPage,
@@ -16,7 +16,7 @@ const HiddenRooms: React.FC = () => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = roomHooks.useHiddenRooms();
+  } = roomHooks.useAllRooms();
 
   const rooms: RoomListItem[] =
     data?.pages.flatMap((page) => page.data.rooms) || [];
@@ -26,7 +26,7 @@ const HiddenRooms: React.FC = () => {
     return (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="h-7 w-40 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-7 w-32 animate-pulse rounded bg-gray-200"></div>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(ROOM_LIMIT)].map((_, i) => (
@@ -38,7 +38,7 @@ const HiddenRooms: React.FC = () => {
   }
 
   if (isError) {
-    return <ErrorState message="Failed to load hidden rooms" />;
+    return <ErrorState message="Failed to load rooms" />;
   }
 
   return (
@@ -46,23 +46,20 @@ const HiddenRooms: React.FC = () => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          Hidden Rooms {totalDocs ? `(${totalDocs})` : ""}
+          All Rooms {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 
       {/* no rooms message */}
       {rooms.length === 0 ? (
-        <EmptyState
-          icon={FaEyeSlash}
-          message="No hidden rooms. You can hide rooms from the room details page menu."
-        />
+        <EmptyState icon={FaDoorOpen} message="No rooms found in the system." />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {rooms.map((r) => (
               <RoomCard key={r._id} room={r} />
             ))}
-            {/* Loading Skeleton for Next Page inside the same grid */}
+            {/* Loading Skeleton for Next Page */}
             {isFetchingNextPage &&
               [...Array(ROOM_LIMIT)].map((_, i) => (
                 <RoomCardSkeleton key={`skeleton-${i}`} />
@@ -87,4 +84,4 @@ const HiddenRooms: React.FC = () => {
   );
 };
 
-export default HiddenRooms;
+export default AllRooms;

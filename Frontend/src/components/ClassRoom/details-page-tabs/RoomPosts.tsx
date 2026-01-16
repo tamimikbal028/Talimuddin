@@ -19,7 +19,8 @@ const RoomPosts: React.FC = () => {
   const { data: roomResponse } = roomHooks.useRoomDetails();
   const roomMeta = roomResponse?.data.meta;
 
-  const canPost = roomMeta?.canPost;
+  const canPost =
+    roomMeta?.isRoomAdmin || roomMeta?.isAppOwner || roomMeta?.isAppAdmin;
 
   const posts = data?.pages.flatMap((page) => page.data.posts) || [];
 

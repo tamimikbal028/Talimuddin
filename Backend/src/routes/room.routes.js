@@ -3,6 +3,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
   createRoom,
   getMyRooms,
+  getAllRooms,
   getRoomDetails,
   joinRoom,
   cancelJoinRequest,
@@ -17,9 +18,6 @@ import {
   getRoomMembers,
   getRoomPendingRequests,
   leaveRoom,
-  getRoomPendingPosts,
-  approvePost,
-  rejectPost,
   removeMember,
   promoteMember,
   demoteMember,
@@ -32,6 +30,7 @@ router.use(verifyJWT);
 // Room Routes
 router.post("/", createRoom);
 router.get("/myRooms", getMyRooms);
+router.get("/allRooms", getAllRooms);
 router.post("/join", joinRoom);
 router.get("/:roomId", getRoomDetails);
 router.get("/:roomId/posts", getRoomPosts);
@@ -53,10 +52,5 @@ router.patch("/:roomId/reject/:userId", rejectJoinRequest);
 router.delete("/:roomId/remove/:userId", removeMember);
 router.patch("/:roomId/promote/:userId", promoteMember);
 router.patch("/:roomId/demote/:userId", demoteMember);
-
-// Post Moderation
-router.get("/:roomId/pending-posts", getRoomPendingPosts);
-router.patch("/:roomId/posts/:postId/approve", approvePost);
-router.patch("/:roomId/posts/:postId/reject", rejectPost);
 
 export default router;

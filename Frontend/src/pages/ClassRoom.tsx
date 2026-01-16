@@ -12,6 +12,8 @@ const CreateRoomPage = lazy(() => import("./ClassRoom/CreateRoomPage"));
 const JoinRoomPage = lazy(() => import("./ClassRoom/JoinRoomPage"));
 const EditRoomPage = lazy(() => import("./ClassRoom/EditRoomPage"));
 
+const AllRooms = lazy(() => import("../components/ClassRoom/Tabs/AllRooms"));
+
 const ClassRoomLayout: React.FC = () => {
   return (
     <>
@@ -28,6 +30,7 @@ const ClassRoom: React.FC = () => {
       <Routes>
         <Route element={<ClassRoomLayout />}>
           <Route index element={<Rooms />} />
+          <Route path="all" element={<AllRooms />} />
         </Route>
 
         {/* Standalone Routes (No Header/Tabs) */}

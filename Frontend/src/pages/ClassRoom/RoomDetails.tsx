@@ -38,7 +38,9 @@ const RoomDetails: React.FC = () => {
   const room = response.data.room;
   const meta = response.data.meta;
 
-  if (!meta.hasAccess) {
+  const hasAccess = meta.isMember || meta.isAppOwner || meta.isAppAdmin;
+
+  if (!hasAccess) {
     return (
       <div className="space-y-5">
         <RoomHeader room={room} meta={meta} />

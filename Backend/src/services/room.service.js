@@ -682,6 +682,30 @@ const roomServices = {
     return { rooms, pagination };
   },
 
+  // 🚀 GET ALL ROOMS
+  getAllRoomsService: async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const rooms = await Room.find({ isDeleted: false })
+      .select("name coverImage membersCount postsCount")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalDocs = await Room.countDocuments({ isDeleted: false });
+
+    const pagination = {
+      totalDocs,
+      limit: parseInt(limit),
+      page: parseInt(page),
+      totalPages: Math.ceil(totalDocs / limit),
+      hasNextPage: parseInt(page) < Math.ceil(totalDocs / limit),
+      hasPrevPage: parseInt(page) > 1,
+    };
+
+    return { rooms, pagination };
+  },
+
   // 🚀 GET ROOM DETAILS
   getRoomDetailsService: async (roomId, userId) => {
     const room = await Room.findOne({ _id: roomId, isDeleted: false });
@@ -698,18 +722,17 @@ const roomServices = {
 
     const user = await User.findById(userId);
 
-    const isAdmin =
-      membership?.isAdmin ||
-      user.userType === USER_TYPES.OWNER ||
-      user.userType === USER_TYPES.ADMIN ||
-      false;
+    const isAppOwner = user.userType === USER_TYPES.OWNER;
+    const isAppAdmin = user.userType === USER_TYPES.ADMIN;
+    const isRoomAdmin = membership?.isAdmin || false;
+    const isMember =
+      membership?.status === ROOM_MEMBERSHIP_STATUS.JOINED || false;
 
     const meta = {
-      canPost: isAdmin,
-      hasAccess:
-        membership?.status === ROOM_MEMBERSHIP_STATUS.JOINED ||
-        user.userType === USER_TYPES.OWNER ||
-        user.userType === USER_TYPES.ADMIN,
+      isMember,
+      isRoomAdmin,
+      isAppOwner,
+      isAppAdmin,
     };
 
     return { room, meta };
@@ -846,9 +869,6 @@ const roomPostsAndMembers = {
     // Create post using common service
     const formattedPost = await createPostService(newPostData, userId);
 
-    // Update room stats
-    await Room.findByIdAndUpdate(roomId, { $inc: { postsCount: 1 } });
-
     return formattedPost;
   },
 
@@ -880,14 +900,13 @@ const roomPostsAndMembers = {
     const skip = (page - 1) * limit;
 
     // Filter Logic:
-    // 1. Basic: Approved posts in this room, not deleted
+    // 1. Basic: Posts in this room, not deleted
     // 2. Visibility:
     //    - Show if visibility is NOT "ONLY_ME"
     //    - OR if visibility IS "ONLY_ME" AND author is current user
     const query = {
       postOnModel: POST_TARGET_MODELS.ROOM,
       postOnId: roomId,
-      status: POST_STATUS.APPROVED,
       isDeleted: false,
       $or: [
         { visibility: { $ne: POST_VISIBILITY.ONLY_ME } },
@@ -910,7 +929,6 @@ const roomPostsAndMembers = {
 
     const readMap = new Map(readStatuses.map((r) => [r.post.toString(), true]));
 
-    const isCreator = room.creator.toString() === userId.toString();
     const isAdmin = membership.isAdmin;
 
     const postsWithMeta = posts.map((post) => ({
@@ -918,10 +936,7 @@ const roomPostsAndMembers = {
       meta: {
         isRead: readMap.has(post._id.toString()),
         isMine: post.author._id.toString() === userId.toString(),
-        canDelete:
-          isCreator ||
-          isAdmin ||
-          post.author._id.toString() === userId.toString(),
+        canDelete: isAdmin || post.author._id.toString() === userId.toString(),
       },
     }));
 
@@ -962,7 +977,6 @@ const roomPostsAndMembers = {
       throw new ApiError(403, "You are not a member of this room");
     }
 
-    const isCreator = room.creator.toString() === userId.toString();
     const isAdmin = currentUserMembership.isAdmin;
 
     const skip = (page - 1) * limit;
@@ -991,26 +1005,20 @@ const roomPostsAndMembers = {
         if (!user) return null; // Handle orphaned membership
 
         const userIdStr = user._id.toString();
+        const isSelf = userIdStr === userId.toString();
 
         const roleHierarchy = {
-          [ROOM_ROLES.CREATOR]: 3,
           [ROOM_ROLES.ADMIN]: 2,
           [ROOM_ROLES.MEMBER]: 1,
         };
 
-        const currentUserRole = isCreator
-          ? ROOM_ROLES.CREATOR
-          : isAdmin
-            ? ROOM_ROLES.ADMIN
-            : ROOM_ROLES.MEMBER;
+        const currentUserRole = isAdmin ? ROOM_ROLES.ADMIN : ROOM_ROLES.MEMBER;
 
         const currentUserLevel = roleHierarchy[currentUserRole] || 0;
 
         // Determine target role
         let targetRole = ROOM_ROLES.MEMBER;
-        if (room.creator.toString() === userIdStr) {
-          targetRole = ROOM_ROLES.CREATOR;
-        } else if (membership.isAdmin) {
+        if (membership.isAdmin) {
           targetRole = ROOM_ROLES.ADMIN;
         }
 
@@ -1022,28 +1030,23 @@ const roomPostsAndMembers = {
           currentUserLevel >= roleHierarchy[ROOM_ROLES.ADMIN];
 
         // Base user response
-        const mappedUser = (user) => {
-          if (!user) return null;
-          return {
-            user: {
-              _id: user._id,
-              userName: user.userName,
-              fullName: user.fullName,
-              avatar: user.avatar,
-            },
-          };
+        const mappedUser = {
+          user: {
+            _id: user._id,
+            userName: user.userName,
+            fullName: user.fullName,
+            avatar: user.avatar,
+          },
         };
 
         // Add Room-specific meta
         return {
           ...mappedUser,
           meta: {
-            ...mappedUser.meta,
             memberId: membership._id,
             role: targetRole,
             isCR: membership.isCR,
             isAdmin: membership.isAdmin,
-            isCreator: room.creator.toString() === userIdStr,
             isSelf: isSelf,
             canManage,
             joinedAt: membership.createdAt,

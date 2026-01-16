@@ -1,9 +1,4 @@
-import {
-  POST_TYPES,
-  POST_TARGET_MODELS,
-  POST_VISIBILITY,
-  POST_STATUS,
-} from "../constants/post";
+import { POST_TARGET_MODELS, POST_VISIBILITY } from "../constants/post";
 import type { Pagination } from "./common.types";
 
 export interface Attachment {
@@ -18,11 +13,9 @@ export interface Post {
   content: string;
   attachments: Attachment[];
 
-  type: (typeof POST_TYPES)[keyof typeof POST_TYPES];
   postOnModel: (typeof POST_TARGET_MODELS)[keyof typeof POST_TARGET_MODELS];
   postOnId: string;
   visibility: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
-  status?: (typeof POST_STATUS)[keyof typeof POST_STATUS];
 
   author: {
     _id: string;
@@ -30,11 +23,6 @@ export interface Post {
     avatar: string;
     userName: string;
   };
-
-  // Stats
-  likesCount: number;
-  commentsCount: number;
-  sharesCount: number;
 
   createdAt: string;
   updatedAt: string;
@@ -44,7 +32,6 @@ export interface Post {
   editedAt?: string;
 
   // Flags
-  isArchived: boolean;
   isPinned: boolean;
   isDeleted: boolean;
 
@@ -98,9 +85,7 @@ export interface CreatePostRequest {
   visibility: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
   postOnId: string;
   postOnModel: (typeof POST_TARGET_MODELS)[keyof typeof POST_TARGET_MODELS];
-  type: (typeof POST_TYPES)[keyof typeof POST_TYPES];
   attachments: Attachment[];
-  pollOptions: string[];
   tags: string[];
 }
 

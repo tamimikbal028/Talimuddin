@@ -15,7 +15,6 @@ export const createPostService = async (postData, authorId) => {
   const {
     content,
     attachments,
-    type,
     postOnModel,
     postOnId,
     visibility,
@@ -23,22 +22,12 @@ export const createPostService = async (postData, authorId) => {
     tags,
   } = postData;
 
-  if (!content || !type || !postOnModel || !postOnId) {
+  if (!content || !postOnModel || !postOnId) {
     throw new ApiError(400, "All fields are required");
-  }
-
-  if (!Object.values(POST_TYPES).includes(type)) {
-    throw new ApiError(400, "Invalid post type");
   }
 
   if (!Object.values(POST_TARGET_MODELS).includes(postOnModel)) {
     throw new ApiError(400, "Invalid target model");
-  }
-
-  if (type === POST_TYPES.POLL) {
-    if (!pollOptions || pollOptions.length < 2) {
-      throw new ApiError(400, "Poll must have at least 2 options");
-    }
   }
 
   if (postOnModel === POST_TARGET_MODELS.USER) {
@@ -81,84 +70,33 @@ export const createPostService = async (postData, authorId) => {
     }
   }
 
-  // Determine status for group posts
-  let initialStatus = POST_STATUS.APPROVED;
-  if (postOnModel === POST_TARGET_MODELS.GROUP) {
-    const group = await Group.findById(postOnId);
-    if (!group) throw new ApiError(404, "Group not found");
-
-    // Check if user is admin/owner (they don't need approval)
-    const membership = await GroupMembership.findOne({
-      group: postOnId,
-      user: authorId,
-    });
-
-    const isAdminOrOwner =
-      membership &&
-      [GROUP_ROLES.OWNER, GROUP_ROLES.ADMIN].includes(membership.role);
-
-    if (group.settings?.requirePostApproval && !isAdminOrOwner) {
-      initialStatus = POST_STATUS.PENDING;
-    }
-  } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
-    const room = await Room.findById(postOnId);
-    if (!room) throw new ApiError(404, "Room not found");
-
-    // Check if user is admin/creator (they don't need approval/restriction)
-    const membership = await RoomMembership.findOne({
-      room: postOnId,
-      user: authorId,
-    });
-
-    const isCreatorOrAdmin =
-      room.creator.toString() === authorId.toString() ||
-      (membership && membership.isAdmin);
-
-    // Enforce student posting restriction
-    if (!room.settings.allowStudentPosting && !isCreatorOrAdmin) {
-      throw new ApiError(403, "Posting is disabled for students in this room");
-    }
-
-    if (room.settings.requirePostApproval && !isCreatorOrAdmin) {
-      initialStatus = POST_STATUS.PENDING;
-    }
-  }
-
   // Create post
   const post = await Post.create({
     content,
     attachments: attachments || [],
-    type,
     postOnModel,
     postOnId,
     author: authorId,
     visibility: visibility || POST_VISIBILITY.PUBLIC,
-    status: initialStatus,
     pollOptions: pollOptions || [],
     tags: tags || [],
-    likesCount: 0,
-    commentsCount: 0,
-    sharesCount: 0,
-    isArchived: false,
     isPinned: false,
     isDeleted: false,
   });
 
-  // Only increment post count if approved
-  if (initialStatus === POST_STATUS.APPROVED) {
-    if (postOnModel === POST_TARGET_MODELS.GROUP) {
-      await Group.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-    } else if (postOnModel === POST_TARGET_MODELS.USER) {
-      await User.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-    } else if (postOnModel === POST_TARGET_MODELS.DEPARTMENT) {
-      await Department.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-    } else if (postOnModel === POST_TARGET_MODELS.INSTITUTION) {
-      await Institution.findByIdAndUpdate(postOnId, {
-        $inc: { postsCount: 1 },
-      });
-    } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
-      await Room.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-    }
+  // Increment post count
+  if (postOnModel === POST_TARGET_MODELS.GROUP) {
+    await Group.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+  } else if (postOnModel === POST_TARGET_MODELS.USER) {
+    await User.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+  } else if (postOnModel === POST_TARGET_MODELS.DEPARTMENT) {
+    await Department.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+  } else if (postOnModel === POST_TARGET_MODELS.INSTITUTION) {
+    await Institution.findByIdAndUpdate(postOnId, {
+      $inc: { postsCount: 1 },
+    });
+  } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
+    await Room.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
   }
 
   // Populate author details

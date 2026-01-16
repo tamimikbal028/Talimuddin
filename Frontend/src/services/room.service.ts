@@ -27,11 +27,19 @@ export const roomService = {
     const response = await api.post<CreateRoomResponse>("/rooms", roomData);
     return response.data;
   },
-
   // Get My Rooms
   getMyRooms: async (page: number): Promise<MyRoomsResponse> => {
     const limit = ROOM_LIMIT;
     const response = await api.get<MyRoomsResponse>("/rooms/myRooms", {
+      params: { page, limit },
+    });
+    return response.data;
+  },
+
+  // Get All Rooms
+  getAllRooms: async (page: number): Promise<MyRoomsResponse> => {
+    const limit = ROOM_LIMIT;
+    const response = await api.get<MyRoomsResponse>("/rooms/allRooms", {
       params: { page, limit },
     });
     return response.data;
@@ -233,33 +241,6 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Room Pending Posts
-  getRoomPendingPosts: async (
-    roomId: string,
-    page: number
-  ): Promise<RoomPostsResponse> => {
-    const limit = POST_LIMIT;
-    const response = await api.get<RoomPostsResponse>(
-      `/rooms/${roomId}/pending-posts`,
-      {
-        params: { page, limit },
-      }
-    );
-    return response.data;
-  },
-
-  // Approve Room Post
-  approveRoomPost: async (
-    roomId: string,
-    postId: string
-  ): Promise<{ status: string }> => {
-    const response = await api.patch<{ status: string }>(
-      `/rooms/${roomId}/posts/${postId}/approve`
-    );
-    return response.data;
-  },
-
-  // Reject Room Post
   rejectRoomPost: async (
     roomId: string,
     postId: string
