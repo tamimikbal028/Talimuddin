@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import Sidebar from "./layout/Sidebar";
-import SidebarRight from "./layout/SidebarRight";
 import MainContent from "./layout/MainContent";
 import { authHooks, AUTH_KEYS } from "./hooks/useAuth";
 
@@ -46,7 +45,7 @@ const App: React.FC = () => {
 
   // Auth state from TanStack Query
   // ⚠️ CRITICAL: This call triggers the initial auth check
-  const { isAuthenticated, isCheckingAuth } = authHooks.useUser();
+  const { isCheckingAuth } = authHooks.useUser();
 
   // 🔔 Global logout event listener
   // Axios interceptor fires this when all tokens expire
@@ -82,9 +81,6 @@ const App: React.FC = () => {
     );
   }
 
-  // For non-authenticated users or auth pages, don't show right sidebar
-  const showRightSidebar = isAuthenticated || !isAuthPage;
-
   if (isAuthPage) {
     return (
       <>
@@ -117,13 +113,6 @@ const App: React.FC = () => {
             <MainContent />
           </div>
         </div>
-
-        {/* Right Sidebar - Trending/Quick Links */}
-        {showRightSidebar && (
-          <div className="h-full w-75 overflow-y-auto border-l border-gray-500 bg-white">
-            <SidebarRight />
-          </div>
-        )}
       </div>
     </>
   );

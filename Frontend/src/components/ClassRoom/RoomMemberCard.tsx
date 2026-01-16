@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { FaUserShield, FaUserMinus } from "react-icons/fa";
 import { AcceptButton, RejectButton } from "../shared/friends/FriendActions";
-import FriendshipActionButtons from "../shared/friends/FriendshipActionButtons";
 import { roomHooks } from "../../hooks/useRoom";
 import confirm from "../../utils/sweetAlert";
 import { useDropdown } from "../../hooks/useDropdown";
@@ -109,13 +108,6 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
       }
       return null;
     }
-
-    return (
-      <FriendshipActionButtons
-        userId={user._id}
-        user_relation_status={meta.user_relation_status}
-      />
-    );
   };
 
   const institutionName = user.institution?.name || "No Institution";
