@@ -30,44 +30,44 @@ export const createPostService = async (postData, authorId) => {
     throw new ApiError(400, "Invalid target model");
   }
 
-  if (postOnModel === POST_TARGET_MODELS.USER) {
-    if (visibility === POST_VISIBILITY.INTERNAL) {
-      throw new ApiError(
-        400,
-        `Internal visibility is not allowed for Profile posts`
-      );
-    }
-  } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
-    if (
-      visibility !== POST_VISIBILITY.CONNECTIONS &&
-      visibility !== POST_VISIBILITY.ONLY_ME
-    ) {
-      throw new ApiError(
-        400,
-        `Only "Room Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Room posts`
-      );
-    }
-  } else if (postOnModel === POST_TARGET_MODELS.PAGE) {
-    if (visibility === POST_VISIBILITY.INTERNAL) {
-      throw new ApiError(
-        400,
-        `Internal visibility is not allowed for Page posts`
-      );
-    }
-  } else if (postOnModel === POST_TARGET_MODELS.GROUP) {
-    if (visibility === POST_VISIBILITY.INTERNAL) {
-      throw new ApiError(
-        400,
-        `Internal visibility is not allowed for Group posts`
-      );
-    }
-  } else if (postOnModel === POST_TARGET_MODELS.CR_CORNER) {
-    if (visibility !== POST_VISIBILITY.PUBLIC) {
-      throw new ApiError(
-        400,
-        `Only public visibility is allowed for CR Corner posts`
-      );
-    }
+  switch (postOnModel) {
+    case POST_TARGET_MODELS.USER:
+      if (visibility === POST_VISIBILITY.INTERNAL) {
+        throw new ApiError(
+          400,
+          `Internal visibility is not allowed for Profile posts`
+        );
+      }
+      break;
+    case POST_TARGET_MODELS.ROOM:
+      if (
+        visibility !== POST_VISIBILITY.CONNECTIONS &&
+        visibility !== POST_VISIBILITY.ONLY_ME
+      ) {
+        throw new ApiError(
+          400,
+          `Only "Room Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Room posts`
+        );
+      }
+      break;
+    case POST_TARGET_MODELS.PAGE:
+      if (visibility === POST_VISIBILITY.INTERNAL) {
+        throw new ApiError(
+          400,
+          `Internal visibility is not allowed for Page posts`
+        );
+      }
+      break;
+    case POST_TARGET_MODELS.CR_CORNER:
+      if (visibility !== POST_VISIBILITY.PUBLIC) {
+        throw new ApiError(
+          400,
+          `Only public visibility is allowed for CR Corner posts`
+        );
+      }
+      break;
+    default:
+      break;
   }
 
   // Create post
@@ -85,18 +85,15 @@ export const createPostService = async (postData, authorId) => {
   });
 
   // Increment post count
-  if (postOnModel === POST_TARGET_MODELS.GROUP) {
-    await Group.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-  } else if (postOnModel === POST_TARGET_MODELS.USER) {
-    await User.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-  } else if (postOnModel === POST_TARGET_MODELS.DEPARTMENT) {
-    await Department.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
-  } else if (postOnModel === POST_TARGET_MODELS.INSTITUTION) {
-    await Institution.findByIdAndUpdate(postOnId, {
-      $inc: { postsCount: 1 },
-    });
-  } else if (postOnModel === POST_TARGET_MODELS.ROOM) {
-    await Room.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+  switch (postOnModel) {
+    case POST_TARGET_MODELS.USER:
+      await User.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+      break;
+    case POST_TARGET_MODELS.ROOM:
+      await Room.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+      break;
+    default:
+      break;
   }
 
   // Populate author details
@@ -238,69 +235,27 @@ export const deletePostService = async (postId, userId) => {
   // Check authorization
   const isAuthor = post.author.toString() === userId.toString();
 
-  // For group posts, check if user is owner or admin
-  let isGroupAdminOrOwner = false;
-  if (post.postOnModel === POST_TARGET_MODELS.GROUP) {
-    const membership = await GroupMembership.findOne({
-      group: post.postOnId,
-      user: userId,
-      role: { $in: [GROUP_ROLES.OWNER, GROUP_ROLES.ADMIN] },
-    });
-    isGroupAdminOrOwner = !!membership;
-  }
-
-  // Allow delete if user is author OR (for group posts) if user is admin/owner
-  if (!isAuthor && !isGroupAdminOrOwner) {
+  // Allow delete if user is author
+  if (!isAuthor) {
     throw new ApiError(403, "You are not authorized to delete this post");
   }
-
-  // 1. Soft delete all comments of this post
-  const comments = await Comment.find({ post: postId });
-  const commentIds = comments.map((c) => c._id);
-
-  if (commentIds.length > 0) {
-    // Soft delete comments
-    await Comment.updateMany(
-      { _id: { $in: commentIds } },
-      { $set: { isDeleted: true } }
-    );
-
-    // 2. Delete reactions on these comments
-    await Reaction.deleteMany({
-      targetId: { $in: commentIds },
-      targetModel: REACTION_TARGET_MODELS.COMMENT,
-    });
-  }
-
-  // 3. Delete reactions on the post itself
-  await Reaction.deleteMany({
-    targetId: postId,
-    targetModel: REACTION_TARGET_MODELS.POST,
-  });
 
   // 4. Update postsCount for the target model
   if (post.postOnId) {
     try {
-      if (post.postOnModel === POST_TARGET_MODELS.GROUP) {
-        await Group.findByIdAndUpdate(post.postOnId, {
-          $inc: { postsCount: -1 },
-        });
-      } else if (post.postOnModel === POST_TARGET_MODELS.USER) {
-        await User.findByIdAndUpdate(post.postOnId, {
-          $inc: { postsCount: -1 },
-        });
-      } else if (post.postOnModel === POST_TARGET_MODELS.DEPARTMENT) {
-        await Department.findByIdAndUpdate(post.postOnId, {
-          $inc: { postsCount: -1 },
-        });
-      } else if (post.postOnModel === POST_TARGET_MODELS.INSTITUTION) {
-        await Institution.findByIdAndUpdate(post.postOnId, {
-          $inc: { postsCount: -1 },
-        });
-      } else if (post.postOnModel === POST_TARGET_MODELS.ROOM) {
-        await Room.findByIdAndUpdate(post.postOnId, {
-          $inc: { postsCount: -1 },
-        });
+      switch (post.postOnModel) {
+        case POST_TARGET_MODELS.USER:
+          await User.findByIdAndUpdate(post.postOnId, {
+            $inc: { postsCount: -1 },
+          });
+          break;
+        case POST_TARGET_MODELS.ROOM:
+          await Room.findByIdAndUpdate(post.postOnId, {
+            $inc: { postsCount: -1 },
+          });
+          break;
+        default:
+          break;
       }
     } catch (error) {
       throw new ApiError(
@@ -339,66 +294,6 @@ export const updatePostService = async (postId, userId, updateData) => {
     );
   }
 
-  // For group posts, check if user is still a member
-  if (post.postOnModel === POST_TARGET_MODELS.GROUP) {
-    const membership = await GroupMembership.findOne({
-      group: post.postOnId,
-      user: userId,
-      status: GROUP_MEMBERSHIP_STATUS.JOINED,
-    });
-
-    if (!membership) {
-      throw new ApiError(
-        403,
-        "You must be a member of this group to edit your post"
-      );
-    }
-  }
-
-  // Validate visibility if provided (before checking if it changed)
-  if (visibility !== undefined) {
-    // Validate visibility based on post target model
-    if (post.postOnModel === POST_TARGET_MODELS.USER) {
-      if (visibility === POST_VISIBILITY.INTERNAL) {
-        throw new ApiError(
-          400,
-          `Internal visibility is not allowed for Profile posts`
-        );
-      }
-    } else if (post.postOnModel === POST_TARGET_MODELS.ROOM) {
-      if (
-        visibility !== POST_VISIBILITY.CONNECTIONS &&
-        visibility !== POST_VISIBILITY.ONLY_ME
-      ) {
-        throw new ApiError(
-          400,
-          `Only "Room Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Room posts`
-        );
-      }
-    } else if (post.postOnModel === POST_TARGET_MODELS.PAGE) {
-      if (visibility === POST_VISIBILITY.INTERNAL) {
-        throw new ApiError(
-          400,
-          `Internal visibility is not allowed for Page posts`
-        );
-      }
-    } else if (post.postOnModel === POST_TARGET_MODELS.GROUP) {
-      if (visibility === POST_VISIBILITY.INTERNAL) {
-        throw new ApiError(
-          400,
-          `Internal visibility is not allowed for Group posts`
-        );
-      }
-    } else if (post.postOnModel === POST_TARGET_MODELS.CR_CORNER) {
-      if (visibility !== POST_VISIBILITY.PUBLIC) {
-        throw new ApiError(
-          400,
-          `Only public visibility is allowed for CR Corner posts`
-        );
-      }
-    }
-  }
-
   // Update fields
   let isContentChanged = false;
 
@@ -435,17 +330,9 @@ export const updatePostService = async (postId, userId, updateData) => {
     throw new ApiError(404, "Post was lost during update operation");
   }
 
-  // Check like status
-  const existingReaction = await Reaction.findOne({
-    targetId: postId,
-    targetModel: REACTION_TARGET_MODELS.POST,
-    user: userId,
-  });
-
   return {
     post: updatedPostObj,
     meta: {
-      isLiked: !!existingReaction,
       isSaved: false,
       isMine: true,
       isRead: true,

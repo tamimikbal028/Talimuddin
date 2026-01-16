@@ -3,7 +3,6 @@ import { verifyJWT } from "../../middlewares/auth.middleware.js";
 import {
   togglePostPin,
   togglePostRead,
-  togglePostLike,
   createPost,
   updatePost,
   deletePost,
@@ -18,7 +17,6 @@ router.use(verifyJWT);
 router.post("/", createPost);
 
 // Actions on a specific post
-router.post("/:postId/toggle-like", togglePostLike);
 router.post("/:postId/toggle-read", togglePostRead);
 router.post("/:postId/toggle-pin", togglePostPin);
 

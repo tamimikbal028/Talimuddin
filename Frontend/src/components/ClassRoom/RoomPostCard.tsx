@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   FaEllipsisH,
-  FaRegComment,
   FaBookmark,
   FaRegBookmark,
   FaEdit,
@@ -26,8 +25,6 @@ interface RoomPostCardProps {
 }
 
 const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
-  const [showCommentBox, setShowCommentBox] = useState(false);
-
   const {
     isOpen: showMenu,
     openUpward,
@@ -50,15 +47,6 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
     roomHooks.useToggleReadStatusRoomPost();
   const { mutate: toggleBookmark, isPending: isBookmarking } =
     roomHooks.useToggleBookmarkRoomPost();
-
-  const handleToggleCommentBox = () => {
-    setShowCommentBox(!showCommentBox);
-  };
-
-  // Room details for settings
-  const { data: roomResponse } = roomHooks.useRoomDetails();
-  const roomMeta = roomResponse?.data.meta;
-  const canComment = roomMeta?.canComment;
 
   const handleToggleBookmark = () => {
     toggleBookmark({ postId: post._id });
@@ -143,21 +131,6 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* Reply button */}
-          {canComment && (
-            <button
-              onClick={handleToggleCommentBox}
-              className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-                showCommentBox
-                  ? "border-blue-500 bg-blue-50 text-blue-600"
-                  : "border-gray-300 text-gray-600 hover:border-blue-400 hover:bg-gray-50"
-              }`}
-            >
-              <FaRegComment className="h-4 w-4" />
-              <span>Reply</span>
-            </button>
-          )}
-
           <button
             onClick={() => toggleReadStatus({ postId: post._id })}
             disabled={isTogglingRead}

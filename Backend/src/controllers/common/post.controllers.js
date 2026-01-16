@@ -3,7 +3,6 @@ import { ApiResponse } from "../../utils/ApiResponse.js";
 import { ApiError } from "../../utils/ApiError.js";
 import {
   createPostService,
-  toggleLikePostService,
   toggleMarkAsReadService,
   deletePostService,
   updatePostService,
@@ -11,9 +10,7 @@ import {
 } from "../../services/common/post.service.js";
 import { User } from "../../models/user.model.js";
 
-import {
-  POST_TARGET_MODELS,
-} from "../../constants/index.js";
+import { POST_TARGET_MODELS } from "../../constants/index.js";
 
 const createPost = asyncHandler(async (req, res) => {
   const { postOnModel, postOnId } = req.body;
@@ -126,25 +123,6 @@ const createPost = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, { post, meta }, "Post created successfully"));
 });
 
-// Toggle Like
-const togglePostLike = asyncHandler(async (req, res) => {
-  const { postId } = req.params;
-  const { isLiked, likesCount } = await toggleLikePostService(
-    postId,
-    req.user._id
-  );
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        { isLiked, likesCount },
-        isLiked ? "Post liked" : "Post unliked"
-      )
-    );
-});
-
 // Toggle Mark as Read
 const togglePostRead = asyncHandler(async (req, res) => {
   const { postId } = req.params;
@@ -218,11 +196,4 @@ const togglePostPin = asyncHandler(async (req, res) => {
     );
 });
 
-export {
-  createPost,
-  togglePostLike,
-  togglePostRead,
-  deletePost,
-  updatePost,
-  togglePostPin,
-};
+export { createPost, togglePostRead, deletePost, updatePost, togglePostPin };

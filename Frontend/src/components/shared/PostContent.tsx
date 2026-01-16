@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { FaGlobe, FaUserFriends, FaLock, FaBuilding } from "react-icons/fa";
+import { FaGlobe, FaUserFriends, FaLock } from "react-icons/fa";
 import type { IconType } from "react-icons";
 import { POST_VISIBILITY } from "../../constants/post";
 import type { PostContentProps } from "../../types";
@@ -16,7 +16,6 @@ const editPostSchema = z.object({
   tags: z.string().optional(),
   visibility: z.enum([
     POST_VISIBILITY.PUBLIC,
-    POST_VISIBILITY.INTERNAL,
     POST_VISIBILITY.CONNECTIONS,
     POST_VISIBILITY.ONLY_ME,
   ]),
@@ -92,12 +91,6 @@ const PostContent: React.FC<PostContentProps> = ({
       label: "Public",
       Icon: FaGlobe,
       show: allowedVisibilities.includes(POST_VISIBILITY.PUBLIC),
-    },
-    {
-      value: POST_VISIBILITY.INTERNAL,
-      label: "Internal",
-      Icon: FaBuilding,
-      show: allowedVisibilities.includes(POST_VISIBILITY.INTERNAL),
     },
     {
       value: POST_VISIBILITY.CONNECTIONS,
