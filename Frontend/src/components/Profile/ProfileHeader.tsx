@@ -1,21 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  FaEdit,
-  FaUniversity,
-  FaInfoCircle,
-  FaGraduationCap,
-  FaEllipsisV,
-  FaLink,
-  FaBan,
-} from "react-icons/fa";
-import FriendshipActionButtons from "../shared/friends/FriendshipActionButtons";
-import confirm from "../../utils/sweetAlert";
-import { friendshipHooks } from "../../hooks/useFriendship";
-import { FOLLOW_TARGET_MODELS } from "../../constants";
+import { FaEdit, FaInfoCircle, FaEllipsisV, FaLink } from "react-icons/fa";
 import type { ProfileHeaderData } from "../../types";
 import { toast } from "sonner";
-import { profileHooks } from "../../hooks/useProfile";
 import { useDropdown } from "../../hooks/useDropdown";
 
 const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
@@ -30,25 +17,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
     close: closeMenu,
   } = useDropdown();
 
-  const institutionName = userData.institution?.name;
-  const departmentName = userData.academicInfo?.department?.name;
-
-  // Hooks for friendship actions (kept unblock for the blocked banner if needed, or rely on component)
-  const { mutate: blockUser } = friendshipHooks.useBlockUser();
-  const { mutate: unblockUser, isPending: isUnblocking } =
-    friendshipHooks.useUnblockUser();
-
-  // Hook for follow actions
-  const { mutate: toggleFollow, isPending: isFollowPending } =
-    profileHooks.useToggleFollowProfile();
-
-  const isFollowing = meta.isFollowing;
-
-  // Handle follow actions
-  const handleToggleFollow = (targetId: string) => {
-    toggleFollow({ targetId, targetModel: FOLLOW_TARGET_MODELS.USER });
-  };
-
   const handleCopyLink = () => {
     const profileUrl = window.location.href;
     navigator.clipboard.writeText(profileUrl);
@@ -56,62 +24,8 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
     closeMenu();
   };
 
-  const handleBlock = async () => {
-    const ok = await confirm({
-      title: "Block User?",
-      text: "All existing relationships (friendship, follows) will be removed. You won't see each other's updates.",
-      confirmButtonText: "Yes, block",
-      icon: "warning",
-    });
-
-    if (ok) {
-      blockUser({ userId: userData._id });
-      closeMenu();
-    }
-  };
-
-  const handleUnblock = async () => {
-    const ok = await confirm({
-      title: "Unblock User?",
-      text: "You will be able to send friend requests or follow this user again.",
-      confirmButtonText: "Yes, unblock",
-      icon: "question",
-    });
-
-    if (ok) {
-      unblockUser({ userId: userData._id });
-    }
-  };
-
   // Render action buttons based on relationStatus
   const renderActionButtons = () => {
-    // 1. BLOCKED BY ME - Custom banner but can use component if we want unblock button
-    if (meta.isBlockedByMe) {
-      return (
-        <div className="flex items-center gap-3">
-          <span className="rounded-md bg-red-100 px-4 py-2 text-sm font-medium text-red-600">
-            You blocked this user
-          </span>
-          <button
-            onClick={handleUnblock}
-            disabled={isUnblocking}
-            className="rounded-md bg-gray-100 px-6 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isUnblocking ? "Unblocking..." : "Unblock"}
-          </button>
-        </div>
-      );
-    }
-
-    // 2. BLOCKED BY TARGET
-    if (meta.isBlockedByTarget) {
-      return (
-        <span className="rounded-md bg-gray-100 px-4 py-2 text-sm font-medium text-gray-500">
-          {userData.fullName} blocked you
-        </span>
-      );
-    }
-
     if (isOwnProfile) {
       return (
         <>
@@ -141,29 +55,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
     // Other user's profile
     return (
       <div className="flex items-center gap-3">
-        {/* Unified Friendship Actions */}
-        <FriendshipActionButtons
-          userId={userData._id}
-          user_relation_status={meta.user_relation_status}
-        />
-
-        {/* Follow/Unfollow Button */}
-        <button
-          onClick={() => handleToggleFollow(userData._id)}
-          disabled={isFollowPending}
-          className={`flex items-center gap-2 rounded-md px-6 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-            isFollowing
-              ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              : "bg-blue-600 text-white hover:bg-blue-700"
-          }`}
-        >
-          {isFollowPending
-            ? "Processing..."
-            : isFollowing
-              ? "Unfollow"
-              : "Follow"}
-        </button>
-
         {/* View Details button - at far right */}
         <Link
           to={`/profile/${userData.userName}/details`}
@@ -210,17 +101,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
                   <FaLink className="h-4 w-4 flex-shrink-0 text-gray-400" />
                   <span className="font-medium">Copy profile link</span>
                 </button>
-                {!isOwnProfile &&
-                  !meta.isBlockedByMe &&
-                  !meta.isBlockedByTarget && (
-                    <button
-                      onClick={handleBlock}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-red-600 transition-colors hover:bg-gray-50"
-                    >
-                      <FaBan className="h-4 w-4 flex-shrink-0" />
-                      <span className="font-medium">Block user</span>
-                    </button>
-                  )}
               </div>
             </div>
           )}
@@ -282,22 +162,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
             <h1 className="mb-1 text-3xl leading-tight font-bold text-gray-900">
               {userData.fullName}
             </h1>
-
-            {/* Institution & Department */}
-            <div className="mt-1 space-y-1">
-              <p className="flex items-center gap-2 text-sm text-gray-600 md:text-base">
-                <FaUniversity className="h-4 w-4 text-blue-700" />
-                <span className={`font-medium text-gray-500 italic`}>
-                  {institutionName || "No institution added"}
-                </span>
-              </p>
-              <p className="flex items-center gap-2 text-sm text-gray-600 md:text-base">
-                <FaGraduationCap className="h-4 w-4 text-green-700" />
-                <span className={`font-medium text-gray-500 italic`}>
-                  {departmentName || "No department added"}
-                </span>
-              </p>
-            </div>
 
             {/* Bio */}
             <p className="mt-3 max-w-prose text-base leading-relaxed font-medium text-gray-500">

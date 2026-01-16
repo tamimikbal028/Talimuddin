@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { ROOM_TYPES, ROOM_PRIVACY } from "../constants/index.js";
+import { ROOM_TYPES } from "../constants/index.js";
 
 const roomSchema = new Schema(
   {
@@ -22,15 +22,6 @@ const roomSchema = new Schema(
       required: true,
     },
 
-    // --- 3. Privacy ---
-    privacy: {
-      type: String,
-      enum: Object.values(ROOM_PRIVACY),
-      default: ROOM_PRIVACY.PUBLIC,
-      index: true,
-    },
-
-    // --- 4. Access ---
     joinCode: {
       type: String,
       unique: true,
@@ -38,7 +29,6 @@ const roomSchema = new Schema(
       index: true,
     },
 
-    // --- 5. Management ---
     creator: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -46,7 +36,6 @@ const roomSchema = new Schema(
       index: true,
     },
 
-    // --- 6. Status Flags ---
     isArchived: {
       type: Boolean,
       default: false,
@@ -58,7 +47,6 @@ const roomSchema = new Schema(
       index: true,
     },
 
-    // --- 7. Config ---
     settings: {
       allowStudentPosting: { type: Boolean, default: true },
       allowComments: { type: Boolean, default: true },

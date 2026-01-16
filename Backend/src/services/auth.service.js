@@ -1,20 +1,7 @@
 import { User } from "../models/user.model.js";
-import { Friendship } from "../models/friendship.model.js";
-import { Follow } from "../models/follow.model.js";
-import { Post } from "../models/post.model.js";
-import { Institution } from "../models/institution.model.js";
-import { Department } from "../models/department.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadFile, deleteFile } from "../utils/cloudinaryFileUpload.js";
-import { findInstitutionByEmailDomain } from "./academic.service.js";
-import {
-  USER_TYPES,
-  USER_RELATION_STATUS,
-  POST_TARGET_MODELS,
-  POST_VISIBILITY,
-  FRIENDSHIP_STATUS,
-  FOLLOW_TARGET_MODELS,
-} from "../constants/index.js";
+import { USER_TYPES } from "../constants/index.js";
 import jwt from "jsonwebtoken";
 
 // --- Utility: Token Generator ---
@@ -53,35 +40,21 @@ export const registerUserService = async (userData) => {
     throw new ApiError(403, "Restricted user type.");
   }
 
-  // 3. Check for institution using email domain
-  const institution = await findInstitutionByEmailDomain(email);
-
-  // 5. Create User Payload with conditional institution linking
   const userPayload = {
     fullName,
     email,
     password,
     userName,
     userType,
-    agreedToTerms: agreeToTerms, // Backend এ সেভ করছি
-    termsAgreedAt: new Date(), // রাজি হওয়ার সঠিক সময় টি সেভ করে রাখছি
-    // Default values
+    agreeToTerms,
+    termsAgreedAt: new Date(),
     isStudentEmail: false,
   };
 
-  // If an institution was found, link it to the user
-
-  if (institution) {
-    userPayload.isStudentEmail = true;
-    userPayload.institution = institution._id;
-    userPayload.institutionType = institution.type;
-  }
-
   const user = await User.create(userPayload);
-  const createdUser = await User.findById(user._id)
-    .select("-password -refreshToken")
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo");
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
   if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
@@ -121,10 +94,9 @@ export const loginUserService = async ({ email, userName, password }) => {
     user._id
   );
 
-  const loggedInUser = await User.findById(user._id)
-    .select("-password -refreshToken")
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo");
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
   return { user: loggedInUser, accessToken, refreshToken };
 };

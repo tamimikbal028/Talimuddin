@@ -4,21 +4,10 @@ import {
   FaUser,
   FaCog,
   FaBell,
-  FaVideo,
-  FaLayerGroup,
-  FaFolder,
-  FaStore,
-  FaChalkboardTeacher,
   FaSchool,
   FaEllipsisH,
-  FaBriefcase,
   FaSignOutAlt,
-  FaBookOpen,
-  FaUserFriends,
-  FaSearch,
-  FaTrophy,
 } from "react-icons/fa";
-import { BsStars } from "react-icons/bs";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
 
@@ -32,84 +21,18 @@ const Sidebar: React.FC = () => {
 
   const navigationItems = [
     {
-      icon: FaSearch,
-      label: "Search",
-      path: "/search",
-      active: location.pathname.startsWith("/search"),
-    },
-    {
-      icon: FaTrophy,
-      label: "Competition",
-      path: "/gaming",
-      active: location.pathname === "/gaming",
-    },
-    {
       icon: FaSchool,
       label: "ClassRoom",
       path: "/classroom",
       active: location.pathname.startsWith("/classroom"),
     },
     {
-      icon: FaLayerGroup,
-      label: "Groups",
-      path: "/groups",
-      active: location.pathname.startsWith("/groups"),
-    },
-    {
-      icon: FaFolder,
-      label: "Files & Archive",
-      path: "/files",
-      active: location.pathname.startsWith("/files"),
-    },
-    {
-      icon: FaUserFriends,
-      label: "Friends",
-      path: "/friends",
-      active: location.pathname.startsWith("/friends"),
-    },
-    {
       icon: FaBell,
       label: "Notifications",
       path: "/notifications",
       active: location.pathname.startsWith("/notifications"),
-      badge: 5,
     },
-    {
-      icon: BsStars,
-      label: "Study Helper AI",
-      path: "/study-helper",
-      active: location.pathname.startsWith("/study-helper"),
-    },
-    {
-      icon: FaBookOpen,
-      label: "Open Study",
-      path: "/open-study",
-      active: location.pathname.startsWith("/open-study"),
-    },
-    {
-      icon: FaBriefcase,
-      label: "Career Hub",
-      path: "/career-hub",
-      active: location.pathname.startsWith("/career-hub"),
-    },
-    {
-      icon: FaStore,
-      label: "Student Store",
-      path: "/store",
-      active: location.pathname.startsWith("/store"),
-    },
-    {
-      icon: FaChalkboardTeacher,
-      label: "Tuition",
-      path: "/tuition",
-      active: location.pathname.startsWith("/tuition"),
-    },
-    {
-      icon: FaVideo,
-      label: "Videos",
-      path: "/videos",
-      active: location.pathname.startsWith("/videos"),
-    },
+
     {
       icon: FaEllipsisH,
       label: "More",
@@ -164,13 +87,6 @@ const Sidebar: React.FC = () => {
                 />
                 <span>{item.label}</span>
               </div>
-              {item.badge && (
-                <span
-                  className={`rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white`}
-                >
-                  {item.badge}
-                </span>
-              )}
             </NavLink>
           ))}
         </nav>
@@ -209,5 +125,3 @@ const Sidebar: React.FC = () => {
 };
 
 export default Sidebar;
-
-

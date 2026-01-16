@@ -1,11 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import {
-  FaHeart,
-  FaShare,
   FaEllipsisH,
-  FaRegHeart,
-  FaRegComment,
   FaBookmark,
   FaRegBookmark,
   FaEdit,
@@ -20,16 +16,13 @@ import {
   formatPostDateTime,
 } from "../../utils/dateUtils";
 import SeparatorDot from "../shared/SeparatorDot";
-import CommentItem from "../shared/CommentItem";
-import CommentSkeleton from "../shared/skeletons/CommentSkeleton";
 import PostContent from "../shared/PostContent";
 import type { Attachment, Post, PostMeta } from "../../types";
-import { authHooks } from "../../hooks/useAuth";
+// import { authHooks } from "../../hooks/useAuth";
 
 import { ATTACHMENT_TYPES } from "../../constants";
 import confirm from "../../utils/sweetAlert";
 import { profileHooks } from "../../hooks/useProfile";
-import { commentHooks } from "../../hooks/common/useComment";
 import { useDropdown } from "../../hooks/useDropdown";
 
 interface ProfilePostCardProps {
@@ -38,8 +31,6 @@ interface ProfilePostCardProps {
 }
 
 const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
-  const [showCommentBox, setShowCommentBox] = useState(false);
-  const [commentText, setCommentText] = useState("");
   const {
     isOpen: showMenu,
     openUpward,
@@ -54,13 +45,11 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
   const [showAllTags, setShowAllTags] = useState(false);
 
   // Get current logged-in user
-  const { user: currentUser } = authHooks.useUser();
+  // const { user: currentUser } = authHooks.useUser();
 
   const isOwnPost = meta.isMine;
 
   // Post hooks
-  const { mutate: likeMutate, isPending: isLiking } =
-    profileHooks.useToggleLikeProfilePost();
   const { mutate: deletePost, isPending: isDeleting } =
     profileHooks.useDeleteProfilePost();
   const { mutate: updatePost, isPending: isUpdating } =
@@ -71,67 +60,6 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
     profileHooks.useToggleBookmarkProfilePost();
   const { mutate: togglePin, isPending: isPinning } =
     profileHooks.useTogglePinProfilePost();
-
-  // Comment hooks
-  const {
-    data: commentsData,
-    isLoading: isLoadingComments,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = commentHooks.usePostComments({
-    postId: post._id,
-    enabled: showCommentBox,
-  });
-
-  const { mutate: addComment, isPending: isAddingComment } =
-    profileHooks.useAddProfileComment({
-      postId: post._id,
-    });
-  const { mutate: deleteComment } = profileHooks.useDeleteProfileComment({
-    postId: post._id,
-  });
-  const { mutate: toggleLikeComment } = commentHooks.useToggleLikeComment({
-    postId: post._id,
-  });
-  const { mutate: updateComment } = commentHooks.useUpdateComment({
-    postId: post._id,
-  });
-
-  const postComments =
-    commentsData?.pages.flatMap((page) => page.data.comments) || [];
-
-  const handleLike = () => {
-    likeMutate({ postId: post._id });
-    closeMenu();
-  };
-
-  const handleToggleCommentBox = () => {
-    setShowCommentBox(!showCommentBox);
-  };
-
-  // Ref for textarea
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-
-  const handleAddComment = (
-    e?: React.FormEvent | React.KeyboardEvent | React.MouseEvent
-  ) => {
-    if (e) e.preventDefault();
-    if (!commentText.trim() || isAddingComment) return;
-
-    addComment(
-      { content: commentText },
-      {
-        onSuccess: () => {
-          setCommentText("");
-          // Reset textarea height
-          if (textareaRef.current) {
-            textareaRef.current.style.height = "auto";
-          }
-        },
-      }
-    );
-  };
 
   const handleToggleBookmark = () => {
     toggleBookmark({ postId: post._id });
@@ -419,145 +347,6 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
           </div>
         </div>
       </div>
-
-      {/* like/comment/share - Buttons */}
-      <div className="border-t border-gray-100 px-4 py-3">
-        <div className="grid grid-cols-3 gap-2">
-          {/* like button */}
-          <button
-            onClick={handleLike}
-            disabled={isLiking}
-            className={`flex items-center justify-center space-x-2 rounded-lg px-3 py-2 transition-colors disabled:opacity-50 ${
-              meta.isLiked
-                ? "bg-red-50 text-red-600 hover:bg-red-100"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            {meta.isLiked ? <FaHeart size={18} /> : <FaRegHeart size={18} />}
-            <span className="text-sm font-medium">Like</span>
-          </button>
-
-          {/* comment button */}
-          <button
-            onClick={handleToggleCommentBox}
-            className={`flex items-center justify-center space-x-2 rounded-lg px-3 py-2 transition-colors ${
-              showCommentBox
-                ? "bg-blue-50 text-blue-600"
-                : "text-gray-600 hover:bg-gray-100"
-            }`}
-          >
-            <FaRegComment size={18} />
-            <span className="text-sm font-medium">Comment</span>
-          </button>
-
-          {/* share button */}
-          <button
-            onClick={handleCopyLink}
-            className="flex items-center justify-center space-x-2 rounded-lg px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100"
-          >
-            <FaShare size={18} />
-            <span className="text-sm font-medium">Share</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Comments Section & Input - Show only when comment button is clicked */}
-      {showCommentBox && (
-        <div className="border-t border-gray-100">
-          {/* Loading State */}
-          {isLoadingComments && (
-            <div className="space-y-1 px-2.5 py-2">
-              <CommentSkeleton />
-              <CommentSkeleton />
-              <CommentSkeleton />
-            </div>
-          )}
-
-          {/* Comments List - Scrollable */}
-          {!isLoadingComments && postComments.length > 0 && (
-            <div className="px-2.5 py-2">
-              <div className="max-h-[400px] space-y-1 overflow-y-auto">
-                {/* Display all comments - Newest first */}
-                {postComments.map((item) => (
-                  <CommentItem
-                    key={item.comment._id}
-                    comment={item.comment}
-                    meta={item.meta}
-                    currentUserId={currentUser?._id}
-                    onDeleteComment={(commentId) => deleteComment(commentId)}
-                    onLikeComment={(commentId) => toggleLikeComment(commentId)}
-                    onUpdateComment={(commentId, content) =>
-                      updateComment({ commentId, content })
-                    }
-                  />
-                ))}
-                {/* Load More Button */}
-                {hasNextPage && (
-                  <button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    className="w-full rounded-lg border border-blue-600 p-2 text-center text-sm font-medium text-blue-600 transition-colors hover:bg-blue-600 hover:text-white disabled:opacity-50"
-                  >
-                    {isFetchingNextPage
-                      ? "Loading more..."
-                      : "Load more comments"}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Create Comment Input */}
-          <div className="border-t border-gray-100 p-4">
-            {currentUser?.restrictions?.isCommentBlocked ? (
-              <div className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-600">
-                You are restricted from commenting.
-                {currentUser.restrictions.commentRestriction?.reason && (
-                  <span className="block text-xs text-red-500">
-                    Reason: {currentUser.restrictions.commentRestriction.reason}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3">
-                <img
-                  src={currentUser?.avatar}
-                  alt="Your avatar"
-                  className="h-8 w-8 rounded-full bg-gray-300 object-cover"
-                />
-                <textarea
-                  ref={textareaRef}
-                  value={commentText}
-                  onChange={(e) => {
-                    setCommentText(e.target.value);
-                    // Auto-resize
-                    e.target.style.height = "auto";
-                    e.target.style.height = e.target.scrollHeight + "px";
-                  }}
-                  placeholder="Write a comment (max 1000 chars)..."
-                  className="max-h-32 flex-1 resize-none overflow-y-auto rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  rows={1}
-                  style={{ minHeight: "38px" }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleAddComment(e);
-                    }
-                  }}
-                  maxLength={1000}
-                />
-                <button
-                  onClick={handleAddComment}
-                  disabled={!commentText.trim() || isAddingComment}
-                  className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isAddingComment ? "Sending..." : "Send"}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

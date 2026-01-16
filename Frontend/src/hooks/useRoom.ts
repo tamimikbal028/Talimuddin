@@ -10,7 +10,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
 import type { ApiError, UpdateRoomData } from "../types";
 import { postHooks } from "./common/usePost";
-import { commentHooks } from "./common/useComment";
 
 const useCreateRoom = () => {
   const queryClient = useQueryClient();
@@ -327,23 +326,6 @@ const useToggleBookmarkRoomPost = () => {
   });
 };
 
-// Room Comment Hooks
-const useAddRoomComment = ({ postId }: { postId: string }) => {
-  const { roomId } = useParams();
-  return commentHooks.useAddComment({
-    postId,
-    invalidateKey: ["roomPosts", roomId],
-  });
-};
-
-const useDeleteRoomComment = ({ postId }: { postId: string }) => {
-  const { roomId } = useParams();
-  return commentHooks.useDeleteComment({
-    postId,
-    invalidateKey: ["roomPosts", roomId],
-  });
-};
-
 // ====================================
 // Join Request Management
 // ====================================
@@ -588,10 +570,6 @@ const roomHooks = {
   useUpdateRoomPost,
   useToggleReadStatusRoomPost,
   useToggleBookmarkRoomPost,
-
-  // Comments
-  useAddRoomComment,
-  useDeleteRoomComment,
 
   // Join Request Management
   useCancelJoinRequest,

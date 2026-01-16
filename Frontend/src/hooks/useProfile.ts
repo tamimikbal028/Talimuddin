@@ -15,9 +15,6 @@ import type {
 } from "../types";
 import type { AxiosError } from "axios";
 import { postHooks } from "./common/usePost";
-
-import { commentHooks } from "./common/useComment";
-import { followHooks } from "./common/useFollow";
 import { useParams } from "react-router-dom";
 import { AUTH_KEYS } from "./useAuth";
 
@@ -30,25 +27,33 @@ const defaultProfileQueryOptions = {
   retry: 1,
 };
 
-const useProfileHeader = (username: string) =>
-  useQuery({
+const useProfileHeader = () => {
+  const { username } = useParams();
+  return useQuery({
     queryKey: ["profileHeader", username],
     queryFn: async () => {
-      const response = await profileService.getProfileHeader(username);
+      const response = await profileService.getProfileHeader(
+        username as string
+      );
       return response.data;
     },
     ...defaultProfileQueryOptions,
   });
+};
 
-const useProfileDetails = (username: string) =>
-  useQuery({
+const useProfileDetails = () => {
+  const { username } = useParams();
+  return useQuery({
     queryKey: ["profileDetails", username],
     queryFn: async () => {
-      const response = await profileService.getProfileDetails(username);
+      const response = await profileService.getProfileDetails(
+        username as string
+      );
       return response.data;
     },
     ...defaultProfileQueryOptions,
   });
+};
 
 // Update hooks
 const useUpdateGeneral = () => {
@@ -205,29 +210,6 @@ const useTogglePinProfilePost = () => {
   });
 };
 
-// Comment hooks
-const useAddProfileComment = ({ postId }: { postId: string }) => {
-  return commentHooks.useAddComment({
-    postId,
-    invalidateKey: ["profilePosts"],
-  });
-};
-
-const useDeleteProfileComment = ({ postId }: { postId: string }) => {
-  return commentHooks.useDeleteComment({
-    postId,
-    invalidateKey: ["profilePosts"],
-  });
-};
-
-// Follow hooks
-const useToggleFollowProfile = () => {
-  const { username } = useParams();
-  return followHooks.useToggleFollow({
-    invalidateKey: ["profileHeader", username],
-  });
-};
-
 const profileHooks = {
   useProfileHeader,
   useProfileDetails,
@@ -243,9 +225,6 @@ const profileHooks = {
   useToggleReadStatusProfilePost,
   useToggleBookmarkProfilePost,
   useTogglePinProfilePost,
-  useAddProfileComment,
-  useDeleteProfileComment,
-  useToggleFollowProfile,
 } as const;
 
 export { profileHooks };

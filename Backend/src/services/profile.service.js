@@ -1,14 +1,7 @@
 import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
 import { ReadPost } from "../models/readPost.model.js";
-import { Reaction } from "../models/reaction.model.js";
-import { Friendship } from "../models/friendship.model.js";
-import {
-  POST_TARGET_MODELS,
-  POST_VISIBILITY,
-  REACTION_TARGET_MODELS,
-  FRIENDSHIP_STATUS,
-} from "../constants/index.js";
+import { POST_TARGET_MODELS, POST_VISIBILITY } from "../constants/index.js";
 import { ApiError } from "../utils/ApiError.js";
 
 // === Get User Profile Posts Service ===
