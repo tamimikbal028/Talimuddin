@@ -39,8 +39,6 @@ const postSchema = new Schema(
       index: true,
     },
 
-    // Model on which the post is made
-    // (User, Group, Page, Room, Institution, Department, CrCorner)
     postOnModel: {
       type: String,
       required: true,
@@ -48,7 +46,6 @@ const postSchema = new Schema(
       required: true,
       index: true,
     },
-    // Id of the Model where the post is made
     postOnId: {
       type: Schema.Types.ObjectId,
       required: true,
@@ -56,7 +53,6 @@ const postSchema = new Schema(
       index: true,
     },
 
-    // Id of the User who made the post
     author: {
       type: Schema.Types.ObjectId,
       ref: "User",
@@ -64,17 +60,10 @@ const postSchema = new Schema(
       index: true,
     },
 
-    // (public, connections, internal, only_me)
     visibility: {
       type: String,
       enum: Object.values(POST_VISIBILITY),
       default: POST_VISIBILITY.PUBLIC,
-      index: true,
-    },
-    status: {
-      type: String,
-      enum: Object.values(POST_STATUS),
-      default: POST_STATUS.APPROVED,
       index: true,
     },
 
@@ -87,17 +76,9 @@ const postSchema = new Schema(
     ],
     tags: [{ type: String, trim: true }],
 
-    // Stats
-    likesCount: { type: Number, default: 0 },
-    commentsCount: { type: Number, default: 0 },
-    sharesCount: { type: Number, default: 0 },
-
-    // Edited status
     isEdited: { type: Boolean, default: false },
     editedAt: { type: Date },
 
-    // Flags
-    isArchived: { type: Boolean, default: false },
     isPinned: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
   },
@@ -112,8 +93,8 @@ postSchema.index(
   },
   {
     weights: {
-      content: 10, // Higher priority for content matches
-      tags: 5, // Medium priority for tag matches
+      content: 10,
+      tags: 5,
     },
     name: "post_search_text_index",
   }
@@ -124,6 +105,5 @@ postSchema.index({ postOnId: 1, postOnModel: 1, createdAt: -1 });
 postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ visibility: 1, createdAt: -1 });
 postSchema.index({ author: 1, visibility: 1, isDeleted: 1 });
-postSchema.index({ postOnId: 1, status: 1, createdAt: -1 });
 
 export const Post = mongoose.model("Post", postSchema);
