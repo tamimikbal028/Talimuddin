@@ -7,7 +7,6 @@ import { ApiError } from "../utils/ApiError.js";
 import { uploadFile, deleteFile } from "../utils/cloudinaryFileUpload.js";
 import { createPostService } from "./common/post.service.js";
 import {
-  POST_STATUS,
   POST_TARGET_MODELS,
   USER_TYPES,
   POST_VISIBILITY,
@@ -31,7 +30,8 @@ const branchActions = {
 
     // Generate unique 6-character alphanumeric join code
     const generateJoinCode = () => {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Removed confusing chars: 0,O,1,I
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      // Removed confusing chars: 0,O,1,I
       let code = "";
       for (let i = 0; i < 6; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));

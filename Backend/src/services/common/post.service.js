@@ -1,26 +1,14 @@
 import { Post } from "../../models/post.model.js";
 import { ReadPost } from "../../models/readPost.model.js";
 import { User } from "../../models/user.model.js";
-import {
-  POST_TARGET_MODELS,
-  POST_TYPES,
-  POST_VISIBILITY,
-  POST_STATUS,
-} from "../../constants/index.js";
+import { POST_TARGET_MODELS, POST_VISIBILITY } from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Branch } from "../../models/branch.model.js";
 import { BranchMembership } from "../../models/branchMembership.model.js";
 
 export const createPostService = async (postData, authorId) => {
-  const {
-    content,
-    attachments,
-    postOnModel,
-    postOnId,
-    visibility,
-    pollOptions,
-    tags,
-  } = postData;
+  const { content, attachments, postOnModel, postOnId, visibility, tags } =
+    postData;
 
   if (!content || !postOnModel || !postOnId) {
     throw new ApiError(400, "All fields are required");
@@ -30,44 +18,19 @@ export const createPostService = async (postData, authorId) => {
     throw new ApiError(400, "Invalid target model");
   }
 
-  switch (postOnModel) {
-    case POST_TARGET_MODELS.USER:
-      if (visibility === POST_VISIBILITY.INTERNAL) {
-        throw new ApiError(
-          400,
-          `Internal visibility is not allowed for Profile posts`
-        );
-      }
-      break;
-    case POST_TARGET_MODELS.BRANCH:
-      if (
-        visibility !== POST_VISIBILITY.CONNECTIONS &&
-        visibility !== POST_VISIBILITY.ONLY_ME
-      ) {
-        throw new ApiError(
-          400,
-          `Only "Branch Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Branch posts`
-        );
-      }
-      break;
-    case POST_TARGET_MODELS.PAGE:
-      if (visibility === POST_VISIBILITY.INTERNAL) {
-        throw new ApiError(
-          400,
-          `Internal visibility is not allowed for Page posts`
-        );
-      }
-      break;
-    case POST_TARGET_MODELS.CR_CORNER:
-      if (visibility !== POST_VISIBILITY.PUBLIC) {
-        throw new ApiError(
-          400,
-          `Only public visibility is allowed for CR Corner posts`
-        );
-      }
-      break;
-    default:
-      break;
+  // Validate visibility based on model
+  if (postOnModel === POST_TARGET_MODELS.USER) {
+    // Profiling might allow Public/Connections/OnlyMe (Internal removed)
+  } else if (postOnModel === POST_TARGET_MODELS.BRANCH) {
+    if (
+      visibility !== POST_VISIBILITY.CONNECTIONS &&
+      visibility !== POST_VISIBILITY.ONLY_ME
+    ) {
+      throw new ApiError(
+        400,
+        `Only "Branch Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Branch posts`
+      );
+    }
   }
 
   // Create post
@@ -78,7 +41,6 @@ export const createPostService = async (postData, authorId) => {
     postOnId,
     author: authorId,
     visibility: visibility || POST_VISIBILITY.PUBLIC,
-    pollOptions: pollOptions || [],
     tags: tags || [],
     isPinned: false,
     isDeleted: false,
@@ -357,38 +319,34 @@ export const togglePinPostService = async (postId, userId) => {
     throw new ApiError(410, "Cannot pin a deleted post.");
   }
 
-  // Only group posts can be pinned in this implementation
-  if (post.postOnModel !== POST_TARGET_MODELS.GROUP) {
-    throw new ApiError(400, "Pinning is only supported for group posts");
+  // Only branch posts can be pinned in this implementation (or user profile)
+  if (
+    post.postOnModel !== POST_TARGET_MODELS.BRANCH &&
+    post.postOnModel !== POST_TARGET_MODELS.USER
+  ) {
+    throw new ApiError(
+      400,
+      "Pinning is only supported for branch or user posts"
+    );
   }
 
   // Check authorization based on model
-  if (post.postOnModel === POST_TARGET_MODELS.GROUP) {
-    const membership = await GroupMembership.findOne({
-      group: post.postOnId,
+  if (post.postOnModel === POST_TARGET_MODELS.BRANCH) {
+    const membership = await BranchMembership.findOne({
+      branch: post.postOnId,
       user: userId,
-      role: { $in: [GROUP_ROLES.OWNER, GROUP_ROLES.ADMIN] },
+      isAdmin: true,
     });
     if (!membership) {
       throw new ApiError(
         403,
-        "You are not authorized to pin/unpin posts in this group"
+        "You are not authorized to pin/unpin posts in this branch"
       );
     }
   } else if (post.postOnModel === POST_TARGET_MODELS.USER) {
     // Only profile owner can pin their own posts
     if (post.postOnId.toString() !== userId.toString()) {
       throw new ApiError(403, "You can only pin posts on your own profile");
-    }
-  } else if (
-    [POST_TARGET_MODELS.DEPARTMENT, POST_TARGET_MODELS.INSTITUTION].includes(
-      post.postOnModel
-    )
-  ) {
-    // TODO: Add admin check for Dept/Institution if needed
-    // For now, allow pinning if it's the post author or we can add specific admin logic later
-    if (post.author.toString() !== userId.toString()) {
-      throw new ApiError(403, "Unauthorized to pin this post");
     }
   }
 
