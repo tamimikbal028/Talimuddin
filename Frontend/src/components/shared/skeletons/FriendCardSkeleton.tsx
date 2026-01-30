@@ -1,5 +1,3 @@
-import React from "react";
-
 const FriendCardSkeleton = () => {
   return (
     <div className="flex items-center space-x-3 rounded-lg border border-gray-300 bg-white p-3 shadow-sm">
