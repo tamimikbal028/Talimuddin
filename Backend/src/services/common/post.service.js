@@ -8,8 +8,8 @@ import {
   POST_STATUS,
 } from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Room } from "../../models/branch.model.js";
-import { RoomMembership } from "../../models/roomMembership.model.js";
+import { Branch } from "../../models/branch.model.js";
+import { BranchMembership } from "../../models/branchMembership.model.js";
 
 export const createPostService = async (postData, authorId) => {
   const {
@@ -39,14 +39,14 @@ export const createPostService = async (postData, authorId) => {
         );
       }
       break;
-    case POST_TARGET_MODELS.ROOM:
+    case POST_TARGET_MODELS.BRANCH:
       if (
         visibility !== POST_VISIBILITY.CONNECTIONS &&
         visibility !== POST_VISIBILITY.ONLY_ME
       ) {
         throw new ApiError(
           400,
-          `Only "Room Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Room posts`
+          `Only "Branch Members" (CONNECTIONS) and "Only me" (ONLY_ME) visibility are allowed for Branch posts`
         );
       }
       break;
@@ -89,8 +89,8 @@ export const createPostService = async (postData, authorId) => {
     case POST_TARGET_MODELS.USER:
       await User.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
       break;
-    case POST_TARGET_MODELS.ROOM:
-      await Room.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+    case POST_TARGET_MODELS.BRANCH:
+      await Branch.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
       break;
     default:
       break;
@@ -249,8 +249,8 @@ export const deletePostService = async (postId, userId) => {
             $inc: { postsCount: -1 },
           });
           break;
-        case POST_TARGET_MODELS.ROOM:
-          await Room.findByIdAndUpdate(post.postOnId, {
+        case POST_TARGET_MODELS.BRANCH:
+          await Branch.findByIdAndUpdate(post.postOnId, {
             $inc: { postsCount: -1 },
           });
           break;
@@ -274,7 +274,7 @@ export const deletePostService = async (postId, userId) => {
 
 // === Update Post Service ===
 export const updatePostService = async (postId, userId, updateData) => {
-  const { content, visibility, tags } = updateData;
+  const { content, visibility, tags, attachments } = updateData;
 
   const post = await Post.findById(postId);
 
@@ -311,6 +311,11 @@ export const updatePostService = async (postId, userId, updateData) => {
   ) {
     post.tags = tags;
     // Tags change shouldn't mark post as edited
+  }
+
+  if (attachments) {
+    post.attachments = attachments;
+    isContentChanged = true;
   }
 
   if (isContentChanged) {

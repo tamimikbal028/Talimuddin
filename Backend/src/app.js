@@ -20,12 +20,6 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-// ⏳ Global Latency Simulation Middleware
-// app.use(async (req, res, next) => {
-//   await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
-//   next();
-// });
-
 // Import and use routes
 import authRouter from "./routes/auth.routes.js";
 app.use("/api/v1/users", authRouter);
@@ -33,11 +27,11 @@ app.use("/api/v1/users", authRouter);
 import { errorHandler } from "./middlewares/error.middleware.js";
 import profileRouter from "./routes/profile.routes.js";
 import postRouter from "./routes/common/post.routes.js";
-import roomRouter from "./routes/room.routes.js";
+import branchRouter from "./routes/branch.routes.js";
 
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/profile", profileRouter);
-app.use("/api/v1/rooms", roomRouter);
+app.use("/api/v1/branches", branchRouter);
 
 // Global Error Handling Middleware
 app.use(errorHandler);

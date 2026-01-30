@@ -48,62 +48,8 @@ const createPost = asyncHandler(async (req, res) => {
       break;
     }
 
-    case POST_TARGET_MODELS.GROUP: {
-      // 1. Validation (Group Existence & Membership)
-      const group = await Group.findById(postOnId);
-      if (!group) {
-        throw new ApiError(404, "Group not found");
-      }
-
-      const membership = await GroupMembership.findOne({
-        group: postOnId,
-        user: userId,
-        status: GROUP_MEMBERSHIP_STATUS.JOINED,
-      });
-
-      if (!membership) {
-        throw new ApiError(403, "You must be a member to post in this group");
-      }
-
-      if (
-        membership.role === GROUP_ROLES.MEMBER &&
-        group.settings?.allowMemberPosting === false
-      ) {
-        throw new ApiError(
-          403,
-          "Posting is disabled for members in this group"
-        );
-      }
-
-      // 2. Create Post
-      result = await createPostService(req.body, userId);
-
-      // 3. Post-Creation Side Effects
-      break;
-    }
-
-    case POST_TARGET_MODELS.DEPARTMENT: {
-      // 1. TODO: Department specific validation (if any)
-
-      // 2. Create Post
-      result = await createPostService(req.body, userId);
-
-      // 3. Post-Creation Side Effects
-      break;
-    }
-
-    case POST_TARGET_MODELS.INSTITUTION: {
-      // 1. TODO: Institution specific validation (if any)
-
-      // 2. Create Post
-      result = await createPostService(req.body, userId);
-
-      // 3. Post-Creation Side Effects
-      break;
-    }
-
-    case POST_TARGET_MODELS.ROOM: {
-      // 1. TODO: Room specific validation
+    case POST_TARGET_MODELS.BRANCH: {
+      // 1. TODO: Branch specific validation
 
       // 2. Create Post
       result = await createPostService(req.body, userId);
