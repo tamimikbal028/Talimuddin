@@ -8,7 +8,7 @@ import {
   POST_STATUS,
 } from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { Room } from "../../models/room.model.js";
+import { Room } from "../../models/branch.model.js";
 import { RoomMembership } from "../../models/roomMembership.model.js";
 
 export const createPostService = async (postData, authorId) => {

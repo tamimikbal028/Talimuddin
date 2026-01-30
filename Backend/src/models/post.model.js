@@ -1,12 +1,13 @@
-import mongoose, { Schema } from "mongoose";
-import {
-  ATTACHMENT_TYPES,
-  POST_TARGET_MODELS,
-  POST_VISIBILITY,
-} from "../constants/index.js";
+import mongoose from "mongoose";
+import { POST_TARGET_MODELS, POST_VISIBILITY } from "../constants/index.js";
 
-const postSchema = new Schema(
+const postSchema = new mongoose.Schema(
   {
+    title: {
+      type: String,
+      trim: true,
+      maxLength: 150,
+    },
     content: {
       type: String,
       trim: true,
@@ -16,15 +17,9 @@ const postSchema = new Schema(
 
     attachments: [
       {
-        // (image, video, pdf, doc, link)
-        type: {
-          type: String,
-          enum: Object.values(ATTACHMENT_TYPES),
-          required: true,
-        },
         // url from cloudinary
         url: { type: String, required: true },
-        name: { type: String },
+        name: { type: String, trim: true, maxLength: 255 },
         size: { type: Number },
       },
     ],
@@ -37,14 +32,14 @@ const postSchema = new Schema(
       index: true,
     },
     postOnId: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "postOnModel",
       index: true,
+      refPath: "postOnModel",
     },
 
     author: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: true,
@@ -57,14 +52,7 @@ const postSchema = new Schema(
       index: true,
     },
 
-    pollOptions: [
-      {
-        text: { type: String },
-        votes: { type: Number, default: 0 },
-        voters: [{ type: Schema.Types.ObjectId, ref: "User" }],
-      },
-    ],
-    tags: [{ type: String, trim: true }],
+    tags: [{ type: String, trim: true, maxLength: 50 }],
 
     isEdited: { type: Boolean, default: false },
     editedAt: { type: Date },
@@ -91,9 +79,9 @@ postSchema.index(
 );
 
 // ✅ Compound Indexes for Filtered Search and Performance
-postSchema.index({ postOnId: 1, postOnModel: 1, createdAt: -1 });
 postSchema.index({ author: 1, createdAt: -1 });
 postSchema.index({ visibility: 1, createdAt: -1 });
 postSchema.index({ author: 1, visibility: 1, isDeleted: 1 });
+postSchema.index({ postOnId: 1, postOnModel: 1, createdAt: -1 });
 
 export const Post = mongoose.model("Post", postSchema);

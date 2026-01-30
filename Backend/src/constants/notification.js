@@ -5,9 +5,8 @@ export const NOTIFICATION_TYPES = {
   FRIEND_REQUEST: "FRIEND_REQUEST",
   FRIEND_ACCEPT: "FRIEND_ACCEPT",
   FOLLOW: "FOLLOW",
-  MENTION: "MENTION", // ফিউচারে যদি কাউকে ট্যাগ করেন
-  SYSTEM: "SYSTEM", // এডমিন বা সিস্টেম থেকে পাঠানো বার্তা
-
+  MENTION: "MENTION",
+  SYSTEM: "SYSTEM",
   GROUP_APPROVE: "GROUP_APPROVE",
   GROUP_ROLE_UPDATE: "GROUP_ROLE_UPDATE",
 };
