@@ -13,10 +13,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { POST_VISIBILITY, POST_TARGET_MODELS } from "../../constants/post";
 import { authHooks } from "../../hooks/useAuth";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 import { useParams } from "react-router-dom";
 
-const createRoomPostSchema = z.object({
+const createBranchPostSchema = z.object({
   content: z
     .string()
     .min(1, "Post content cannot be empty")
@@ -25,12 +25,13 @@ const createRoomPostSchema = z.object({
   visibility: z.string(),
 });
 
-type CreateRoomPostFormData = z.infer<typeof createRoomPostSchema>;
+type CreateBranchPostFormData = z.infer<typeof createBranchPostSchema>;
 
-const CreateRoomPost: React.FC = () => {
-  const { roomId } = useParams<{ roomId: string }>();
+const CreateBranchPost: React.FC = () => {
+  const { branchId } = useParams<{ branchId: string }>();
   const { user } = authHooks.useUser();
-  const { mutate: createRoomPost, isPending } = roomHooks.useCreateRoomPost();
+  const { mutate: createBranchPost, isPending } =
+    branchHooks.useCreateBranchPost();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -40,20 +41,20 @@ const CreateRoomPost: React.FC = () => {
     watch,
     reset,
     formState: { isValid },
-  } = useForm<CreateRoomPostFormData>({
-    resolver: zodResolver(createRoomPostSchema),
+  } = useForm<CreateBranchPostFormData>({
+    resolver: zodResolver(createBranchPostSchema),
     defaultValues: {
       content: "",
       tags: "",
-      visibility: POST_VISIBILITY.CONNECTIONS, // Default: Room members can see
+      visibility: POST_VISIBILITY.CONNECTIONS,
     },
   });
 
   const privacy = watch("visibility");
   const postContent = watch("content");
 
-  const onSubmit = (data: CreateRoomPostFormData) => {
-    if (!roomId) return;
+  const onSubmit = (data: CreateBranchPostFormData) => {
+    if (!branchId) return;
 
     // Process tags: split by comma or space, remove empty strings
     const processedTags = data.tags
@@ -63,11 +64,11 @@ const CreateRoomPost: React.FC = () => {
           .filter((tag) => tag.length > 0)
       : [];
 
-    createRoomPost(
+    createBranchPost(
       {
         ...data,
-        postOnId: roomId,
-        postOnModel: POST_TARGET_MODELS.ROOM,
+        postOnId: branchId,
+        postOnModel: POST_TARGET_MODELS.BRANCH,
         attachments: [],
         tags: processedTags,
       },
@@ -88,7 +89,7 @@ const CreateRoomPost: React.FC = () => {
   }> = [
     {
       value: POST_VISIBILITY.CONNECTIONS,
-      label: "Room Members",
+      label: "Branch Members",
       Icon: FaUserFriends,
       show: true,
     },
@@ -159,7 +160,9 @@ const CreateRoomPost: React.FC = () => {
                 <textarea
                   {...register("content")}
                   onFocus={() => setIsExpanded(true)}
-                  placeholder={`What's on your mind, ${user?.fullName?.split(" ")[0]}?`}
+                  placeholder={`What's on your mind, ${
+                    user?.fullName?.split(" ")[0]
+                  }?`}
                   className="w-full resize-none rounded-lg border border-gray-300 p-3 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   rows={isExpanded ? 4 : 1}
                   maxLength={5000}
@@ -275,4 +278,4 @@ const CreateRoomPost: React.FC = () => {
   );
 };
 
-export default CreateRoomPost;
+export default CreateBranchPost;

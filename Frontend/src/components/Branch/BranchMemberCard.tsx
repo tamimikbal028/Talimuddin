@@ -2,26 +2,21 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { FaUserShield, FaUserMinus } from "react-icons/fa";
-import { AcceptButton, RejectButton } from "../shared/friends/FriendActions";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 import confirm from "../../utils/sweetAlert";
 import { useDropdown } from "../../hooks/useDropdown";
-import type { RoomMember } from "../../types";
+import type { BranchMember } from "../../types";
 
-interface RoomMemberCardProps {
-  member: RoomMember;
-  currentUserRole: string | null;
-
+interface BranchMemberCardProps {
+  member: BranchMember;
   isPendingRequest?: boolean;
 }
 
-const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
+const BranchMemberCard = ({
   member,
-  currentUserRole,
   isPendingRequest = false,
-}) => {
+}: BranchMemberCardProps) => {
   const { user, meta } = member;
-
   const {
     isOpen: showMenu,
     openUpward,
@@ -31,31 +26,26 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
     close: closeMenu,
   } = useDropdown();
 
-  // Room management mutations
-  const { mutate: acceptJoinRequest, isPending: isAcceptingJoin } =
-    roomHooks.useAcceptJoinRequest();
-  const { mutate: rejectJoinRequest, isPending: isRejectingJoin } =
-    roomHooks.useRejectJoinRequest();
-  const { mutate: removeMember } = roomHooks.useRemoveRoomMember();
-  const { mutate: promoteMember } = roomHooks.usePromoteRoomMember();
-  const { mutate: demoteMember } = roomHooks.useDemoteRoomMember();
+  // Branch management mutations
+  // Note: pending requests hooks may have been removed if features were removed.
+  // If they are missing from useBranch.ts, we should remove them here.
+  // Assuming they are still there or similar logic exists.
+  // In Step 232 I removed useAcceptJoinRequest, useRejectJoinRequest from useBranch.ts ?
+  // Let me check useBranch.ts content in memory or via view.
+  // I removed them. So I must remove them here too.
+
+  const { mutate: removeMember } = branchHooks.useRemoveBranchMember();
+  const { mutate: promoteMember } = branchHooks.usePromoteBranchMember();
+  const { mutate: demoteMember } = branchHooks.useDemoteBranchMember();
 
   // Check if 3-dot menu should show
   const canManage = meta.canManage;
-
-  const handleAcceptJoinRequest = () => {
-    acceptJoinRequest({ userId: user._id });
-  };
-
-  const handleRejectJoinRequest = () => {
-    rejectJoinRequest({ userId: user._id });
-  };
 
   const handleRemove = async () => {
     closeMenu();
     const ok = await confirm({
       title: "Remove Member?",
-      text: `${user.fullName} will be removed from this room.`,
+      text: `${user.fullName} will be removed from this branch.`,
       confirmButtonText: "Yes, remove",
       icon: "warning",
     });
@@ -92,20 +82,7 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
 
   const renderActions = () => {
     if (isPendingRequest) {
-      if (currentUserRole === "CREATOR" || currentUserRole === "ADMIN") {
-        return (
-          <div className="flex space-x-2">
-            <AcceptButton
-              onClick={handleAcceptJoinRequest}
-              disabled={isAcceptingJoin}
-            />
-            <RejectButton
-              onClick={handleRejectJoinRequest}
-              disabled={isRejectingJoin}
-            />
-          </div>
-        );
-      }
+      // Pending request logic removal
       return null;
     }
   };
@@ -113,13 +90,15 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
   const institutionName = user.institution?.name || "No Institution";
 
   const getRoleBadge = () => {
-    if (meta.isCreator) {
-      return (
-        <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-semibold text-purple-700">
-          Creator
-        </span>
-      );
-    }
+    // Creator role removed?
+    // Wait, in Step 225 I removed CREATOR from BRANCH_ROLES.
+    // But `meta.isCreator` might still exist in types?
+    // In `branch.types.ts` I defined `BranchMember` meta as:
+    // role: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
+    // isSelf: boolean; isAdmin: boolean; canManage: boolean;
+    // No `isCreator`.
+    // So I should check against `isAdmin` or if role === 'ADMIN'.
+
     if (meta.isAdmin) {
       return (
         <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
@@ -127,13 +106,7 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
         </span>
       );
     }
-    if (meta.isCR) {
-      return (
-        <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
-          CR
-        </span>
-      );
-    }
+    // CR logic? Removed or didn't exist in new types.
     return null;
   };
 
@@ -184,28 +157,33 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
                 } animate-in fade-in zoom-in duration-200`}
               >
                 <div className="py-1">
-                  {/* Creator-only actions: Promote/Demote */}
-                  {currentUserRole === "CREATOR" && (
-                    <>
-                      {meta.role === "MEMBER" && (
-                        <button
-                          onClick={handlePromote}
-                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                        >
-                          <FaUserShield className="h-4 w-4 flex-shrink-0 text-blue-500" />
-                          <span className="font-medium">Make Admin</span>
-                        </button>
-                      )}
-                      {meta.role === "ADMIN" && (
-                        <button
-                          onClick={handleDemote}
-                          className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
-                        >
-                          <FaUserMinus className="h-4 w-4 flex-shrink-0 text-orange-500" />
-                          <span className="font-medium">Demote to Member</span>
-                        </button>
-                      )}
-                    </>
+                  {/* Since CREATOR is gone, maybe logic is: check if I assume I am admin/owner and can demote other admins? 
+                      We don't strictly have a "Creator" role check anymore, just "Admin".
+                      But usually only an Owner/Creator can demote an Admin. 
+                      If I am AppOwner I can do anything.
+                      If I am BranchAdmin, can I demote other BranchAdmins? Probably not, unless I created it. 
+                      But we simplified roles. 
+                      Let's stick to simple: if `canManage` is true, show options. 
+                      `canManage` from backend should handle permission logic.
+                  */}
+
+                  {meta.role === "MEMBER" && (
+                    <button
+                      onClick={handlePromote}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      <FaUserShield className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                      <span className="font-medium">Make Admin</span>
+                    </button>
+                  )}
+                  {meta.role === "ADMIN" && (
+                    <button
+                      onClick={handleDemote}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
+                    >
+                      <FaUserMinus className="h-4 w-4 flex-shrink-0 text-orange-500" />
+                      <span className="font-medium">Demote to Member</span>
+                    </button>
                   )}
 
                   {/* Remove action */}
@@ -214,7 +192,7 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
                     className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-orange-600 transition-colors hover:bg-gray-50"
                   >
                     <FaUserMinus className="h-4 w-4 flex-shrink-0" />
-                    <span className="font-medium">Remove from Room</span>
+                    <span className="font-medium">Remove from Branch</span>
                   </button>
                 </div>
               </div>
@@ -226,4 +204,4 @@ const RoomMemberCard: React.FC<RoomMemberCardProps> = ({
   );
 };
 
-export default RoomMemberCard;
+export default BranchMemberCard;

@@ -1,18 +1,18 @@
 import React from "react";
-import CreateRoomForm from "../../components/ClassRoom/CreateRoomForm";
+import CreateBranchForm from "../../components/Branch/CreateBranchForm";
 
-const CreateRoomPage: React.FC = () => {
+const CreateBranchPage: React.FC = () => {
   return (
     <>
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Create New Room</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Create New Branch</h1>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <CreateRoomForm />
+        <CreateBranchForm />
       </div>
     </>
   );
 };
 
-export default CreateRoomPage;
+export default CreateBranchPage;

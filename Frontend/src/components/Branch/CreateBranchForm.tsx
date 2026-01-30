@@ -1,57 +1,57 @@
 import { useForm, Controller } from "react-hook-form";
 import { FaChalkboardTeacher, FaChevronDown } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 import { useState, useRef, useEffect } from "react";
-import { ROOM_TYPES } from "../../constants";
+import { BRANCH_TYPES } from "../../constants/branch";
 
-export type RoomFormValues = {
+export type BranchFormValues = {
   name: string;
   description?: string;
-  roomType: string;
-  parentRoomJoinCode?: string;
+  branchType: string;
+  parentBranchJoinCode?: string;
 };
 
-const CreateRoomForm = () => {
+const CreateBranchForm = () => {
   const navigate = useNavigate();
-  const [showRoomTypeDropdown, setShowRoomTypeDropdown] = useState(false);
-  const roomTypeRef = useRef<HTMLDivElement>(null);
+  const [showBranchTypeDropdown, setShowBranchTypeDropdown] = useState(false);
+  const branchTypeRef = useRef<HTMLDivElement>(null);
 
-  const { mutate: createRoom, isPending } = roomHooks.useCreateRoom();
+  const { mutate: createBranch, isPending } = branchHooks.useCreateBranch();
 
-  const handleCreate = (data: RoomFormValues) => {
-    createRoom(data);
+  const handleCreate = (data: BranchFormValues) => {
+    createBranch(data);
   };
 
   const { register, handleSubmit, formState, control, watch } =
-    useForm<RoomFormValues>({
+    useForm<BranchFormValues>({
       defaultValues: {
         name: "",
         description: "",
-        roomType: ROOM_TYPES.MAIN_ROOM,
-        parentRoomJoinCode: "",
+        branchType: BRANCH_TYPES.MAIN_BRANCH,
+        parentBranchJoinCode: "",
       },
     });
 
-  const selectedRoomType = watch("roomType");
+  const selectedBranchType = watch("branchType");
   const { errors } = formState;
 
-  const roomTypes = [
-    { value: ROOM_TYPES.MAIN_ROOM, label: "Main Room" },
-    { value: ROOM_TYPES.SUB_ROOM, label: "Sub Room" },
+  const branchTypes = [
+    { value: BRANCH_TYPES.MAIN_BRANCH, label: "Main Branch" },
+    { value: BRANCH_TYPES.SUB_BRANCH, label: "Sub Branch" },
   ];
 
-  const getRoomTypeLabel = (value: string) => {
-    return roomTypes.find((type) => type.value === value)?.label;
+  const getBranchTypeLabel = (value: string) => {
+    return branchTypes.find((type) => type.value === value)?.label;
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        roomTypeRef.current &&
-        !roomTypeRef.current.contains(event.target as Node)
+        branchTypeRef.current &&
+        !branchTypeRef.current.contains(event.target as Node)
       ) {
-        setShowRoomTypeDropdown(false);
+        setShowBranchTypeDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -66,7 +66,7 @@ const CreateRoomForm = () => {
         </div>
         <div>
           <h3 className="text-xl font-bold text-gray-900">
-            Create a New Study Room
+            Create a New Study Branch
           </h3>
           <p className="mt-1 text-sm font-medium text-gray-500">
             Set up a collaborative space for your class
@@ -74,18 +74,18 @@ const CreateRoomForm = () => {
         </div>
       </div>
 
-      {/* Room Name Field */}
+      {/* Branch Name Field */}
       <div>
         <label className="mb-2 block text-sm font-semibold text-gray-700">
-          Room Name <span className="text-red-500">*</span>
+          Branch Name <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           {...register("name", {
-            required: "Room name is required",
+            required: "Branch name is required",
             minLength: {
               value: 3,
-              message: "Room name must be at least 3 characters",
+              message: "Branch name must be at least 3 characters",
             },
           })}
           placeholder="e.g., CSE 2-1 Study Group"
@@ -103,49 +103,50 @@ const CreateRoomForm = () => {
         </label>
         <textarea
           {...register("description")}
-          placeholder="Brief description of the room (optional)"
+          placeholder="Brief description of the branch (optional)"
           rows={3}
           className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
         />
       </div>
 
-      {/* Room Type and Privacy */}
+      {/* Branch Type */}
       <div className="flex justify-between gap-5">
-        {/* Room Type */}
         <div className="w-full">
           <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Room Type <span className="text-red-500">*</span>
+            Branch Type <span className="text-red-500">*</span>
           </label>
           <Controller
-            name="roomType"
+            name="branchType"
             control={control}
-            rules={{ required: "Room type is required" }}
+            rules={{ required: "Branch type is required" }}
             render={({ field }) => (
-              <div className="relative" ref={roomTypeRef}>
+              <div className="relative" ref={branchTypeRef}>
                 <button
                   type="button"
-                  onClick={() => setShowRoomTypeDropdown(!showRoomTypeDropdown)}
+                  onClick={() =>
+                    setShowBranchTypeDropdown(!showBranchTypeDropdown)
+                  }
                   className="flex w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-3 text-left text-gray-900 shadow-sm transition-colors hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
                   <span className="font-medium">
-                    {getRoomTypeLabel(field.value)}
+                    {getBranchTypeLabel(field.value)}
                   </span>
                   <FaChevronDown
                     className={`h-4 w-4 text-gray-500 transition-transform ${
-                      showRoomTypeDropdown ? "rotate-180" : ""
+                      showBranchTypeDropdown ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
-                {showRoomTypeDropdown && (
+                {showBranchTypeDropdown && (
                   <div className="absolute top-full left-0 z-50 mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-lg">
-                    {roomTypes.map((type) => (
+                    {branchTypes.map((type) => (
                       <button
                         key={type.value}
                         type="button"
                         onClick={() => {
                           field.onChange(type.value);
-                          setShowRoomTypeDropdown(false);
+                          setShowBranchTypeDropdown(false);
                         }}
                         className={`flex w-full items-center px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
                           field.value === type.value ? "bg-blue-50" : ""
@@ -167,38 +168,38 @@ const CreateRoomForm = () => {
               </div>
             )}
           />
-          {errors.roomType?.message && (
+          {errors.branchType?.message && (
             <p className="mt-1.5 text-sm text-red-600">
-              {errors.roomType.message}
+              {errors.branchType.message}
             </p>
           )}
         </div>
       </div>
 
-      {/* Sub Room Join Code */}
-      {selectedRoomType === ROOM_TYPES.SUB_ROOM && (
+      {/* Sub Branch Join Code */}
+      {selectedBranchType === BRANCH_TYPES.SUB_BRANCH && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
           <label className="mb-2 block text-sm font-semibold text-gray-700">
-            Main Room Join Code <span className="text-red-500">*</span>
+            Main Branch Join Code <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
-            {...register("parentRoomJoinCode", {
+            {...register("parentBranchJoinCode", {
               required:
-                selectedRoomType === ROOM_TYPES.SUB_ROOM
-                  ? "Main room join code is required"
+                selectedBranchType === BRANCH_TYPES.SUB_BRANCH
+                  ? "Main branch join code is required"
                   : false,
               pattern: {
                 value: /^[A-Z0-9]{6}$/,
                 message: "Join code must be 6 alphanumeric characters",
               },
             })}
-            placeholder="Enter the 6-digit join code of the main room"
+            placeholder="Enter the 6-digit join code of the main branch"
             className="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 font-mono text-gray-900 placeholder-gray-400 shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
-          {errors.parentRoomJoinCode?.message && (
+          {errors.parentBranchJoinCode?.message && (
             <p className="mt-1.5 text-sm text-red-600">
-              {errors.parentRoomJoinCode.message}
+              {errors.parentBranchJoinCode.message}
             </p>
           )}
         </div>
@@ -218,11 +219,11 @@ const CreateRoomForm = () => {
           disabled={isPending}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-blue-700"
         >
-          {isPending ? "Creating..." : "Create Room"}
+          {isPending ? "Creating..." : "Create Branch"}
         </button>
       </div>
     </form>
   );
 };
 
-export default CreateRoomForm;
+export default CreateBranchForm;

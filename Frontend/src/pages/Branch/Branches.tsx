@@ -1,16 +1,16 @@
 import React from "react";
-import RoomCard from "../../components/ClassRoom/RoomCard";
-import RoomCardSkeleton from "../../components/shared/skeletons/RoomCardSkeleton";
+import BranchCard from "../../components/Branch/BranchCard";
+import BranchCardSkeleton from "../../components/shared/skeletons/BranchCardSkeleton";
 import ErrorState from "../../components/shared/ErrorState";
 import EmptyState from "../../components/shared/EmptyState";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 import { authHooks } from "../../hooks/useAuth";
 import { USER_TYPES } from "../../constants/user";
-import { ROOM_LIMIT } from "../../constants";
-import type { RoomListItem } from "../../types";
+import { BRANCH_LIMIT } from "../../constants";
+import type { BranchListItem } from "../../types";
 import { FaDoorOpen } from "react-icons/fa";
 
-const Rooms: React.FC = () => {
+const Branches: React.FC = () => {
   const {
     data,
     fetchNextPage,
@@ -18,11 +18,11 @@ const Rooms: React.FC = () => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = roomHooks.useMyRooms();
+  } = branchHooks.useMyBranches();
   const { user } = authHooks.useUser();
 
-  const rooms: RoomListItem[] =
-    data?.pages.flatMap((page) => page.data.rooms) || [];
+  const branches: BranchListItem[] =
+    data?.pages.flatMap((page) => page.data.branches) || [];
   const totalDocs = data?.pages[0]?.data.pagination.totalDocs || 0;
 
   if (isLoading) {
@@ -32,8 +32,8 @@ const Rooms: React.FC = () => {
           <div className="h-7 w-32 animate-pulse rounded bg-gray-200"></div>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[...Array(ROOM_LIMIT)].map((_, i) => (
-            <RoomCardSkeleton key={i} />
+          {[...Array(BRANCH_LIMIT)].map((_, i) => (
+            <BranchCardSkeleton key={i} />
           ))}
         </div>
       </div>
@@ -41,7 +41,7 @@ const Rooms: React.FC = () => {
   }
 
   if (isError) {
-    return <ErrorState message="Failed to load rooms" />;
+    return <ErrorState message="Failed to load branches" />;
   }
 
   return (
@@ -49,30 +49,30 @@ const Rooms: React.FC = () => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          Joined Rooms {totalDocs ? `(${totalDocs})` : ""}
+          Joined Branches {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 
-      {/* no rooms message */}
-      {rooms.length === 0 ? (
+      {/* no branches message */}
+      {branches.length === 0 ? (
         <EmptyState
           icon={FaDoorOpen}
           message={
-            user?.userType === USER_TYPES.TEACHER
-              ? "Create or join a room to get started."
-              : "Join a room to get started."
+            user?.userType === USER_TYPES.OWNER
+              ? "Create or join a branch to get started."
+              : "Join a branch to get started."
           }
         />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {rooms.map((r) => (
-              <RoomCard key={r._id} room={r} />
+            {branches.map((b) => (
+              <BranchCard key={b._id} branch={b} />
             ))}
             {/* Loading Skeleton for Next Page inside the same grid */}
             {isFetchingNextPage &&
-              [...Array(ROOM_LIMIT)].map((_, i) => (
-                <RoomCardSkeleton key={`skeleton-${i}`} />
+              [...Array(BRANCH_LIMIT)].map((_, i) => (
+                <BranchCardSkeleton key={`skeleton-${i}`} />
               ))}
           </div>
 
@@ -94,4 +94,4 @@ const Rooms: React.FC = () => {
   );
 };
 
-export default Rooms;
+export default Branches;

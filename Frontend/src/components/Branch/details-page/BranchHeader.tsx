@@ -8,24 +8,25 @@ import {
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import type { Room } from "../../../types";
-import { roomHooks } from "../../../hooks/useRoom";
+import type { Branch } from "../../../types";
+import { branchHooks } from "../../../hooks/useBranch";
 import confirm from "../../../utils/sweetAlert";
-import RoomDetailsNavBar from "./RoomDetailsNavBar";
+import BranchDetailsNavBar from "./BranchDetailsNavBar";
 import { useDropdown } from "../../../hooks/useDropdown";
-import type { RoomDetailsMeta } from "../../../types/room.types";
+import type { BranchDetailsMeta } from "../../../types/branch.types";
 
-interface RoomHeaderProps {
-  room: Room;
-  meta: RoomDetailsMeta;
+interface BranchHeaderProps {
+  branch: Branch;
+  meta: BranchDetailsMeta;
 }
 
-const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
+const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
   const navigate = useNavigate();
 
-  const { mutate: deleteRoom, isPending: isDeleting } =
-    roomHooks.useDeleteRoom();
-  const { mutate: leaveRoom, isPending: isLeaving } = roomHooks.useLeaveRoom();
+  const { mutate: deleteBranch, isPending: isDeleting } =
+    branchHooks.useDeleteBranch();
+  const { mutate: leaveBranch, isPending: isLeaving } =
+    branchHooks.useLeaveBranch();
 
   const {
     isOpen: showMenu,
@@ -37,9 +38,9 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
   } = useDropdown();
 
   const handleCopyJoinCode = async () => {
-    if (room.joinCode) {
+    if (branch.joinCode) {
       try {
-        await navigator.clipboard.writeText(room.joinCode);
+        await navigator.clipboard.writeText(branch.joinCode);
         toast.success("Join code copied to clipboard");
       } catch (error) {
         toast.error(`Failed to copy join code: ${error}`);
@@ -51,30 +52,30 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
   const handleDelete = async () => {
     closeMenu();
     const ok = await confirm({
-      title: "Delete Room?",
-      text: "Are you sure you want to delete this room? This action cannot be undone.",
+      title: "Delete Branch?",
+      text: "Are you sure you want to delete this branch? This action cannot be undone.",
       confirmButtonText: "Yes, delete",
       confirmButtonColor: "#d33",
       isDanger: true,
     });
 
     if (ok) {
-      deleteRoom(room._id);
+      deleteBranch(branch._id);
     }
   };
 
   const handleLeave = async () => {
     closeMenu();
     const ok = await confirm({
-      title: "Leave Room?",
-      text: "Are you sure you want to leave this room? You'll need the join code to rejoin.",
+      title: "Leave Branch?",
+      text: "Are you sure you want to leave this branch? You'll need the join code to rejoin.",
       confirmButtonText: "Yes, leave",
       confirmButtonColor: "#d33",
       isDanger: true,
     });
 
     if (ok) {
-      leaveRoom(room._id);
+      leaveBranch(branch._id);
     }
   };
 
@@ -83,8 +84,8 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
       {/* Cover Image with Back Button */}
       <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-700">
         <img
-          src={room.coverImage}
-          alt={room.name}
+          src={branch.coverImage}
+          alt={branch.name}
           className="h-full w-full object-cover"
         />
 
@@ -108,7 +109,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
               {/* Name & Badges */}
               <div className="flex items-center gap-3">
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {room.name}
+                  {branch.name}
                 </h1>
               </div>
 
@@ -117,9 +118,9 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                 {/* Members Count */}
                 <span className="text-sm font-medium text-gray-600">
                   <span className="font-semibold text-gray-900">
-                    {room.membersCount.toLocaleString()}
+                    {branch.membersCount.toLocaleString()}
                   </span>{" "}
-                  {room.membersCount <= 1 ? "Member" : "Members"}
+                  {branch.membersCount <= 1 ? "Member" : "Members"}
                 </span>
 
                 {/* Separator */}
@@ -128,9 +129,9 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                 {/* Posts Count */}
                 <span className="text-sm font-medium text-gray-600">
                   <span className="font-semibold text-gray-900">
-                    {room.postsCount.toLocaleString()}
+                    {branch.postsCount.toLocaleString()}
                   </span>{" "}
-                  {room.postsCount <= 1 ? "Post" : "Posts"}
+                  {branch.postsCount <= 1 ? "Post" : "Posts"}
                 </span>
               </div>
             </div>
@@ -138,14 +139,14 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
             {/* Right: Action Buttons */}
             <div className="flex items-center gap-2">
               {/* Join Code Display */}
-              {meta.isAppOwner || meta.isAppAdmin || meta.isRoomAdmin ? (
+              {meta.isAppOwner || meta.isAppAdmin || meta.isBranchAdmin ? (
                 <button
                   onClick={handleCopyJoinCode}
                   className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
                   title="Click to copy join code"
                 >
                   <span className="font-mono text-sm font-semibold text-gray-700">
-                    {room.joinCode}
+                    {branch.joinCode}
                   </span>
                 </button>
               ) : (
@@ -183,7 +184,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                           >
                             <FaSignOutAlt className="h-4 w-4 flex-shrink-0" />
                             <span className="font-medium">
-                              {isLeaving ? "Leaving..." : "Leave Room"}
+                              {isLeaving ? "Leaving..." : "Leave Branch"}
                             </span>
                           </button>
                         </>
@@ -191,15 +192,15 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
 
                       {(meta.isAppOwner ||
                         meta.isAppAdmin ||
-                        meta.isRoomAdmin) && (
+                        meta.isBranchAdmin) && (
                         <>
                           <Link
-                            to={`/classroom/rooms/${room._id}/edit`}
+                            to={`/classroom/branches/${branch._id}/edit`}
                             className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
                             onClick={closeMenu}
                           >
                             <FaEdit className="h-4 w-4 flex-shrink-0" />
-                            <span className="font-medium">Edit Room</span>
+                            <span className="font-medium">Edit Branch</span>
                           </Link>
                         </>
                       )}
@@ -212,7 +213,7 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
                         >
                           <FaTrash className="h-4 w-4 flex-shrink-0" />
                           <span className="font-medium">
-                            {isDeleting ? "Deleting..." : "Delete Room"}
+                            {isDeleting ? "Deleting..." : "Delete Branch"}
                           </span>
                         </button>
                       )}
@@ -227,23 +228,23 @@ const RoomHeader: React.FC<RoomHeaderProps> = ({ room, meta }) => {
           <div className="mt-4">
             <p
               className={
-                room.description
+                branch.description
                   ? "text-gray-700"
                   : "font-medium text-gray-500 italic"
               }
             >
-              {room.description}
+              {branch.description}
             </p>
           </div>
         </div>
 
         {/* Navigation Tabs */}
         <div className="mx-auto max-w-5xl px-6">
-          <RoomDetailsNavBar />
+          <BranchDetailsNavBar />
         </div>
       </div>
     </div>
   );
 };
 
-export default RoomHeader;
+export default BranchHeader;

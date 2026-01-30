@@ -1,12 +1,12 @@
 import React from "react";
-import { roomHooks } from "../../../hooks/useRoom";
-import RoomPostSkeleton from "../../shared/skeletons/RoomPostSkeleton";
+import { branchHooks } from "../../../hooks/useBranch";
+import BranchPostSkeleton from "../../shared/skeletons/BranchPostSkeleton";
 import type { ApiError } from "../../../types";
 import type { AxiosError } from "axios";
-import RoomPostCard from "../RoomPostCard";
-import CreateRoomPost from "../CreateRoomPost";
+import BranchPostCard from "../BranchPostCard";
+import CreateBranchPost from "../CreateBranchPost";
 
-const RoomPosts: React.FC = () => {
+const BranchPosts: React.FC = () => {
   const {
     isLoading,
     error,
@@ -14,13 +14,15 @@ const RoomPosts: React.FC = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = roomHooks.useRoomPosts();
+  } = branchHooks.useBranchPosts();
 
-  const { data: roomResponse } = roomHooks.useRoomDetails();
-  const roomMeta = roomResponse?.data.meta;
+  const { data: branchResponse } = branchHooks.useBranchDetails();
+  const branchMeta = branchResponse?.data.meta;
 
   const canPost =
-    roomMeta?.isRoomAdmin || roomMeta?.isAppOwner || roomMeta?.isAppAdmin;
+    branchMeta?.isBranchAdmin ||
+    branchMeta?.isAppOwner ||
+    branchMeta?.isAppAdmin;
 
   const posts = data?.pages.flatMap((page) => page.data.posts) || [];
 
@@ -28,7 +30,7 @@ const RoomPosts: React.FC = () => {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <RoomPostSkeleton key={i} />
+          <BranchPostSkeleton key={i} />
         ))}
       </div>
     );
@@ -51,13 +53,13 @@ const RoomPosts: React.FC = () => {
   return (
     <>
       {/* Create Post Card */}
-      {canPost && <CreateRoomPost />}
+      {canPost && <CreateBranchPost />}
 
       {/* Posts List */}
       {posts.length > 0 ? (
         <div className="space-y-3">
           {posts.map((item) => (
-            <RoomPostCard
+            <BranchPostCard
               key={item.post._id}
               post={item.post}
               meta={item.meta}
@@ -85,4 +87,4 @@ const RoomPosts: React.FC = () => {
   );
 };
 
-export default RoomPosts;
+export default BranchPosts;

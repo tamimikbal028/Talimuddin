@@ -14,17 +14,17 @@ import { formatPostDate, formatPostClock } from "../../utils/dateUtils";
 import SeparatorDot from "../shared/SeparatorDot";
 import PostContent from "../shared/PostContent";
 import type { Attachment, Post, PostMeta } from "../../types";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 import { useDropdown } from "../../hooks/useDropdown";
 import { ATTACHMENT_TYPES } from "../../constants";
 import confirm from "../../utils/sweetAlert";
 
-interface RoomPostCardProps {
+interface BranchPostCardProps {
   post: Post;
   meta: PostMeta;
 }
 
-const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
+const BranchPostCard: React.FC<BranchPostCardProps> = ({ post, meta }) => {
   const {
     isOpen: showMenu,
     openUpward,
@@ -40,13 +40,13 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
 
   // Post hooks
   const { mutate: deletePost, isPending: isDeleting } =
-    roomHooks.useDeleteRoomPost();
+    branchHooks.useDeleteBranchPost();
   const { mutate: updatePost, isPending: isUpdating } =
-    roomHooks.useUpdateRoomPost();
+    branchHooks.useUpdateBranchPost();
   const { mutate: toggleReadStatus, isPending: isTogglingRead } =
-    roomHooks.useToggleReadStatusRoomPost();
+    branchHooks.useToggleReadStatusBranchPost();
   const { mutate: toggleBookmark, isPending: isBookmarking } =
-    roomHooks.useToggleBookmarkRoomPost();
+    branchHooks.useToggleBookmarkBranchPost();
 
   const handleToggleBookmark = () => {
     toggleBookmark({ postId: post._id });
@@ -315,4 +315,4 @@ const RoomPostCard: React.FC<RoomPostCardProps> = ({ post, meta }) => {
   );
 };
 
-export default RoomPostCard;
+export default BranchPostCard;

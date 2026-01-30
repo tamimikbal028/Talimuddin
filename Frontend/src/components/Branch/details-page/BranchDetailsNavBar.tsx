@@ -1,17 +1,17 @@
 import React from "react";
 import { NavLink, useParams } from "react-router-dom";
-import { FaUsers, FaFolder, FaInfoCircle } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa";
 import { BsPostcard } from "react-icons/bs";
 
-const RoomDetailsNavBar: React.FC = () => {
-  const { roomId } = useParams<{ roomId: string }>();
-  const baseUrl = `/classroom/rooms/${roomId}`;
-  // Navigation tabs
+const BranchDetailsNavBar: React.FC = () => {
+  const { branchId } = useParams<{ branchId: string }>();
+  const baseUrl = `/classroom/branches/${branchId}`;
+
+  // Navigation tabs (Reduced as per previous step decisions, if we removed About/Files routes in BranchDetails.tsx, we should remove them here too.
+  // In Step 360 BranchDetails.tsx only has Posts and Members routes. So I should remove Files and About here.)
   const tabs = [
     { path: baseUrl, label: "Posts", icon: BsPostcard, end: true },
-    { path: `${baseUrl}/files`, label: "Files", icon: FaFolder, end: true },
     { path: `${baseUrl}/members`, label: "Members", icon: FaUsers, end: true },
-    { path: `${baseUrl}/about`, label: "About", icon: FaInfoCircle, end: true },
   ];
 
   return (
@@ -42,4 +42,4 @@ const RoomDetailsNavBar: React.FC = () => {
   );
 };
 
-export default RoomDetailsNavBar;
+export default BranchDetailsNavBar;

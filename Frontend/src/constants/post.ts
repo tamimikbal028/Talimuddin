@@ -18,9 +18,8 @@ export const ATTACHMENT_TYPES = {
   LINK: "LINK",
 };
 
-// 🎯 পোস্ট কোথায় হচ্ছে? (Location)
 export const POST_TARGET_MODELS = {
-  ROOM: "Room",
+  BRANCH: "Branch",
   USER: "User",
 };
 

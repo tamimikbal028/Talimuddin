@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCamera, FaCog, FaArrowLeft, FaInfoCircle } from "react-icons/fa";
+import { FaCamera, FaArrowLeft, FaInfoCircle } from "react-icons/fa";
 import PageLoader from "../Fallbacks/PageLoader";
-import { roomHooks } from "../../hooks/useRoom";
-import RoomPhotosTab from "../../components/ClassRoom/Edit/RoomPhotosTab";
-import RoomGeneralTab from "../../components/ClassRoom/Edit/RoomGeneralTab";
-import RoomSettingsTab from "../../components/ClassRoom/Edit/RoomSettingsTab";
+import { branchHooks } from "../../hooks/useBranch";
+import BranchPhotosTab from "../../components/Branch/Edit/BranchPhotosTab";
+import BranchGeneralTab from "../../components/Branch/Edit/BranchGeneralTab";
 
-type TabType = "photos" | "general" | "settings";
+type TabType = "photos" | "general";
 
 interface Tab {
   id: TabType;
@@ -18,42 +17,44 @@ interface Tab {
 const TABS: Tab[] = [
   { id: "photos", label: "Cover Image", icon: <FaCamera /> },
   { id: "general", label: "Basic Info", icon: <FaInfoCircle /> },
-  { id: "settings", label: "Room Settings", icon: <FaCog /> },
 ];
 
-const EditRoomPage: React.FC = () => {
+const EditBranchPage = () => {
   const navigate = useNavigate();
-  const { data: roomData, isLoading, error } = roomHooks.useRoomDetails();
+  const { data: branchData, isLoading, error } = branchHooks.useBranchDetails();
   const [activeTab, setActiveTab] = useState<TabType>("photos");
 
   if (isLoading) return <PageLoader />;
-  if (error || !roomData) {
+  if (error || !branchData) {
     return (
       <div className="animate-in fade-in zoom-in-95 flex h-[80vh] flex-col items-center justify-center gap-6 duration-500">
         <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-50 text-red-500">
           <FaInfoCircle className="text-4xl" />
         </div>
         <div className="text-center">
-          <h1 className="text-3xl font-black text-gray-900">Room Not Found</h1>
+          <h1 className="text-3xl font-black text-gray-900">
+            Branch Not Found
+          </h1>
           <p className="mt-2 font-medium text-gray-500">
-            The room you're trying to manage doesn't exist or has been removed.
+            The branch you're trying to manage doesn't exist or has been
+            removed.
           </p>
         </div>
         <button
           onClick={() => navigate("/classroom")}
           className="mt-4 rounded-xl bg-gray-900 px-8 py-3 font-bold text-white shadow-lg shadow-gray-200 transition-all hover:bg-gray-800 active:scale-95"
         >
-          Back to Rooms
+          Back to Branches
         </button>
       </div>
     );
   }
 
-  const { room, meta } = roomData.data;
+  const { branch, meta } = branchData.data;
 
-  // Security: Only creator and admin can access
-  if (!meta.isCreator && !meta.isAdmin) {
-    navigate(`/classroom/rooms/${room._id}`);
+  // Security: Only admin can access
+  if (!meta.isBranchAdmin && !meta.isAppOwner && !meta.isAppAdmin) {
+    navigate(`/classroom/branches/${branch._id}`);
     return null;
   }
 
@@ -66,7 +67,7 @@ const EditRoomPage: React.FC = () => {
           <div className="flex items-center justify-between border-b border-gray-100 py-5">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate(`/classroom/rooms/${room._id}`)}
+                onClick={() => navigate(`/classroom/branches/${branch._id}`)}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 hover:text-gray-900 active:scale-95"
                 aria-label="Go back"
               >
@@ -74,10 +75,10 @@ const EditRoomPage: React.FC = () => {
               </button>
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-gray-900">
-                  Manage Room
+                  Manage Branch
                 </h1>
                 <p className="text-xs font-semibold text-gray-500">
-                  {room.name}
+                  {branch.name}
                 </p>
               </div>
             </div>
@@ -107,14 +108,13 @@ const EditRoomPage: React.FC = () => {
       <div className="mx-auto max-w-4xl px-4 pt-10">
         <div className="flex flex-col gap-8">
           {activeTab === "photos" && (
-            <RoomPhotosTab coverImage={room.coverImage} />
+            <BranchPhotosTab coverImage={branch.coverImage} />
           )}
-          {activeTab === "general" && <RoomGeneralTab room={room} />}
-          {activeTab === "settings" && <RoomSettingsTab room={room} />}
+          {activeTab === "general" && <BranchGeneralTab branch={branch} />}
         </div>
       </div>
     </div>
   );
 };
 
-export default EditRoomPage;
+export default EditBranchPage;

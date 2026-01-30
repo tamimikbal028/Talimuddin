@@ -2,17 +2,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { FaSignInAlt } from "react-icons/fa";
-import { roomHooks } from "../../hooks/useRoom";
+import { branchHooks } from "../../hooks/useBranch";
 
-type JoinRoomFormValues = {
+type JoinBranchFormValues = {
   joinCode: string;
 };
 
-const JoinRoomPage: React.FC = () => {
+const JoinBranchPage: React.FC = () => {
   const navigate = useNavigate();
-  const { mutate: joinRoom, isPending } = roomHooks.useJoinRoom();
+  const { mutate: joinBranch, isPending } = branchHooks.useJoinBranch();
 
-  const { register, handleSubmit, formState } = useForm<JoinRoomFormValues>({
+  const { register, handleSubmit, formState } = useForm<JoinBranchFormValues>({
     defaultValues: {
       joinCode: "",
     },
@@ -20,11 +20,11 @@ const JoinRoomPage: React.FC = () => {
 
   const { errors } = formState;
 
-  const onSubmit = (data: JoinRoomFormValues) => {
-    joinRoom(data.joinCode, {
+  const onSubmit = (data: JoinBranchFormValues) => {
+    joinBranch(data.joinCode, {
       onSuccess: (response) => {
-        const roomId = response.data.roomId;
-        navigate(`/classroom/rooms/${roomId}`);
+        const branchId = response.data.branchId;
+        navigate(`/classroom/branches/${branchId}`);
       },
     });
   };
@@ -44,9 +44,9 @@ const JoinRoomPage: React.FC = () => {
           <FaSignInAlt className="h-6 w-6" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-gray-900">Join a Room</h3>
+          <h3 className="text-xl font-bold text-gray-900">Join a Branch</h3>
           <p className="mt-1 text-sm font-medium text-gray-500">
-            Enter the 6-character join code to join a room
+            Enter the 6-character join code to join a branch
           </p>
         </div>
       </div>
@@ -90,11 +90,11 @@ const JoinRoomPage: React.FC = () => {
           className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-600 to-green-700 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:from-green-700 hover:to-green-800 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <FaSignInAlt className="h-5 w-5" />
-          {isPending ? "Joining..." : "Join Room"}
+          {isPending ? "Joining..." : "Join Branch"}
         </button>
       </div>
     </form>
   );
 };
 
-export default JoinRoomPage;
+export default JoinBranchPage;

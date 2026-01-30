@@ -1,41 +1,30 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import type { RoomListItem } from "../../types";
+import type { BranchListItem } from "../../types";
 
 type Props = {
-  room: RoomListItem;
+  branch: BranchListItem;
 };
 
-const RoomCard: React.FC<Props> = ({ room }) => {
+const BranchCard: React.FC<Props> = ({ branch }) => {
   return (
     <div className="overflow-hidden rounded-lg shadow-sm">
       <Link
-        to={`/classroom/rooms/${room._id}`}
+        to={`/classroom/branches/${branch._id}`}
         className="relative block h-36 w-full bg-gray-100"
       >
         <img
-          src={room.coverImage}
-          alt={room.name}
+          src={branch.coverImage}
+          alt={branch.name}
           className="h-full w-full object-cover"
         />
 
         <div className="absolute top-0 left-0 w-full bg-black/85 p-2">
-          <p className="truncate font-medium text-white">{room.name}</p>
-          {room.creator && (
-            <p className="mt-0.5 truncate text-xs text-gray-200">
-              <Link
-                onClick={(e) => e.stopPropagation()}
-                to={`/profile/${room.creator.userName}`}
-                className="font-medium text-blue-300 hover:underline"
-              >
-                {room.creator.fullName}
-              </Link>
-            </p>
-          )}
+          <p className="truncate font-medium text-white">{branch.name}</p>
         </div>
       </Link>
     </div>
   );
 };
 
-export default RoomCard;
+export default BranchCard;
