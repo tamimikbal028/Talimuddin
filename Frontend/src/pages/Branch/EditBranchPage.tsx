@@ -41,7 +41,7 @@ const EditBranchPage = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/classroom")}
+          onClick={() => navigate("/branch")}
           className="mt-4 rounded-xl bg-gray-900 px-8 py-3 font-bold text-white shadow-lg shadow-gray-200 transition-all hover:bg-gray-800 active:scale-95"
         >
           Back to Branches
@@ -54,7 +54,7 @@ const EditBranchPage = () => {
 
   // Security: Only admin can access
   if (!meta.isBranchAdmin && !meta.isAppOwner && !meta.isAppAdmin) {
-    navigate(`/classroom/branches/${branch._id}`);
+    navigate(`/branch/branches/${branch._id}`);
     return null;
   }
 
@@ -67,7 +67,7 @@ const EditBranchPage = () => {
           <div className="flex items-center justify-between border-b border-gray-100 py-5">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => navigate(`/classroom/branches/${branch._id}`)}
+                onClick={() => navigate(`/branch/branches/${branch._id}`)}
                 className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200 hover:text-gray-900 active:scale-95"
                 aria-label="Go back"
               >

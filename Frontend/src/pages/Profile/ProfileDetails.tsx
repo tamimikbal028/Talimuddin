@@ -18,7 +18,6 @@ import { USER_TYPES } from "../../constants";
 interface OfficeHour {
   day: string;
   timeRange: string;
-  room?: string;
 }
 
 const ProfileDetails: React.FC = () => {
@@ -27,7 +26,8 @@ const ProfileDetails: React.FC = () => {
   const { user: currentUser } = authHooks.useUser();
 
   const profileUsername = username || currentUser?.userName;
-  const { data, isLoading, error } = profileHooks.useProfileDetails(profileUsername);
+  const { data, isLoading, error } =
+    profileHooks.useProfileDetails(profileUsername);
   const user = data?.user;
 
   if (isLoading) return <PageLoader />;
@@ -428,7 +428,7 @@ const ProfileDetails: React.FC = () => {
                         key={i}
                         className="text-base font-medium text-gray-800"
                       >
-                        {oh.day} - {oh.timeRange} {oh.room && `(${oh.room})`}
+                        {oh.day} - {oh.timeRange}
                       </p>
                     )
                   )}
@@ -442,6 +442,3 @@ const ProfileDetails: React.FC = () => {
 };
 
 export default ProfileDetails;
-
-
-

@@ -191,7 +191,7 @@ export const showQuickFileMenu = async (
 };
 
 /**
- * Member action menu (for Groups/Rooms)
+ * Member action menu (for Groups/Branches)
  *
  * @example
  * await showMemberMenu("John Doe", {
@@ -281,7 +281,7 @@ export const showPostMenu = async (callbacks: {
 };
 
 /**
- * Media/File options menu (for classroom media tab)
+ * Media/File options menu (for branch media tab)
  *
  * @example
  * await showMediaMenu(file, {

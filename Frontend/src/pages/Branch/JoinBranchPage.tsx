@@ -24,13 +24,13 @@ const JoinBranchPage: React.FC = () => {
     joinBranch(data.joinCode, {
       onSuccess: (response) => {
         const branchId = response.data.branchId;
-        navigate(`/classroom/branches/${branchId}`);
+        navigate(`/branch/branches/${branchId}`);
       },
     });
   };
 
   const handleCancel = () => {
-    navigate("/classroom");
+    navigate("/branch");
   };
 
   return (

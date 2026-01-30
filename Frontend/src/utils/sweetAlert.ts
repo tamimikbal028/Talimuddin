@@ -224,10 +224,10 @@ export const inputGroupName = () =>
     maxLength: 100,
   });
 
-export const inputRoomName = () =>
+export const inputBranchName = () =>
   showInput({
-    title: "Create New Room",
-    inputPlaceholder: "Enter room name",
+    title: "Create New Branch",
+    inputPlaceholder: "Enter branch name",
     confirmButtonText: "Create",
     maxLength: 100,
   });

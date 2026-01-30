@@ -21,7 +21,7 @@ const BranchDetails: React.FC = () => {
           {error?.message || "Branch Not Available"}
         </span>
         <Link
-          to="/classroom"
+          to="/branch"
           className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
         >
           <FaDoorOpen className="h-4 w-4" />

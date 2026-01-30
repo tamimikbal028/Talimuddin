@@ -1,17 +1,17 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
-import Header from "../components/ClassRoom/Header";
-import Rooms from "./ClassRoom/Rooms";
+import Header from "../components/Branch/BranchHeader";
+import Branches from "./Branch/Branches";
 import PageLoader from "./Fallbacks/PageLoader";
 
 // Lazy load pages
-const RoomDetails = lazy(() => import("./ClassRoom/RoomDetails"));
-const CreateRoomPage = lazy(() => import("./ClassRoom/CreateRoomPage"));
-const JoinRoomPage = lazy(() => import("./ClassRoom/JoinRoomPage"));
-const EditRoomPage = lazy(() => import("./ClassRoom/EditRoomPage"));
-const AllRooms = lazy(() => import("./ClassRoom/AllRooms"));
+const BranchDetails = lazy(() => import("./Branch/BranchDetails"));
+const CreateBranchPage = lazy(() => import("./Branch/CreateBranchPage"));
+const JoinBranchPage = lazy(() => import("./Branch/JoinBranchPage"));
+const EditBranchPage = lazy(() => import("./Branch/EditBranchPage"));
+const AllBranches = lazy(() => import("./Branch/AllBranches"));
 
-const ClassRoomLayout: React.FC = () => {
+const BranchLayout: React.FC = () => {
   return (
     <>
       <Header />
@@ -20,24 +20,24 @@ const ClassRoomLayout: React.FC = () => {
   );
 };
 
-const ClassRoom: React.FC = () => {
+const Branch: React.FC = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* With Header */}
-        <Route element={<ClassRoomLayout />}>
-          <Route index element={<Rooms />} />
-          <Route path="all" element={<AllRooms />} />
+        <Route element={<BranchLayout />}>
+          <Route index element={<Branches />} />
+          <Route path="all" element={<AllBranches />} />
         </Route>
 
         {/* Standalone Routes (No Header) */}
-        <Route path="createroom" element={<CreateRoomPage />} />
-        <Route path="joinroom" element={<JoinRoomPage />} />
-        <Route path="rooms/:roomId/edit" element={<EditRoomPage />} />
-        <Route path="rooms/:roomId/*" element={<RoomDetails />} />
+        <Route path="createbranch" element={<CreateBranchPage />} />
+        <Route path="joinbranch" element={<JoinBranchPage />} />
+        <Route path="branches/:branchId/edit" element={<EditBranchPage />} />
+        <Route path="branches/:branchId/*" element={<BranchDetails />} />
       </Routes>
     </Suspense>
   );
 };
 
-export default ClassRoom;
+export default Branch;

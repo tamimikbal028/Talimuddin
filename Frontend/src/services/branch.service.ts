@@ -1,5 +1,5 @@
 import api from "../lib/axios";
-import { ROOM_LIMIT, MEMBERS_LIMIT, POST_LIMIT } from "../constants";
+import { BRANCH_LIMIT, MEMBERS_LIMIT, POST_LIMIT } from "../constants";
 import type {
   CreateBranchResponse,
   MyBranchesResponse,
@@ -29,7 +29,7 @@ export const branchService = {
   },
   // Get My Branches
   getMyBranches: async (page: number): Promise<MyBranchesResponse> => {
-    const limit = ROOM_LIMIT; // Using same limit constant for now
+    const limit = BRANCH_LIMIT; // Using branch limit constant
     const response = await api.get<MyBranchesResponse>("/branches/myBranches", {
       params: { page, limit },
     });
@@ -38,7 +38,7 @@ export const branchService = {
 
   // Get All Branches
   getAllBranches: async (page: number): Promise<MyBranchesResponse> => {
-    const limit = ROOM_LIMIT;
+    const limit = BRANCH_LIMIT;
     const response = await api.get<MyBranchesResponse>(
       "/branches/allBranches",
       {

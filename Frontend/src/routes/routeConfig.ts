@@ -53,7 +53,7 @@ export const routes: RouteConfig[] = [
   },
 
   {
-    path: "/classroom/*",
+    path: "/branch/*",
     component: lazy(() => import("../pages/Branch")),
     requireAuth: true,
     title: "ClassRoom",
