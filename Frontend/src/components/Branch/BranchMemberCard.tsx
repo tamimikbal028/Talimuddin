@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import { BsThreeDots } from "react-icons/bs";
 import { FaUserShield, FaUserMinus } from "react-icons/fa";
@@ -16,7 +15,7 @@ const BranchMemberCard = ({
   member,
   isPendingRequest = false,
 }: BranchMemberCardProps) => {
-  const { user, meta } = member;
+  const { user, meta, isAdmin } = member;
   const {
     isOpen: showMenu,
     openUpward,
@@ -26,19 +25,10 @@ const BranchMemberCard = ({
     close: closeMenu,
   } = useDropdown();
 
-  // Branch management mutations
-  // Note: pending requests hooks may have been removed if features were removed.
-  // If they are missing from useBranch.ts, we should remove them here.
-  // Assuming they are still there or similar logic exists.
-  // In Step 232 I removed useAcceptJoinRequest, useRejectJoinRequest from useBranch.ts ?
-  // Let me check useBranch.ts content in memory or via view.
-  // I removed them. So I must remove them here too.
-
   const { mutate: removeMember } = branchHooks.useRemoveBranchMember();
   const { mutate: promoteMember } = branchHooks.usePromoteBranchMember();
   const { mutate: demoteMember } = branchHooks.useDemoteBranchMember();
 
-  // Check if 3-dot menu should show
   const canManage = meta.canManage;
 
   const handleRemove = async () => {
@@ -90,23 +80,13 @@ const BranchMemberCard = ({
   const institutionName = user.institution?.name || "No Institution";
 
   const getRoleBadge = () => {
-    // Creator role removed?
-    // Wait, in Step 225 I removed CREATOR from BRANCH_ROLES.
-    // But `meta.isCreator` might still exist in types?
-    // In `branch.types.ts` I defined `BranchMember` meta as:
-    // role: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
-    // isSelf: boolean; isAdmin: boolean; canManage: boolean;
-    // No `isCreator`.
-    // So I should check against `isAdmin` or if role === 'ADMIN'.
-
-    if (meta.isAdmin) {
+    if (isAdmin) {
       return (
         <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
           Admin
         </span>
       );
     }
-    // CR logic? Removed or didn't exist in new types.
     return null;
   };
 
@@ -157,17 +137,7 @@ const BranchMemberCard = ({
                 } animate-in fade-in zoom-in duration-200`}
               >
                 <div className="py-1">
-                  {/* Since CREATOR is gone, maybe logic is: check if I assume I am admin/owner and can demote other admins? 
-                      We don't strictly have a "Creator" role check anymore, just "Admin".
-                      But usually only an Owner/Creator can demote an Admin. 
-                      If I am AppOwner I can do anything.
-                      If I am BranchAdmin, can I demote other BranchAdmins? Probably not, unless I created it. 
-                      But we simplified roles. 
-                      Let's stick to simple: if `canManage` is true, show options. 
-                      `canManage` from backend should handle permission logic.
-                  */}
-
-                  {meta.role === "MEMBER" && (
+                  {!isAdmin && (
                     <button
                       onClick={handlePromote}
                       className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
@@ -176,7 +146,7 @@ const BranchMemberCard = ({
                       <span className="font-medium">Make Admin</span>
                     </button>
                   )}
-                  {meta.role === "ADMIN" && (
+                  {isAdmin && (
                     <button
                       onClick={handleDemote}
                       className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"

@@ -8,11 +8,13 @@ import { branchService } from "../services/branch.service";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
+import { authHooks } from "./useAuth";
 import type {
   ApiError,
   UpdateBranchData,
   BranchDetailsResponse,
   MyBranchesResponse,
+  BranchMembersResponse,
 } from "../types";
 import { postHooks } from "./common/usePost";
 
@@ -196,16 +198,42 @@ const useBranchPosts = () => {
 
 const useBranchMembers = () => {
   const { branchId } = useParams();
-  return useInfiniteQuery({
+  const { user: currentUser } = authHooks.useUser();
+
+  return useInfiniteQuery<BranchMembersResponse, AxiosError<ApiError>>({
     queryKey: ["branchMembers", branchId],
-    queryFn: ({ pageParam }) =>
-      branchService.getBranchMembers(branchId as string, pageParam as number),
+    queryFn: async ({ pageParam }) => {
+      const response = await branchService.getBranchMembers(
+        branchId as string,
+        pageParam as number
+      );
+
+      const isRequesterAdmin = response.data.meta.isRequesterAdmin;
+      const isAppAdmin =
+        currentUser?.userType === "OWNER" || currentUser?.userType === "ADMIN";
+
+      // Inject meta into each member to maintain compatibility with BranchMemberCard
+      response.data.members = response.data.members.map((member) => ({
+        ...member,
+        meta: {
+          isSelf: member.user._id === currentUser?._id,
+          isAdmin: member.isAdmin,
+          joinedAt: member.joinedAt,
+          canManage:
+            (isRequesterAdmin || isAppAdmin) &&
+            member.user._id !== currentUser?._id,
+          memberId: member.user._id,
+        },
+      }));
+
+      return response;
+    },
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.data.pagination;
       return page < totalPages ? page + 1 : undefined;
     },
-    enabled: !!branchId,
+    enabled: !!branchId && !!currentUser,
     staleTime: Infinity,
   });
 };

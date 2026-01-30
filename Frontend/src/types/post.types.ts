@@ -2,9 +2,9 @@ import { POST_TARGET_MODELS, POST_VISIBILITY } from "../constants/post";
 import type { Pagination } from "./common.types";
 
 export interface Attachment {
-  type: "IMAGE" | "VIDEO" | "PDF" | "DOC" | "LINK";
   url: string;
   name?: string;
+  size?: number;
 }
 
 // Post Details Type

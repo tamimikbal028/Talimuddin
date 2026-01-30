@@ -5,7 +5,6 @@ import {
   FaGlobe,
   FaUserFriends,
   FaLock,
-  FaBuilding,
   FaPoll,
   FaVideo,
 } from "react-icons/fa";
@@ -13,11 +12,7 @@ import type { IconType } from "react-icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  POST_VISIBILITY,
-  POST_TYPES,
-  POST_TARGET_MODELS,
-} from "../../constants/post";
+import { POST_VISIBILITY, POST_TARGET_MODELS } from "../../constants/post";
 import { authHooks } from "../../hooks/useAuth";
 import { profileHooks } from "../../hooks/useProfile";
 
@@ -30,7 +25,6 @@ const createProfilePostSchema = z.object({
   tags: z.string().optional(),
   visibility: z.enum([
     POST_VISIBILITY.PUBLIC,
-    POST_VISIBILITY.INTERNAL,
     POST_VISIBILITY.CONNECTIONS,
     POST_VISIBILITY.ONLY_ME,
   ]),
@@ -40,7 +34,8 @@ type CreateProfilePostFormData = z.infer<typeof createProfilePostSchema>;
 
 const CreateProfilePost: React.FC = () => {
   const { user: currentUser } = authHooks.useUser();
-  const { mutate: createProfilePost, isPending } = profileHooks.useCreateProfilePost();
+  const { mutate: createProfilePost, isPending } =
+    profileHooks.useCreateProfilePost();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {
@@ -74,12 +69,10 @@ const CreateProfilePost: React.FC = () => {
     createProfilePost(
       {
         content: data.content,
-        visibility: data.visibility,
+        visibility: data.visibility as "PUBLIC" | "CONNECTIONS" | "ONLY_ME",
         postOnId: currentUser?._id || "",
         postOnModel: POST_TARGET_MODELS.USER,
-        type: POST_TYPES.GENERAL,
         attachments: [],
-        pollOptions: [],
         tags: processedTags,
       },
       {
@@ -102,12 +95,6 @@ const CreateProfilePost: React.FC = () => {
       label: "Public",
       Icon: FaGlobe,
       show: true,
-    },
-    {
-      value: POST_VISIBILITY.INTERNAL,
-      label: "Internal",
-      Icon: FaBuilding,
-      show: false,
     },
     {
       value: POST_VISIBILITY.CONNECTIONS,
@@ -297,6 +284,3 @@ const CreateProfilePost: React.FC = () => {
 };
 
 export default CreateProfilePost;
-
-
-

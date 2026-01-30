@@ -1,6 +1,6 @@
 import type { User } from "./user.types";
 import type { Pagination } from "./common.types";
-import { BRANCH_TYPES, BRANCH_ROLES } from "../constants/branch";
+import { BRANCH_TYPES } from "../constants/branch";
 import type { PostResponseItem } from "./post.types";
 
 export interface Branch {
@@ -36,13 +36,12 @@ export interface MyBranchesResponse {
 // Branch Member (from getBranchMembers)
 export interface BranchMember {
   user: User;
+  isAdmin: boolean;
+  joinedAt: string;
   meta: {
-    memberId: string;
-    role: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
     isSelf: boolean;
-    isAdmin: boolean;
-    joinedAt: string;
     canManage: boolean;
+    memberId: string;
   };
 }
 
@@ -123,7 +122,7 @@ export interface BranchMembersResponse {
     members: BranchMember[];
     pagination: Pagination;
     meta: {
-      currentUserRole: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
+      isRequesterAdmin: boolean;
     };
   };
 }

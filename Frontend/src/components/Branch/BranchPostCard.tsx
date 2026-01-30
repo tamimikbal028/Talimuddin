@@ -16,7 +16,6 @@ import PostContent from "../shared/PostContent";
 import type { Attachment, Post, PostMeta } from "../../types";
 import { branchHooks } from "../../hooks/useBranch";
 import { useDropdown } from "../../hooks/useDropdown";
-import { ATTACHMENT_TYPES } from "../../constants";
 import confirm from "../../utils/sweetAlert";
 
 interface BranchPostCardProps {
@@ -93,8 +92,8 @@ const BranchPostCard: React.FC<BranchPostCardProps> = ({ post, meta }) => {
     );
   };
 
-  const images = post.attachments.filter(
-    (attachment: Attachment) => attachment.type === ATTACHMENT_TYPES.IMAGE
+  const images = post.attachments.filter((attachment: Attachment) =>
+    /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(attachment.url)
   );
 
   return (

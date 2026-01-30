@@ -67,6 +67,7 @@ const CreateBranchPost: React.FC = () => {
     createBranchPost(
       {
         ...data,
+        visibility: data.visibility as "PUBLIC" | "CONNECTIONS" | "ONLY_ME",
         postOnId: branchId,
         postOnModel: POST_TARGET_MODELS.BRANCH,
         attachments: [],
