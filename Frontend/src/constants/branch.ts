@@ -1,15 +1,9 @@
-export const ROOM_TYPES = {
-  MAIN_ROOM: "MAIN_ROOM",
-  SUB_ROOM: "SUB_ROOM",
+export const BRANCH_TYPES = {
+  MAIN_BRANCH: "MAIN_BRANCH",
+  SUB_BRANCH: "SUB_BRANCH",
 } as const;
 
-export const ROOM_ROLES = {
-  CREATOR: "CREATOR",
+export const BRANCH_ROLES = {
   ADMIN: "ADMIN",
   MEMBER: "MEMBER",
-} as const;
-
-export const ROOM_MEMBERSHIP_STATUS = {
-  JOINED: "JOINED",
-  PENDING: "PENDING",
 } as const;

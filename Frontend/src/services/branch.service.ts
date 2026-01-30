@@ -1,107 +1,100 @@
 import api from "../lib/axios";
 import { ROOM_LIMIT, MEMBERS_LIMIT, POST_LIMIT } from "../constants";
 import type {
-  CreateRoomResponse,
-  MyRoomsResponse,
-  RoomDetailsResponse,
-  JoinRoomResponse,
-  ToggleArchiveRoomResponse,
-  HideRoomResponse,
-  DeleteRoomResponse,
-  UpdateRoomResponse,
-  UpdateRoomData,
-  RoomPostsResponse,
-  RoomMembersResponse,
-  BaseRoomActionResponse,
-  RoomPendingRequestsResponse,
+  CreateBranchResponse,
+  MyBranchesResponse,
+  BranchDetailsResponse,
+  JoinBranchResponse,
+  DeleteBranchResponse,
+  UpdateBranchResponse,
+  UpdateBranchData,
+  BranchPostsResponse,
+  BranchMembersResponse,
+  BaseBranchActionResponse,
 } from "../types";
 
-export const roomService = {
-  // Create Room (owner only)
-  createRoom: async (roomData: {
+export const branchService = {
+  // Create Branch (owner only)
+  createBranch: async (branchData: {
     name: string;
     description?: string;
-    roomType: string;
-    parentRoomJoinCode?: string;
-  }): Promise<CreateRoomResponse> => {
-    const response = await api.post<CreateRoomResponse>("/rooms", roomData);
+    branchType: string;
+    parentBranchJoinCode?: string;
+  }): Promise<CreateBranchResponse> => {
+    const response = await api.post<CreateBranchResponse>(
+      "/branches",
+      branchData
+    );
     return response.data;
   },
-  // Get My Rooms
-  getMyRooms: async (page: number): Promise<MyRoomsResponse> => {
-    const limit = ROOM_LIMIT;
-    const response = await api.get<MyRoomsResponse>("/rooms/myRooms", {
+  // Get My Branches
+  getMyBranches: async (page: number): Promise<MyBranchesResponse> => {
+    const limit = ROOM_LIMIT; // Using same limit constant for now
+    const response = await api.get<MyBranchesResponse>("/branches/myBranches", {
       params: { page, limit },
     });
     return response.data;
   },
 
-  // Get All Rooms
-  getAllRooms: async (page: number): Promise<MyRoomsResponse> => {
+  // Get All Branches
+  getAllBranches: async (page: number): Promise<MyBranchesResponse> => {
     const limit = ROOM_LIMIT;
-    const response = await api.get<MyRoomsResponse>("/rooms/allRooms", {
-      params: { page, limit },
-    });
+    const response = await api.get<MyBranchesResponse>(
+      "/branches/allBranches",
+      {
+        params: { page, limit },
+      }
+    );
     return response.data;
   },
 
-  // Get Room Details
-  getRoomDetails: async (roomId: string): Promise<RoomDetailsResponse> => {
-    const response = await api.get<RoomDetailsResponse>(`/rooms/${roomId}`);
+  // Get Branch Details
+  getBranchDetails: async (
+    branchId: string
+  ): Promise<BranchDetailsResponse> => {
+    const response = await api.get<BranchDetailsResponse>(
+      `/branches/${branchId}`
+    );
     return response.data;
   },
 
-  // Join Room (by join code only)
-  joinRoom: async (joinCode: string): Promise<JoinRoomResponse> => {
-    const response = await api.post<JoinRoomResponse>("/rooms/join", {
+  // Join Branch (by join code only)
+  joinBranch: async (joinCode: string): Promise<JoinBranchResponse> => {
+    const response = await api.post<JoinBranchResponse>("/branches/join", {
       joinCode,
     });
     return response.data;
   },
 
-  // Toggle Archive Room (Creator only)
-  toggleArchiveRoom: async (
-    roomId: string
-  ): Promise<ToggleArchiveRoomResponse> => {
-    const response = await api.patch<ToggleArchiveRoomResponse>(
-      `/rooms/${roomId}/archive`
+  // Delete Branch (Creator only)
+  deleteBranch: async (branchId: string): Promise<DeleteBranchResponse> => {
+    const response = await api.delete<DeleteBranchResponse>(
+      `/branches/${branchId}`
     );
     return response.data;
   },
 
-  // Delete Room (Creator only)
-  deleteRoom: async (roomId: string): Promise<DeleteRoomResponse> => {
-    const response = await api.delete<DeleteRoomResponse>(`/rooms/${roomId}`);
-    return response.data;
-  },
-
-  // Hide Room (Member only)
-  hideRoom: async (roomId: string): Promise<HideRoomResponse> => {
-    const response = await api.patch<HideRoomResponse>(`/rooms/${roomId}/hide`);
-    return response.data;
-  },
-
-  // Update Room (Creator or Admin)
-  updateRoom: async (
-    roomId: string,
-    updateData: UpdateRoomData
-  ): Promise<UpdateRoomResponse> => {
-    const response = await api.patch<UpdateRoomResponse>(
-      `/rooms/${roomId}`,
+  // Update Branch (Creator or Admin)
+  updateBranch: async (
+    branchId: string,
+    updateData: UpdateBranchData
+  ): Promise<UpdateBranchResponse> => {
+    const response = await api.patch<UpdateBranchResponse>(
+      `/branches/${branchId}`,
       updateData
     );
     return response.data;
   },
 
-  // Update Room Cover Image (Creator or Admin)
-  updateRoomCoverImage: async (
-    roomId: string,
+  // Update Branch Cover Image (Creator or Admin)
+  updateBranchCoverImage: async (
+    branchId: string,
     coverImage: File
-  ): Promise<UpdateRoomResponse> => {
+  ): Promise<UpdateBranchResponse> => {
     const formData = new FormData();
     formData.append("coverImage", coverImage);
-    const response = await api.patch<UpdateRoomResponse>(
-      `/rooms/${roomId}/cover-image`,
+    const response = await api.patch<UpdateBranchResponse>(
+      `/branches/${branchId}/cover-image`,
       formData,
       {
         headers: {
@@ -112,14 +105,14 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Room Posts
-  getRoomPosts: async (
-    roomId: string,
+  // Get Branch Posts
+  getBranchPosts: async (
+    branchId: string,
     page: number
-  ): Promise<RoomPostsResponse> => {
+  ): Promise<BranchPostsResponse> => {
     const limit = POST_LIMIT;
-    const response = await api.get<RoomPostsResponse>(
-      `/rooms/${roomId}/posts`,
+    const response = await api.get<BranchPostsResponse>(
+      `/branches/${branchId}/posts`,
       {
         params: { page, limit },
       }
@@ -127,14 +120,14 @@ export const roomService = {
     return response.data;
   },
 
-  // Get Room Members
-  getRoomMembers: async (
-    roomId: string,
+  // Get Branch Members
+  getBranchMembers: async (
+    branchId: string,
     page: number
-  ): Promise<RoomMembersResponse> => {
+  ): Promise<BranchMembersResponse> => {
     const limit = MEMBERS_LIMIT;
-    const response = await api.get<RoomMembersResponse>(
-      `/rooms/${roomId}/members`,
+    const response = await api.get<BranchMembersResponse>(
+      `/branches/${branchId}/members`,
       {
         params: { page, limit },
       }
@@ -142,111 +135,43 @@ export const roomService = {
     return response.data;
   },
 
-  // Leave Room (Member or Admin, not Creator)
-  leaveRoom: async (roomId: string): Promise<BaseRoomActionResponse> => {
-    const response = await api.delete<BaseRoomActionResponse>(
-      `/rooms/${roomId}/leave`
-    );
-    return response.data;
-  },
-
-  // Cancel Join Request
-  cancelJoinRequest: async (
-    roomId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.delete<BaseRoomActionResponse>(
-      `/rooms/${roomId}/cancel-request`
-    );
-    return response.data;
-  },
-
-  // Accept Join Request (Creator or Admin)
-  acceptJoinRequest: async (
-    roomId: string,
-    userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.patch<BaseRoomActionResponse>(
-      `/rooms/${roomId}/accept/${userId}`
-    );
-    return response.data;
-  },
-
-  // Reject Join Request (Creator or Admin)
-  rejectJoinRequest: async (
-    roomId: string,
-    userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.patch<BaseRoomActionResponse>(
-      `/rooms/${roomId}/reject/${userId}`
-    );
-    return response.data;
-  },
-
-  // Ban Member (Creator or Admin)
-  banMember: async (
-    roomId: string,
-    userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.patch<BaseRoomActionResponse>(
-      `/rooms/${roomId}/ban/${userId}`
+  // Leave Branch (Member or Admin, not Creator)
+  leaveBranch: async (branchId: string): Promise<BaseBranchActionResponse> => {
+    const response = await api.delete<BaseBranchActionResponse>(
+      `/branches/${branchId}/leave`
     );
     return response.data;
   },
 
   // Remove Member (Creator or Admin)
   removeMember: async (
-    roomId: string,
+    branchId: string,
     userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.delete<BaseRoomActionResponse>(
-      `/rooms/${roomId}/remove/${userId}`
+  ): Promise<BaseBranchActionResponse> => {
+    const response = await api.delete<BaseBranchActionResponse>(
+      `/branches/${branchId}/remove/${userId}`
     );
     return response.data;
   },
 
   // Promote Member to Admin (Creator only)
   promoteMember: async (
-    roomId: string,
+    branchId: string,
     userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.patch<BaseRoomActionResponse>(
-      `/rooms/${roomId}/promote/${userId}`
+  ): Promise<BaseBranchActionResponse> => {
+    const response = await api.patch<BaseBranchActionResponse>(
+      `/branches/${branchId}/promote/${userId}`
     );
     return response.data;
   },
 
   // Demote Admin to Member (Creator only)
   demoteMember: async (
-    roomId: string,
+    branchId: string,
     userId: string
-  ): Promise<BaseRoomActionResponse> => {
-    const response = await api.patch<BaseRoomActionResponse>(
-      `/rooms/${roomId}/demote/${userId}`
-    );
-    return response.data;
-  },
-
-  // Get Room Pending Requests (Creator or Admin)
-  getRoomPendingRequests: async (
-    roomId: string,
-    page: number
-  ): Promise<RoomPendingRequestsResponse> => {
-    const limit = MEMBERS_LIMIT;
-    const response = await api.get<RoomPendingRequestsResponse>(
-      `/rooms/${roomId}/requests`,
-      {
-        params: { page, limit },
-      }
-    );
-    return response.data;
-  },
-
-  rejectRoomPost: async (
-    roomId: string,
-    postId: string
-  ): Promise<{ status: string }> => {
-    const response = await api.patch<{ status: string }>(
-      `/rooms/${roomId}/posts/${postId}/reject`
+  ): Promise<BaseBranchActionResponse> => {
+    const response = await api.patch<BaseBranchActionResponse>(
+      `/branches/${branchId}/demote/${userId}`
     );
     return response.data;
   },

@@ -1,13 +1,14 @@
 import type { User } from "./user.types";
 import type { Pagination } from "./common.types";
-import { ROOM_TYPES, ROOM_ROLES } from "../constants/room";
+import { BRANCH_TYPES, BRANCH_ROLES } from "../constants/branch";
+import type { PostResponseItem } from "./post.types";
 
-export interface Room {
+export interface Branch {
   _id: string;
   name: string;
   description?: string;
   coverImage: string;
-  roomType: (typeof ROOM_TYPES)[keyof typeof ROOM_TYPES];
+  branchType: (typeof BRANCH_TYPES)[keyof typeof BRANCH_TYPES];
   joinCode: string;
   isDeleted: boolean;
   membersCount: number;
@@ -16,28 +17,28 @@ export interface Room {
   updatedAt: string;
 }
 
-export interface MyRoomsResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    rooms: RoomListItem[];
-    pagination: Pagination;
-  };
-}
-
-export interface RoomListItem {
+export interface BranchListItem {
   _id: string;
   name: string;
   coverImage: string;
 }
 
-// Room Member (from getRoomMembers)
-export interface RoomMember {
+export interface MyBranchesResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    branches: BranchListItem[];
+    pagination: Pagination;
+  };
+}
+
+// Branch Member (from getBranchMembers)
+export interface BranchMember {
   user: User;
   meta: {
     memberId: string;
-    role: (typeof ROOM_ROLES)[keyof typeof ROOM_ROLES];
+    role: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
     isSelf: boolean;
     isAdmin: boolean;
     joinedAt: string;
@@ -45,99 +46,66 @@ export interface RoomMember {
   };
 }
 
-// Update Room Data (for updateRoom API)
-export interface UpdateRoomData {
+// Update Branch Data (for updateBranch API)
+export interface UpdateBranchData {
   name: string;
   description?: string;
-  roomType: string;
+  branchType: string;
 }
 
-// Room Request (from getRoomPendingRequests)
-export interface RoomRequest {
-  user: User;
-  meta: {
-    memberId: string;
-    requestedAt: string;
-  };
-}
-
-export interface RoomDetailsResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    room: Room;
-    meta: RoomDetailsMeta;
-  };
-}
-
-export interface RoomDetailsMeta {
+export interface BranchDetailsMeta {
   isMember: boolean;
-  isRoomAdmin: boolean;
+  isBranchAdmin: boolean;
   isAppOwner: boolean;
   isAppAdmin: boolean;
 }
 
-export interface CreateRoomResponse {
+export interface BranchDetailsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: {
+    branch: Branch;
+    meta: BranchDetailsMeta;
+  };
+}
+
+export interface CreateBranchResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: null;
 }
 
-export interface JoinRoomResponse {
+export interface JoinBranchResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
-    roomId: string;
-    roomName: string;
-    isPending: boolean;
+    branchId: string;
+    branchName: string;
   };
 }
 
-export interface ToggleArchiveRoomResponse {
+export interface DeleteBranchResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
-    roomId: string;
-    isArchived: boolean;
+    branchId: string;
   };
 }
 
-export interface HideRoomResponse {
+export interface UpdateBranchResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
-    roomId: string;
-    isHidden: boolean;
+    branch: Branch;
   };
 }
 
-export interface DeleteRoomResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    roomId: string;
-  };
-}
-
-export interface UpdateRoomResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    room: Room;
-  };
-}
-
-// Import PostResponseItem for room posts
-import type { PostResponseItem } from "./post.types";
-
-export interface RoomPostsResponse {
+export interface BranchPostsResponse {
   statusCode: number;
   success: boolean;
   message: string;
@@ -147,34 +115,24 @@ export interface RoomPostsResponse {
   };
 }
 
-export interface RoomMembersResponse {
+export interface BranchMembersResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
-    members: RoomMember[];
+    members: BranchMember[];
     pagination: Pagination;
     meta: {
-      currentUserRole: (typeof ROOM_ROLES)[keyof typeof ROOM_ROLES];
+      currentUserRole: (typeof BRANCH_ROLES)[keyof typeof BRANCH_ROLES];
     };
   };
 }
 
-export interface BaseRoomActionResponse {
+export interface BaseBranchActionResponse {
   statusCode: number;
   success: boolean;
   message: string;
   data: {
-    roomId: string;
-  };
-}
-
-export interface RoomPendingRequestsResponse {
-  statusCode: number;
-  success: boolean;
-  message: string;
-  data: {
-    requests: RoomRequest[];
-    pagination: Pagination;
+    branchId: string;
   };
 }

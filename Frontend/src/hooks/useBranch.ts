@@ -4,44 +4,43 @@ import {
   useQueryClient,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import { roomService } from "../services/room.service";
+import { branchService } from "../services/branch.service";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import type { AxiosError } from "axios";
 import type {
   ApiError,
-  UpdateRoomData,
-  RoomDetailsResponse,
-  MyRoomsResponse,
+  UpdateBranchData,
+  BranchDetailsResponse,
+  MyBranchesResponse,
 } from "../types";
 import { postHooks } from "./common/usePost";
 
-const useCreateRoom = () => {
+const useCreateBranch = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (roomData: {
+    mutationFn: (branchData: {
       name: string;
       description?: string;
-      roomType: string;
-      parentRoomJoinCode?: string;
-    }) => roomService.createRoom(roomData),
+      branchType: string;
+      parentBranchJoinCode?: string;
+    }) => branchService.createBranch(branchData),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      navigate("/classroom");
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to create room");
+      toast.error(error?.response?.data?.message || "Failed to create branch");
     },
   });
 };
 
-const useMyRooms = () => {
-  return useInfiniteQuery<MyRoomsResponse, AxiosError<ApiError>>({
-    queryKey: ["myRooms", "infinite"],
-    queryFn: ({ pageParam }) => roomService.getMyRooms(pageParam as number),
+const useMyBranches = () => {
+  return useInfiniteQuery<MyBranchesResponse, AxiosError<ApiError>>({
+    queryKey: ["myBranches", "infinite"],
+    queryFn: ({ pageParam }) =>
+      branchService.getMyBranches(pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.data.pagination;
@@ -51,10 +50,11 @@ const useMyRooms = () => {
   });
 };
 
-const useAllRooms = () => {
-  return useInfiniteQuery<MyRoomsResponse, AxiosError<ApiError>>({
-    queryKey: ["allRooms", "infinite"],
-    queryFn: ({ pageParam }) => roomService.getAllRooms(pageParam as number),
+const useAllBranches = () => {
+  return useInfiniteQuery<MyBranchesResponse, AxiosError<ApiError>>({
+    queryKey: ["allBranches", "infinite"],
+    queryFn: ({ pageParam }) =>
+      branchService.getAllBranches(pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.data.pagination;
@@ -64,199 +64,195 @@ const useAllRooms = () => {
   });
 };
 
-const useRoomDetails = () => {
-  const { roomId } = useParams();
-  return useQuery<RoomDetailsResponse, AxiosError<ApiError>>({
-    queryKey: ["roomDetails", roomId],
-    queryFn: () => roomService.getRoomDetails(roomId as string),
-    enabled: !!roomId,
+const useBranchDetails = () => {
+  const { branchId } = useParams();
+  return useQuery<BranchDetailsResponse, AxiosError<ApiError>>({
+    queryKey: ["branchDetails", branchId],
+    queryFn: () => branchService.getBranchDetails(branchId as string),
+    enabled: !!branchId,
     staleTime: 1000 * 60 * 10, // 10 minutes
     retry: 1,
   });
 };
 
-const useJoinRoom = () => {
+const useJoinBranch = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (joinCode: string) => roomService.joinRoom(joinCode),
+    mutationFn: (joinCode: string) => branchService.joinBranch(joinCode),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
+      queryClient.invalidateQueries({ queryKey: ["branchDetails"] });
 
-      // Navigate to room details
-      const roomId = data.data.roomId;
-      if (roomId) {
-        navigate(`/classroom/rooms/${roomId}`);
+      // Navigate to branch details
+      const branchId = data.data.branchId;
+      if (branchId) {
+        navigate(`/classroom/branches/${branchId}`);
       }
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to join room");
+      toast.error(error?.response?.data?.message || "Failed to join branch");
     },
   });
 };
 
-const useDeleteRoom = () => {
+const useDeleteBranch = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (roomId: string) => roomService.deleteRoom(roomId),
+    mutationFn: (branchId: string) => branchService.deleteBranch(branchId),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      navigate("/classroom");
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
+      // navigate("/classroom");
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to delete room");
+      toast.error(error?.response?.data?.message || "Failed to delete branch");
     },
   });
 };
 
-const useLeaveRoom = () => {
+const useLeaveBranch = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: (roomId: string) => roomService.leaveRoom(roomId),
+    mutationFn: (branchId: string) => branchService.leaveBranch(branchId),
     onSuccess: (data) => {
       toast.success(data.message);
 
-      // Invalidate all room queries
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
+      // Invalidate all branch queries
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
 
-      // Navigate back to classroom
-      navigate("/classroom");
+      // Navigate back
+      // navigate("/classroom");
     },
     onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to leave room");
+      toast.error(error?.response?.data?.message || "Failed to leave branch");
     },
   });
 };
 
-const useUpdateRoomDetails = () => {
-  const { roomId } = useParams();
+const useUpdateBranchDetails = () => {
+  const { branchId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (updateData: UpdateRoomData) =>
-      roomService.updateRoom(roomId as string, updateData),
+    mutationFn: (updateData: UpdateBranchData) =>
+      branchService.updateBranch(branchId as string, updateData),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["branchDetails"] });
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(
-        error?.response?.data?.message || "Failed to update room details"
+        error?.response?.data?.message || "Failed to update branch details"
       );
     },
   });
 };
 
-const useUpdateRoomCoverImage = () => {
-  const { roomId } = useParams();
+const useUpdateBranchCoverImage = () => {
+  const { branchId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (coverImage: File) =>
-      roomService.updateRoomCoverImage(roomId as string, coverImage),
+      branchService.updateBranchCoverImage(branchId as string, coverImage),
     onSuccess: (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["branchDetails"] });
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(
-        error?.response?.data?.message || "Failed to update room cover image"
+        error?.response?.data?.message || "Failed to update branch cover image"
       );
     },
   });
 };
 
 // ====================================
-// Room Posts & Members
+// Branch Posts & Members
 // ====================================
 
-const useRoomPosts = () => {
-  const { roomId } = useParams();
+const useBranchPosts = () => {
+  const { branchId } = useParams();
   return useInfiniteQuery({
-    queryKey: ["roomPosts", roomId],
+    queryKey: ["branchPosts", branchId],
     queryFn: ({ pageParam }) =>
-      roomService.getRoomPosts(roomId as string, pageParam as number),
+      branchService.getBranchPosts(branchId as string, pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.data.pagination;
       return page < totalPages ? page + 1 : undefined;
     },
-    enabled: !!roomId,
+    enabled: !!branchId,
     staleTime: 1000 * 60 * 1, // 1 minute
   });
 };
 
-const useRoomMembers = () => {
-  const { roomId } = useParams();
+const useBranchMembers = () => {
+  const { branchId } = useParams();
   return useInfiniteQuery({
-    queryKey: ["roomMembers", roomId],
+    queryKey: ["branchMembers", branchId],
     queryFn: ({ pageParam }) =>
-      roomService.getRoomMembers(roomId as string, pageParam as number),
+      branchService.getBranchMembers(branchId as string, pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => {
       const { page, totalPages } = lastPage.data.pagination;
       return page < totalPages ? page + 1 : undefined;
     },
-    enabled: !!roomId,
+    enabled: !!branchId,
     staleTime: Infinity,
   });
 };
 
-// Room Post Actions - Using Common Hooks
-const useCreateRoomPost = () => {
-  const { roomId } = useParams();
+// Branch Post Actions - Using Common Hooks
+const useCreateBranchPost = () => {
+  const { branchId } = useParams();
   return postHooks.useCreatePost({
     invalidateKey: [
-      ["roomPosts", roomId],
-      ["roomDetails", roomId],
+      ["branchPosts", branchId],
+      ["branchDetails", branchId],
     ],
   });
 };
 
-const useDeleteRoomPost = () => {
-  const { roomId } = useParams();
+const useDeleteBranchPost = () => {
+  const { branchId } = useParams();
   return postHooks.useDeletePost({
-    queryKey: ["roomPosts", roomId],
+    queryKey: ["branchPosts", branchId],
     invalidateKey: [
-      ["roomPosts", roomId],
-      ["roomDetails", roomId],
+      ["branchPosts", branchId],
+      ["branchDetails", branchId],
     ],
   });
 };
 
-const useUpdateRoomPost = () => {
-  const { roomId } = useParams();
+const useUpdateBranchPost = () => {
+  const { branchId } = useParams();
   return postHooks.useUpdatePost({
-    queryKey: ["roomPosts", roomId],
-    invalidateKey: ["roomPosts", roomId],
+    queryKey: ["branchPosts", branchId],
+    invalidateKey: ["branchPosts", branchId],
   });
 };
 
-const useToggleReadStatusRoomPost = () => {
-  const { roomId } = useParams();
+const useToggleReadStatusBranchPost = () => {
+  const { branchId } = useParams();
   return postHooks.useToggleReadStatus({
-    queryKey: [["roomPosts", roomId]],
+    queryKey: [["branchPosts", branchId]],
     invalidateKey: [],
   });
 };
 
-const useToggleBookmarkRoomPost = () => {
-  const { roomId } = useParams();
+const useToggleBookmarkBranchPost = () => {
+  const { branchId } = useParams();
   return postHooks.useToggleBookmark({
-    queryKey: ["roomPosts", roomId],
-    invalidateKey: ["roomPosts", roomId],
+    queryKey: ["branchPosts", branchId],
+    invalidateKey: ["branchPosts", branchId],
   });
 };
 
@@ -264,67 +260,20 @@ const useToggleBookmarkRoomPost = () => {
 // Join Request Management
 // ====================================
 
-const useAcceptJoinRequest = () => {
-  const { roomId } = useParams();
+const useRemoveBranchMember = () => {
+  const { branchId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ userId }: { userId: string }) =>
-      roomService.acceptJoinRequest(roomId as string, userId),
+      branchService.removeMember(branchId as string, userId),
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({
-        queryKey: ["roomPendingRequests", roomId],
+        queryKey: ["branchMembers", branchId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["roomDetails", roomId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["roomMembers", roomId],
-      });
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to accept request");
-    },
-  });
-};
-
-const useRejectJoinRequest = () => {
-  const { roomId } = useParams();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ userId }: { userId: string }) =>
-      roomService.rejectJoinRequest(roomId as string, userId),
-    onSuccess: (response) => {
-      toast.success(response.message);
-      queryClient.invalidateQueries({
-        queryKey: ["roomPendingRequests", roomId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["roomDetails", roomId],
-      });
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message || "Failed to reject request");
-    },
-  });
-};
-
-const useRemoveRoomMember = () => {
-  const { roomId } = useParams();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ userId }: { userId: string }) =>
-      roomService.removeMember(roomId as string, userId),
-    onSuccess: (response) => {
-      toast.success(response.message);
-      queryClient.invalidateQueries({
-        queryKey: ["roomMembers", roomId],
-      });
-      queryClient.invalidateQueries({
-        queryKey: ["roomDetails", roomId],
+        queryKey: ["branchDetails", branchId],
       });
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -333,17 +282,17 @@ const useRemoveRoomMember = () => {
   });
 };
 
-const usePromoteRoomMember = () => {
-  const { roomId } = useParams();
+const usePromoteBranchMember = () => {
+  const { branchId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ userId }: { userId: string }) =>
-      roomService.promoteMember(roomId as string, userId),
+      branchService.promoteMember(branchId as string, userId),
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({
-        queryKey: ["roomMembers", roomId],
+        queryKey: ["branchMembers", branchId],
       });
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -352,17 +301,17 @@ const usePromoteRoomMember = () => {
   });
 };
 
-const useDemoteRoomMember = () => {
-  const { roomId } = useParams();
+const useDemoteBranchMember = () => {
+  const { branchId } = useParams();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ userId }: { userId: string }) =>
-      roomService.demoteMember(roomId as string, userId),
+      branchService.demoteMember(branchId as string, userId),
     onSuccess: (response) => {
       toast.success(response.message);
       queryClient.invalidateQueries({
-        queryKey: ["roomMembers", roomId],
+        queryKey: ["branchMembers", branchId],
       });
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -371,51 +320,32 @@ const useDemoteRoomMember = () => {
   });
 };
 
-const useRoomPendingRequests = () => {
-  const { roomId } = useParams();
-  return useInfiniteQuery({
-    queryKey: ["roomPendingRequests", roomId],
-    queryFn: ({ pageParam }) =>
-      roomService.getRoomPendingRequests(roomId as string, pageParam as number),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) => {
-      const { page, totalPages } = lastPage.data.pagination;
-      return page < totalPages ? page + 1 : undefined;
-    },
-    enabled: !!roomId,
-    staleTime: Infinity,
-  });
-};
-
-const roomHooks = {
-  useCreateRoom,
-  useMyRooms,
-  useAllRooms,
-  useRoomDetails,
-  useJoinRoom,
-  useDeleteRoom,
-  useLeaveRoom,
-  useUpdateRoomDetails,
-  useUpdateRoomCoverImage,
+const branchHooks = {
+  useCreateBranch,
+  useMyBranches,
+  useAllBranches,
+  useBranchDetails,
+  useJoinBranch,
+  useDeleteBranch,
+  useLeaveBranch,
+  useUpdateBranchDetails,
+  useUpdateBranchCoverImage,
 
   // Posts & Members
-  useRoomPosts,
-  useRoomMembers,
-  useRoomPendingRequests,
+  useBranchPosts,
+  useBranchMembers,
 
   // Post Actions
-  useCreateRoomPost,
-  useDeleteRoomPost,
-  useUpdateRoomPost,
-  useToggleReadStatusRoomPost,
-  useToggleBookmarkRoomPost,
+  useCreateBranchPost,
+  useDeleteBranchPost,
+  useUpdateBranchPost,
+  useToggleReadStatusBranchPost,
+  useToggleBookmarkBranchPost,
 
   // Join Request Management
-  useAcceptJoinRequest,
-  useRejectJoinRequest,
-  useRemoveRoomMember,
-  usePromoteRoomMember,
-  useDemoteRoomMember,
+  useRemoveBranchMember,
+  usePromoteBranchMember,
+  useDemoteBranchMember,
 } as const;
 
-export { roomHooks };
+export { branchHooks };
