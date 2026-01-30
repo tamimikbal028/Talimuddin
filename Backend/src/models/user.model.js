@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
     userType: {
       type: String,
       enum: Object.values(USER_TYPES),
-      default: USER_TYPES.STUDENT,
+      default: USER_TYPES.USER,
       index: true,
     },
     accountStatus: {

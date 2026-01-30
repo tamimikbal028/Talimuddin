@@ -48,7 +48,6 @@ export const registerUserService = async (userData) => {
     userType,
     agreeToTerms,
     termsAgreedAt: new Date(),
-    isStudentEmail: false,
   };
 
   const user = await User.create(userPayload);
@@ -211,16 +210,13 @@ export const updateAcademicProfileService = async (
     department: effectiveDepartment,
   };
 
-  if (userType === USER_TYPES.STUDENT) {
-    if (session) academicInfoPayload.session = session;
-    if (section !== undefined) academicInfoPayload.section = section;
-    if (studentId !== undefined) academicInfoPayload.studentId = studentId;
-  } else if (userType === USER_TYPES.TEACHER) {
-    if (teacherId !== undefined) academicInfoPayload.teacherId = teacherId;
-    if (rank !== undefined) academicInfoPayload.rank = rank;
-    if (officeHours !== undefined)
-      academicInfoPayload.officeHours = officeHours;
-  }
+  // Since all users are now USER type, we handle all academic info fields
+  if (session) academicInfoPayload.session = session;
+  if (section !== undefined) academicInfoPayload.section = section;
+  if (studentId !== undefined) academicInfoPayload.studentId = studentId;
+  if (teacherId !== undefined) academicInfoPayload.teacherId = teacherId;
+  if (rank !== undefined) academicInfoPayload.rank = rank;
+  if (officeHours !== undefined) academicInfoPayload.officeHours = officeHours;
 
   const user = await User.findByIdAndUpdate(
     userId,

@@ -38,11 +38,10 @@ const userRegisterSchema = Joi.object({
   // 🔥 CRITICAL SECURITY FIX 🔥
   // এখানে আমরা whitelist করে দিচ্ছি। এর বাইরে কিছু পাঠালেই Error খাবে।
   userType: Joi.string()
-    .valid(USER_TYPES.STUDENT, USER_TYPES.TEACHER) // ONLY THESE TWO ALLOWED
+    .valid(USER_TYPES.USER) // ONLY USER ALLOWED
     .required()
     .messages({
-      "any.only":
-        "Security Alert: You can only register as STUDENT or TEACHER.",
+      "any.only": "Security Alert: You can only register as USER.",
     }),
   // ✅ Real World Safety: Backend এও Terms Agreement চেক করা
   agreeToTerms: Joi.boolean().valid(true).required().messages({

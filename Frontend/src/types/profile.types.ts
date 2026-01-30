@@ -31,37 +31,3 @@ export interface UpdateGeneralData {
   skills?: string[];
   interests?: string[];
 }
-
-/**
- * PATCH /users/update-academic request body
- * Student fields
- */
-export interface UpdateStudentAcademicData {
-  institution?: string; // ObjectId - only for non-verified users
-  department?: string; // ObjectId - only for non-verified users
-  session?: string;
-  currentSemester?: number;
-  section?: string;
-  studentId?: string;
-}
-
-/**
- * PATCH /users/update-academic request body
- * Teacher fields
- */
-export interface UpdateTeacherAcademicData {
-  institution?: string; // ObjectId - only for non-verified users
-  department?: string; // ObjectId - only for non-verified users
-  teacherId?: string;
-  rank?: string;
-  officeHours?: {
-    day: string;
-    timeRange: string;
-    room: string;
-  }[];
-}
-
-// Combined academic update type
-export type UpdateAcademicData =
-  | UpdateStudentAcademicData
-  | UpdateTeacherAcademicData;
