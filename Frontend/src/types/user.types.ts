@@ -121,6 +121,5 @@ export interface RegisterData {
   email: string;
   userName: string;
   password: string;
-  userType: UserType;
   agreeToTerms: boolean;
 }

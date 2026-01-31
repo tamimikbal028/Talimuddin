@@ -35,13 +35,13 @@ const userRegisterSchema = Joi.object({
       "string.empty": "Username is required.",
     }),
 
-  // 🔥 CRITICAL SECURITY FIX 🔥
-  // এখানে আমরা whitelist করে দিচ্ছি। এর বাইরে কিছু পাঠালেই Error খাবে।
+  // userType is optional, will default to USER in service
   userType: Joi.string()
-    .valid(USER_TYPES.USER) // ONLY USER ALLOWED
-    .required()
+    .valid(USER_TYPES.USER)
+    .optional()
+    .default(USER_TYPES.USER)
     .messages({
-      "any.only": "Security Alert: You can only register as USER.",
+      "any.only": "Invalid user type.",
     }),
   // ✅ Real World Safety: Backend এও Terms Agreement চেক করা
   agreeToTerms: Joi.boolean().valid(true).required().messages({
@@ -50,16 +50,4 @@ const userRegisterSchema = Joi.object({
   }),
 });
 
-// ... userOnboardingSchema যা ছিল তাই থাকবে ...
-const userOnboardingSchema = Joi.object({
-  institution: Joi.string().hex().length(24).optional().allow(""),
-  department: Joi.string().hex().length(24).optional().allow(""),
-  session: Joi.string().optional().allow(""),
-  section: Joi.string().optional().allow(""),
-  studentId: Joi.string().optional().allow(""),
-  teacherId: Joi.string().optional().allow(""),
-  rank: Joi.string().optional().allow(""),
-  officeHours: Joi.array().optional(),
-});
-
-export { userRegisterSchema, userOnboardingSchema };
+export { userRegisterSchema };

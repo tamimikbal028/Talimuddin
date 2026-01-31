@@ -28,8 +28,10 @@ const generateAccessAndRefreshTokens = async (userId) => {
 // 🚀 1. REGISTER USER SERVICE
 // ==========================================
 export const registerUserService = async (userData) => {
-  const { fullName, email, password, userName, userType, agreeToTerms } =
-    userData;
+  const { fullName, email, password, userName, agreeToTerms } = userData;
+
+  // Always set userType to USER
+  const userType = USER_TYPES.USER;
 
   const existedUser = await User.findOne({ $or: [{ email }, { userName }] });
   if (existedUser) {

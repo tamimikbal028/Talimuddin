@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authHooks } from "../../hooks/useAuth";
-import { USER_TYPES } from "../../constants";
 
 // ✅ Zod Schema - Backend validation এর সাথে match করে
 const registerSchema = z.object({
@@ -32,10 +31,6 @@ const registerSchema = z.object({
     .regex(/(?=.*[A-Z])/, "Password must contain at least one uppercase letter")
     .regex(/(?=.*\d)/, "Password must contain at least one number"),
 
-  userType: z.enum([USER_TYPES.STUDENT, USER_TYPES.TEACHER], {
-    message: "User Type is required",
-  }),
-
   // 📝 agreeToTerms: শুধু Frontend এর জন্য, Backend এ যাবে না
   agreeToTerms: z.literal(true, "You must agree to the terms"),
 });
@@ -59,7 +54,6 @@ const Register = () => {
       email: "",
       userName: "",
       password: "",
-      userType: undefined,
       agreeToTerms: undefined,
     },
   });
@@ -160,34 +154,6 @@ const Register = () => {
               {errors.userName && (
                 <p className="mt-1 text-sm text-red-500">
                   {errors.userName.message}
-                </p>
-              )}
-            </div>
-
-            {/* User Type Field */}
-            <div>
-              <label
-                htmlFor="userType"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                I am a
-              </label>
-              <select
-                id="userType"
-                {...registerField("userType")}
-                className={`w-full appearance-none rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
-                  errors.userType
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                }`}
-              >
-                <option value="">Select user type</option>
-                <option value={USER_TYPES.STUDENT}>Student</option>
-                <option value={USER_TYPES.TEACHER}>Teacher</option>
-              </select>
-              {errors.userType && (
-                <p className="mt-1 text-sm text-red-500">
-                  {errors.userType.message}
                 </p>
               )}
             </div>
@@ -303,5 +269,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
