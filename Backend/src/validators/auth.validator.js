@@ -17,15 +17,10 @@ const userRegisterSchema = Joi.object({
       "string.pattern.base": "Phone number must be 11 digits",
     }),
 
-  password: Joi.string()
-    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])"))
-    .min(8)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must contain at least one lowercase, one uppercase letter and one number",
-      "string.min": "Password must be at least 8 characters long",
-    }),
+  password: Joi.string().min(6).required().messages({
+    "string.min": "Password must be at least 6 characters long",
+    "string.empty": "Password is required",
+  }),
 
   userName: Joi.string()
     .trim()

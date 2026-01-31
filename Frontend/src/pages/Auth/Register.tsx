@@ -26,12 +26,7 @@ const registerSchema = z.object({
       "Username can only contain letters, numbers, and underscores"
     ),
 
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/(?=.*[a-z])/, "Password must contain at least one lowercase letter")
-    .regex(/(?=.*[A-Z])/, "Password must contain at least one uppercase letter")
-    .regex(/(?=.*\d)/, "Password must contain at least one number"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 
   // 📝 agreeToTerms: শুধু Frontend এর জন্য, Backend এ যাবে না
   agreeToTerms: z.literal(true, "You must agree to the terms"),
@@ -190,7 +185,7 @@ const Register = () => {
               </div>
               {/* Password Requirements Hint */}
               <p className="mt-1 text-xs font-medium text-gray-500">
-                Min 8 characters, 1 uppercase, 1 lowercase, 1 number
+                Minimum 6 characters
               </p>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500">
