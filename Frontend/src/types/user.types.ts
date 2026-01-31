@@ -15,17 +15,6 @@ export type AccountStatus =
 export type Gender = (typeof GENDERS)[keyof typeof GENDERS];
 
 // ====================================
-// SOCIAL & PRIVACY
-// ====================================
-
-export interface SocialLinks {
-  linkedin?: string;
-  github?: string;
-  website?: string;
-  facebook?: string;
-}
-
-// ====================================
 // ACTIVITY RESTRICTIONS
 // ====================================
 
@@ -62,11 +51,6 @@ export interface User {
   coverImage: string;
   bio?: string;
   gender?: Gender;
-
-  // Social
-  socialLinks?: SocialLinks;
-  skills?: string[];
-  interests?: string[];
 
   // Stats (from backend model)
   postsCount: number;

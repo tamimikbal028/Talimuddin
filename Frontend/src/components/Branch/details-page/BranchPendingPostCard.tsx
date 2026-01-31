@@ -1,4 +1,3 @@
-import React from "react";
 import type { Post, PostMeta } from "../../../types/post.types";
 import dayjs from "dayjs";
 import { roomHooks } from "../../../hooks/useRoom";
@@ -11,11 +10,11 @@ interface RoomPendingPostCardProps {
   isAdminView?: boolean;
 }
 
-const RoomPendingPostCard: React.FC<RoomPendingPostCardProps> = ({
+const RoomPendingPostCard = ({
   post,
   meta,
   isAdminView = false,
-}) => {
+}: RoomPendingPostCardProps) => {
   const { mutate: approve, isPending: isApproving } =
     roomHooks.useApproveRoomPost();
   const { mutate: reject, isPending: isRejecting } =

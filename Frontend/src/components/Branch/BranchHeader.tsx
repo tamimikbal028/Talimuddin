@@ -22,7 +22,7 @@ const Header: React.FC = () => {
             className="flex items-center gap-2 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 transition-colors hover:border-blue-400 hover:bg-blue-100"
           >
             <FaPlus className="h-4 w-4" />
-            Create Room
+            Create Branch
           </Link>
         )}
         {!(isAppOwner || isAppAdmin) && (
@@ -31,7 +31,7 @@ const Header: React.FC = () => {
             className="flex items-center gap-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 px-4 py-2 text-sm font-semibold text-green-600 transition-colors hover:border-green-400 hover:bg-green-100"
           >
             <FaSignInAlt className="h-4 w-4" />
-            Join Room
+            Join Branch
           </Link>
         )}
       </div>

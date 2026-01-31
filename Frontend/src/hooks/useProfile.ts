@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { profileService } from "../services/profile.service";
 import type {
   UpdateGeneralData,
-  UpdateAcademicData,
   ApiError,
   ProfilePostsResponse,
 } from "../types";
@@ -65,9 +64,9 @@ const useUpdateGeneral = () => {
     onSuccess: (response) => {
       queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
       queryClient.invalidateQueries({ queryKey: ["profileHeader"] });
-      // Invalidate room queries since user name appears on room cards
-      queryClient.invalidateQueries({ queryKey: ["myRooms"] });
-      queryClient.invalidateQueries({ queryKey: ["hiddenRooms"] });
+      // Invalidate branch queries since user name appears on branch cards
+      queryClient.invalidateQueries({ queryKey: ["myBranches"] });
+      queryClient.invalidateQueries({ queryKey: ["hiddenBranches"] });
       queryClient.invalidateQueries({ queryKey: ["archivedRooms"] });
       queryClient.invalidateQueries({ queryKey: ["roomDetails"] });
       toast.success(response.message);
@@ -75,25 +74,6 @@ const useUpdateGeneral = () => {
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message ?? "Update General failed");
-    },
-  });
-};
-
-const useUpdateAcademic = () => {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-
-  return useMutation({
-    mutationFn: (data: UpdateAcademicData) =>
-      profileService.updateAcademic(data),
-    onSuccess: (response) => {
-      queryClient.setQueryData(AUTH_KEYS.currentUser, response.data.user);
-      queryClient.invalidateQueries({ queryKey: ["profileHeader"] });
-      toast.success(response.message);
-      navigate(`/profile/${response.data.user.userName}`);
-    },
-    onError: (error: AxiosError<ApiError>) => {
-      toast.error(error?.response?.data?.message ?? "Update Academic failed");
     },
   });
 };
@@ -162,14 +142,6 @@ const useCreateProfilePost = () => {
   });
 };
 
-const useToggleLikeProfilePost = () => {
-  const { username } = useParams();
-  return postHooks.useToggleLikePost({
-    queryKey: ["profilePosts", username],
-    invalidateKey: ["profileHeader", username],
-  });
-};
-
 const useDeleteProfilePost = () => {
   const { username } = useParams();
   return postHooks.useDeletePost({
@@ -214,12 +186,10 @@ const profileHooks = {
   useProfileHeader,
   useProfileDetails,
   useUpdateGeneral,
-  useUpdateAcademic,
   useUpdateAvatar,
   useUpdateCoverImage,
   useProfilePosts,
   useCreateProfilePost,
-  useToggleLikeProfilePost,
   useDeleteProfilePost,
   useUpdateProfilePost,
   useToggleReadStatusProfilePost,

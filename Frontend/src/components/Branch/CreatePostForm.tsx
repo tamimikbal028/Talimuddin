@@ -95,7 +95,7 @@ const CreatePostForm: React.FC<Props> = ({
         rows={4}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Write something to the room..."
+        placeholder="Write something to the branch..."
       />
 
       {/* attachments picker */}

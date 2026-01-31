@@ -90,7 +90,7 @@ const RoomRequestsTab: React.FC = () => {
             No pending requests
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            When people ask to join your room, they'll show up here.
+            When people ask to join your branch, they'll show up here.
           </p>
         </div>
       )}
