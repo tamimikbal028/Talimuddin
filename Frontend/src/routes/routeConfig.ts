@@ -72,20 +72,12 @@ export const routes: RouteConfig[] = [
 
   // Profile routes
   {
-    path: "/profile",
+    path: "/profile/:username",
     component: lazy(() => import("../pages/Profile/Profile")),
     requireAuth: true,
     title: "Profile",
     category: "profile",
-    meta: { description: "Your profile page" },
-  },
-  {
-    path: "/profile/:username",
-    component: lazy(() => import("../pages/Profile/Profile")),
-    requireAuth: true,
-    title: "User Profile",
-    category: "profile",
-    meta: { description: "View user profile" },
+    meta: { description: "View profile" },
   },
   {
     path: "/profile/edit",
@@ -96,20 +88,12 @@ export const routes: RouteConfig[] = [
     meta: { description: "Edit your profile information" },
   },
   {
-    path: "/profile/details",
+    path: "/profile/:username/details",
     component: lazy(() => import("../pages/Profile/ProfileDetails")),
     requireAuth: true,
     title: "Profile Details",
     category: "profile",
     meta: { description: "View detailed profile information" },
-  },
-  {
-    path: "/profile/:username/details",
-    component: lazy(() => import("../pages/Profile/ProfileDetails")),
-    requireAuth: true,
-    title: "User Profile Details",
-    category: "profile",
-    meta: { description: "View user's detailed profile information" },
   },
   {
     path: "/settings",

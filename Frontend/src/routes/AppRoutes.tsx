@@ -19,7 +19,7 @@ const AppRoutes: React.FC = () => {
 
   // Idle prefetch a few high-traffic routes
   useEffect(() => {
-    prefetchOnIdle(["/", "/profile"]);
+    prefetchOnIdle(["/"]);
   }, []);
 
   return (
