@@ -13,7 +13,9 @@ const registerSchema = z.object({
     .min(3, "Full Name must be at least 3 characters")
     .max(50, "Full Name must be at most 50 characters"),
 
-  email: z.string().email("Please enter a valid email address"),
+  phoneNumber: z
+    .string()
+    .regex(/^[0-9]{11}$/, "Phone number must be 11 digits"),
 
   userName: z
     .string()
@@ -51,7 +53,7 @@ const Register = () => {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: "",
-      email: "",
+      phoneNumber: "",
       userName: "",
       password: "",
       agreeToTerms: undefined,
@@ -106,28 +108,28 @@ const Register = () => {
               )}
             </div>
 
-            {/* Email Field */}
+            {/* Phone Number Field */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="phoneNumber"
                 className="mb-2 block text-sm font-medium text-gray-700"
               >
-                Email Address
+                Phone Number
               </label>
               <input
-                id="email"
-                type="email"
-                {...registerField("email")}
+                id="phoneNumber"
+                type="tel"
+                {...registerField("phoneNumber")}
                 className={`w-full rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
-                  errors.email
+                  errors.phoneNumber
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 }`}
-                placeholder="Enter your email"
+                placeholder="Enter your phone number (11 digits)"
               />
-              {errors.email && (
+              {errors.phoneNumber && (
                 <p className="mt-1 text-sm text-red-500">
-                  {errors.email.message}
+                  {errors.phoneNumber.message}
                 </p>
               )}
             </div>

@@ -6,7 +6,6 @@ import {
   FaUser,
   FaPhone,
   FaVenusMars,
-  FaPray,
   FaInfoCircle,
   FaSpinner,
   FaLinkedin,
@@ -18,7 +17,7 @@ import {
 } from "react-icons/fa";
 
 import { profileHooks } from "../../hooks/useProfile";
-import { GENDERS, RELIGIONS } from "../../constants";
+import { GENDERS } from "../../constants";
 import type { User } from "../../types";
 
 // ====================================
@@ -31,6 +30,7 @@ const generalInfoSchema = z.object({
     .min(2, "Name must be at least 2 characters")
     .max(50, "Name cannot exceed 50 characters"),
   bio: z.string().max(300, "Bio cannot exceed 300 characters").optional(),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")),
   phoneNumber: z
     .string()
     .regex(/^(\+?\d{10,14})?$/, "Invalid phone number format")
@@ -78,17 +78,9 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ user }) => {
     defaultValues: {
       fullName: user.fullName || "",
       bio: user.bio || "",
+      email: user.email || "",
       phoneNumber: user.phoneNumber || "",
       gender: (user.gender as "MALE" | "FEMALE" | "") || "",
-      religion: user.religion || "",
-      socialLinks: {
-        linkedin: user.socialLinks?.linkedin || "",
-        github: user.socialLinks?.github || "",
-        website: user.socialLinks?.website || "",
-        facebook: user.socialLinks?.facebook || "",
-      },
-      skills: user.skills?.join(", ") || "",
-      interests: user.interests?.join(", ") || "",
     },
   });
 
@@ -169,6 +161,28 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ user }) => {
             )}
           </div>
 
+          {/* Email */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Email Address (Optional)
+            </label>
+            <input
+              type="email"
+              {...register("email")}
+              className={`w-full rounded-lg border px-3 py-2 focus:ring-2 focus:outline-none ${
+                errors.email
+                  ? "border-red-300 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
+              placeholder="your.email@example.com"
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
           {/* Gender */}
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -194,30 +208,7 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ user }) => {
             />
           </div>
 
-          {/* Religion */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              <FaPray className="mr-1 inline text-gray-400" />
-              Religion
-            </label>
-            <Controller
-              name="religion"
-              control={control}
-              render={({ field }) => (
-                <select
-                  {...field}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="">Select Religion</option>
-                  {Object.entries(RELIGIONS).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </select>
-              )}
-            />
-          </div>
+          
         </div>
 
         {/* Bio */}
@@ -410,5 +401,3 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ user }) => {
 };
 
 export default GeneralTab;
-
-

@@ -118,7 +118,7 @@ export interface LoginCredentials {
 // Register Types
 export interface RegisterData {
   fullName: string;
-  email: string;
+  phoneNumber: string;
   userName: string;
   password: string;
   agreeToTerms: boolean;

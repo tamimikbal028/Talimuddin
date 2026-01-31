@@ -8,9 +8,15 @@ const userRegisterSchema = Joi.object({
     "string.min": "Full name must be at least 3 characters",
   }),
 
-  email: Joi.string().email().trim().lowercase().required(),
+  phoneNumber: Joi.string()
+    .trim()
+    .pattern(/^[0-9]{11}$/)
+    .required()
+    .messages({
+      "string.empty": "Phone number is required",
+      "string.pattern.base": "Phone number must be 11 digits",
+    }),
 
-  // পাসওয়ার্ড পলিসি (স্ট্রং)
   password: Joi.string()
     .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])"))
     .min(8)

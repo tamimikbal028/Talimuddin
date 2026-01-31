@@ -28,14 +28,19 @@ const generateAccessAndRefreshTokens = async (userId) => {
 // 🚀 1. REGISTER USER SERVICE
 // ==========================================
 export const registerUserService = async (userData) => {
-  const { fullName, email, password, userName, agreeToTerms } = userData;
+  const { fullName, phoneNumber, password, userName, agreeToTerms } = userData;
 
   // Always set userType to USER
   const userType = USER_TYPES.USER;
 
-  const existedUser = await User.findOne({ $or: [{ email }, { userName }] });
+  const existedUser = await User.findOne({
+    $or: [{ phoneNumber }, { userName }],
+  });
   if (existedUser) {
-    throw new ApiError(409, "User with this email or username already exists");
+    throw new ApiError(
+      409,
+      "User with this phone number or username already exists"
+    );
   }
 
   if ([USER_TYPES.ADMIN, USER_TYPES.OWNER].includes(userType)) {
@@ -44,7 +49,7 @@ export const registerUserService = async (userData) => {
 
   const userPayload = {
     fullName,
-    email,
+    phoneNumber,
     password,
     userName,
     userType,
