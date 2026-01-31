@@ -23,15 +23,15 @@ const Sidebar: React.FC = () => {
   const navigationItems = [
     {
       icon: FaSchool,
-      label: "ClassRoom",
-      path: "/classroom",
-      active: location.pathname === "/classroom",
+      label: "Branch",
+      path: "/branch",
+      active: location.pathname === "/branch",
     },
     {
       icon: FaDoorOpen,
-      label: "All Rooms",
-      path: "/classroom/all",
-      active: location.pathname === "/classroom/all",
+      label: "All Branches",
+      path: "/branch/all",
+      active: location.pathname === "/branch/all",
     },
 
     {

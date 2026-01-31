@@ -91,7 +91,7 @@ const useJoinBranch = () => {
       // Navigate to branch details
       const branchId = data.data.branchId;
       if (branchId) {
-        navigate(`/classroom/branches/${branchId}`);
+        navigate(`/branch/branches/${branchId}`);
       }
     },
     onError: (error: AxiosError<ApiError>) => {
@@ -108,7 +108,7 @@ const useDeleteBranch = () => {
     onSuccess: (data) => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ["myBranches"] });
-      // navigate("/classroom");
+      // navigate("/branch");
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message || "Failed to delete branch");
@@ -128,7 +128,7 @@ const useLeaveBranch = () => {
       queryClient.invalidateQueries({ queryKey: ["myBranches"] });
 
       // Navigate back
-      // navigate("/classroom");
+      // navigate("/branch");
     },
     onError: (error: AxiosError<ApiError>) => {
       toast.error(error?.response?.data?.message || "Failed to leave branch");

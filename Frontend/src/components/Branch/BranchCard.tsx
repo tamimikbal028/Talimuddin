@@ -10,7 +10,7 @@ const BranchCard: React.FC<Props> = ({ branch }) => {
   return (
     <div className="overflow-hidden rounded-lg shadow-sm">
       <Link
-        to={`/classroom/branches/${branch._id}`}
+        to={`/branch/branches/${branch._id}`}
         className="relative block h-36 w-full bg-gray-100"
       >
         <img

@@ -5,7 +5,7 @@ import { BsPostcard } from "react-icons/bs";
 
 const BranchDetailsNavBar: React.FC = () => {
   const { branchId } = useParams<{ branchId: string }>();
-  const baseUrl = `/classroom/branches/${branchId}`;
+  const baseUrl = `/branch/branches/${branchId}`;
 
   // Navigation tabs (Reduced as per previous step decisions, if we removed About/Files routes in BranchDetails.tsx, we should remove them here too.
   // In Step 360 BranchDetails.tsx only has Posts and Members routes. So I should remove Files and About here.)

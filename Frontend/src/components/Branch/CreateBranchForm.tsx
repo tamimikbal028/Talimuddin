@@ -209,7 +209,7 @@ const CreateBranchForm = () => {
       <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-5">
         <button
           type="button"
-          onClick={() => navigate("/classroom")}
+          onClick={() => navigate("/branch")}
           className="cursor-pointer rounded-lg border border-red-500 bg-white px-5 py-2.5 text-sm font-semibold text-red-500 shadow-sm transition-colors hover:bg-red-50"
         >
           Cancel

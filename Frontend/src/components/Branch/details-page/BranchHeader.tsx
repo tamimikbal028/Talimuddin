@@ -91,7 +91,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
 
         {/* Back Button */}
         <button
-          onClick={() => navigate("/classroom")}
+          onClick={() => navigate("/branch")}
           className="absolute top-4 left-4 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-black/70 active:scale-95"
           title="Go back to classroom"
         >
@@ -195,7 +195,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
                         meta.isBranchAdmin) && (
                         <>
                           <Link
-                            to={`/classroom/branches/${branch._id}/edit`}
+                            to={`/branch/branches/${branch._id}/edit`}
                             className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
                             onClick={closeMenu}
                           >

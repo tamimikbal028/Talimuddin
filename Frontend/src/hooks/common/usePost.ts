@@ -11,7 +11,6 @@ import type {
 } from "../../types";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
-import { POST_STATUS } from "../../constants/post";
 
 interface UsePostMutationProps {
   queryKey?: (string | undefined)[] | (string | undefined)[][]; // Single key or Array of keys
@@ -59,10 +58,6 @@ const useCreatePost = ({ queryKey, invalidateKey }: UsePostMutationProps) => {
         } else {
           queryClient.invalidateQueries({ queryKey: invalidateKey });
         }
-      }
-
-      if (response.data?.post?.status === POST_STATUS.PENDING) {
-        toast.info("Post submitted and waiting for admin approval");
       } else {
         toast.success(response.message);
       }
@@ -70,94 +65,6 @@ const useCreatePost = ({ queryKey, invalidateKey }: UsePostMutationProps) => {
     onError: (error: AxiosError<ApiError>) => {
       const message = error?.response?.data?.message;
       toast.error(message || "Create post failed");
-    },
-  });
-};
-
-const useToggleLikePost = ({
-  queryKey,
-  invalidateKey,
-}: UsePostMutationProps) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ postId }: { postId: string }) =>
-      postService.togglePostLike(postId),
-
-    // ১. ক্লিক করার সাথে সাথে রান হবে (Optimistic Update)
-    onMutate: async ({ postId }: { postId: string }) => {
-      // ব্যাকগ্রাউন্ড ফেচ আটকানো (Safety)
-      await queryClient.cancelQueries({ queryKey: queryKey }); // Dynamic Key
-
-      // আগের ডেটার স্ন্যাপশট নেওয়া (Rollback এর জন্য)
-      const previousPosts = queryClient.getQueriesData({
-        queryKey: queryKey, // Dynamic Key
-      });
-
-      // মেমোরিতে ডেটা ম্যানুয়ালি আপডেট করা
-      queryClient.setQueriesData(
-        { queryKey: queryKey }, // Dynamic Key
-        (oldData: InfiniteData<ProfilePostsResponse> | undefined) => {
-          if (!oldData) return oldData;
-
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              data: {
-                ...page.data,
-                posts: page.data.posts.map((item) => {
-                  if (item.post._id === postId) {
-                    const isLiked = item.meta.isLiked;
-                    return {
-                      ...item,
-                      meta: {
-                        ...item.meta,
-                        isLiked: !isLiked,
-                      },
-                      post: {
-                        ...item.post,
-                        likesCount:
-                          (isLiked ? -1 : 1) + (item.post.likesCount || 0),
-                      },
-                    };
-                  }
-                  return item;
-                }),
-              },
-            })),
-          };
-        }
-      );
-
-      // স্ন্যাপশট রিটার্ন করা
-      return { previousPosts };
-    },
-
-    onError: (error: AxiosError<ApiError>, variables, context) => {
-      // আগের অবস্থায় ফিরিয়ে নেওয়া (Rollback)
-      if (context?.previousPosts) {
-        context.previousPosts.forEach(([key, data]) => {
-          queryClient.setQueryData(key, data);
-        });
-      }
-      const { postId } = variables;
-      console.error(`Error toggling like for post ${postId}:`, error);
-      const message = error?.response?.data?.message;
-      toast.error(message || "Error from useToggleLikePost");
-    },
-    onSettled: () => {
-      if (invalidateKey) {
-        if (Array.isArray(invalidateKey[0])) {
-          (invalidateKey as (string | undefined)[][]).forEach((key) => {
-            queryClient.invalidateQueries({ queryKey: key });
-          });
-        } else {
-          queryClient.invalidateQueries({
-            queryKey: invalidateKey as (string | undefined)[],
-          });
-        }
-      }
     },
   });
 };
@@ -522,7 +429,6 @@ const useTogglePin = ({ queryKey, invalidateKey }: UsePostMutationProps) => {
 
 const postHooks = {
   useCreatePost,
-  useToggleLikePost,
   useToggleReadStatus,
   useToggleBookmark,
   useUpdatePost,

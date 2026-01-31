@@ -29,7 +29,7 @@ const BranchGeneralTab: React.FC<BranchGeneralTabProps> = ({ branch }) => {
       },
       {
         onSuccess: () => {
-          navigate(`/classroom/branches/${branchId}`);
+          navigate(`/branch/branches/${branchId}`);
         },
       }
     );

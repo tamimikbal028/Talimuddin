@@ -20,7 +20,7 @@ const BranchPhotosTab: React.FC<BranchPhotosTabProps> = ({ coverImage }) => {
     if (file) {
       updateCover(file, {
         onSuccess: () => {
-          navigate(`/classroom/branches/${branchId}`);
+          navigate(`/branch/branches/${branchId}`);
         },
       });
     }
