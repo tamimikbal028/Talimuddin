@@ -27,7 +27,7 @@ export interface NotificationUser {
 
 export interface Notification {
   id: string;
-  type: "like" | "comment" | "share" | "follow" | "mention";
+  type: "like" | "comment" | "share" | "mention";
   user: NotificationUser;
   content: string;
   timestamp: string;
@@ -131,19 +131,6 @@ export const mockNotifications: Notification[] = [
     postContent: "Just launched my new portfolio website! 🚀",
     timestamp: "15 min ago",
     isRead: false,
-  },
-  {
-    id: "3",
-    type: "follow",
-    user: {
-      name: "Mike Johnson",
-      username: "mikej",
-      avatar:
-        "https://ui-avatars.com/api/?name=Mike+Johnson&background=f59e0b&color=fff&size=40",
-    },
-    content: "started following you",
-    timestamp: "1 hour ago",
-    isRead: true,
   },
   {
     id: "4",

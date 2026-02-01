@@ -3,7 +3,6 @@ import {
   FaHeart,
   FaComment,
   FaShare,
-  FaUserPlus,
   FaBell,
 } from "react-icons/fa";
 
@@ -15,7 +14,7 @@ interface NotificationUser {
 
 interface NotificationItemProps {
   id: string;
-  type: "like" | "comment" | "share" | "follow" | "mention";
+  type: "like" | "comment" | "share" | "mention";
   user: NotificationUser;
   content: string;
   timestamp: string;
@@ -42,8 +41,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         return <FaComment className="text-blue-500" />;
       case "share":
         return <FaShare className="text-green-500" />;
-      case "follow":
-        return <FaUserPlus className="text-purple-500" />;
       case "mention":
         return <FaBell className="text-yellow-500" />;
       default:

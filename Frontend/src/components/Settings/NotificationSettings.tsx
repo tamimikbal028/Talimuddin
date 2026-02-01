@@ -10,7 +10,6 @@ const NotificationSettings: React.FC = () => {
     sms: false,
     likes: true,
     comments: true,
-    follows: true,
     messages: true,
     inApp: true,
   });
@@ -60,13 +59,6 @@ const NotificationSettings: React.FC = () => {
           action="toggle"
           value={notifications.comments}
           onToggle={() => handleNotificationToggle("comments")}
-        />
-        <SettingsItem
-          label="Follows"
-          description="Get notified when someone follows you"
-          action="toggle"
-          value={notifications.follows}
-          onToggle={() => handleNotificationToggle("follows")}
         />
         <SettingsItem
           label="Messages"

@@ -263,24 +263,6 @@ export const confirmExit = () =>
     isDanger: true,
   });
 
-// Block/Unblock confirmations
-export const confirmBlock = (userName: string) =>
-  confirm({
-    title: "Block User?",
-    text: `Are you sure you want to block ${userName}?`,
-    icon: "warning",
-    confirmButtonText: "Yes, block",
-    isDanger: true,
-  });
-
-export const confirmUnblock = (userName: string) =>
-  confirm({
-    title: "Unblock User?",
-    text: `Unblock ${userName}?`,
-    icon: "question",
-    confirmButtonText: "Yes, unblock",
-  });
-
 // Report confirmation
 export const confirmReport = (itemType: string) =>
   confirm({
@@ -338,12 +320,6 @@ export const showLeaveSuccess = (itemName: string) =>
   showSuccess({
     title: "Left!",
     text: `You left "${itemName}"`,
-  });
-
-export const showBlockSuccess = (userName: string) =>
-  showSuccess({
-    title: "Blocked!",
-    text: `${userName} has been blocked`,
   });
 
 export const showReportSuccess = () =>

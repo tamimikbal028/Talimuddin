@@ -55,15 +55,10 @@ export interface User {
   // Stats (from backend model)
   postsCount: number;
   connectionsCount: number;
-  followersCount: number;
-  followingCount: number;
   publicFilesCount: number;
 
   // Friendship
   profile_relation_status?: string;
-  isFollowing?: boolean;
-  isBlockedByMe?: boolean;
-  isBlockedByTarget?: boolean;
 
   // User Type
   userType: UserType;

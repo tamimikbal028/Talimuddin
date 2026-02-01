@@ -359,10 +359,9 @@ export const getUserProfileHeaderService = async (
     throw new ApiError(400, "Username is required");
   }
 
-  const user = await User.findOne({ userName: targetUsername })
-    .select("-password -refreshToken")
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo");
+  const user = await User.findOne({ userName: targetUsername }).select(
+    "-password -refreshToken"
+  );
 
   if (!user) {
     throw new ApiError(404, "User not found");
@@ -371,9 +370,6 @@ export const getUserProfileHeaderService = async (
   const isSelf =
     currentUserId && currentUserId.toString() === user._id.toString();
   let relationStatus = USER_RELATION_STATUS.NONE;
-  let isFollowing = false;
-  let isBlockedByMe = false;
-  let isBlockedByTarget = false;
 
   if (isSelf) {
     relationStatus = USER_RELATION_STATUS.SELF;
@@ -389,14 +385,6 @@ export const getUserProfileHeaderService = async (
     if (friendship) {
       if (friendship.status === FRIENDSHIP_STATUS.ACCEPTED) {
         relationStatus = USER_RELATION_STATUS.FRIEND;
-      } else if (friendship.status === FRIENDSHIP_STATUS.BLOCKED) {
-        if (friendship.requester.toString() === currentUserId.toString()) {
-          relationStatus = USER_RELATION_STATUS.BLOCKED;
-          isBlockedByMe = true;
-        } else {
-          relationStatus = USER_RELATION_STATUS.BLOCKED_BY_THEM;
-          isBlockedByTarget = true;
-        }
       } else if (friendship.status === FRIENDSHIP_STATUS.PENDING) {
         if (friendship.requester.toString() === currentUserId.toString()) {
           relationStatus = USER_RELATION_STATUS.REQUEST_SENT;
@@ -405,23 +393,12 @@ export const getUserProfileHeaderService = async (
         }
       }
     }
-
-    // Follow Status
-    const follow = await Follow.findOne({
-      follower: currentUserId,
-      following: user._id,
-      followingModel: FOLLOW_TARGET_MODELS.USER,
-    });
-    if (follow) isFollowing = true;
   }
 
   return {
     user,
     meta: {
       user_relation_status: relationStatus,
-      isFollowing,
-      isBlockedByMe,
-      isBlockedByTarget,
       isOwnProfile: isSelf,
     },
   };

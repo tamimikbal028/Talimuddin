@@ -108,7 +108,7 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
 
         {/* Profile Stats - positioned on right side of cover */}
         <div className="absolute right-3 bottom-3 hidden md:block">
-          <div className="grid grid-cols-4 divide-x divide-gray-300 rounded-lg border border-gray-200 bg-white py-2 opacity-75 shadow-lg backdrop-blur">
+          <div className="grid grid-cols-2 divide-x divide-gray-300 rounded-lg border border-gray-200 bg-white py-2 opacity-75 shadow-lg backdrop-blur">
             <div className="px-4 text-center">
               <p className="text-lg font-bold text-gray-900">
                 {userData.postsCount || 0}
@@ -123,22 +123,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
               </p>
               <p className="text-xs font-medium text-gray-500">
                 {userData.connectionsCount === 1 ? "Friend" : "Friends"}
-              </p>
-            </div>
-            <div className="px-4 text-center">
-              <p className="text-lg font-bold text-gray-900">
-                {userData.followersCount || 0}
-              </p>
-              <p className="text-xs font-medium text-gray-500">
-                {userData.followersCount === 1 ? "Follower" : "Followers"}
-              </p>
-            </div>
-            <div className="px-4 text-center">
-              <p className="text-lg font-bold text-gray-900">
-                {userData.followingCount || 0}
-              </p>
-              <p className="text-xs font-medium text-gray-500">
-                {userData.followingCount === 1 ? "Following" : "Followings"}
               </p>
             </div>
           </div>
