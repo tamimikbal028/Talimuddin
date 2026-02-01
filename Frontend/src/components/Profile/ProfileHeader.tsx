@@ -11,7 +11,7 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <div className="p-6">
+      <div className="p-5">
         {/* Avatar, Name, Stats and Edit Button */}
         <div className="flex items-start gap-4">
           <img
