@@ -63,10 +63,10 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
 
           {/* Action Buttons */}
           {isOwnProfile && (
-            <div className="pt-3">
+            <div className="pt-4">
               <Link
                 to="/profile/edit"
-                className="flex items-center gap-2 rounded-md bg-blue-600 px-6 py-2 text-white transition-colors hover:bg-blue-700"
+                className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
               >
                 <FaEdit className="h-4 w-4" />
                 Edit Profile
