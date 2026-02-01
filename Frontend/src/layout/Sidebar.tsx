@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   FaUser,
@@ -13,9 +12,8 @@ import {
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
-import { DEFAULT_POTRIKA_ID } from "../constants";
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const location = useLocation();
   const { mutate: logout, isPending: isLoggingOut } = authHooks.useLogout();
   const { user } = authHooks.useUser();
@@ -39,7 +37,7 @@ const Sidebar: React.FC = () => {
     {
       icon: FaNewspaper,
       label: "Potrika",
-      path: `/potrika/${DEFAULT_POTRIKA_ID}`,
+      path: "/potrika",
       active: location.pathname.startsWith("/potrika"),
     },
     {

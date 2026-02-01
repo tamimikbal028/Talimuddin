@@ -11,12 +11,16 @@ import {
   updatePotrikaAvatar,
   updatePotrikaCoverImage,
   updatePotrikaDetails,
+  getAllPotrikas,
 } from "../controllers/potrika.controllers.js";
 
 const router = Router();
 
 // All potrika routes require authenticated user
 router.use(verifyJWT);
+
+// GET /potrika
+router.get("/", getAllPotrikas);
 
 // GET /potrika/:potrikaId
 router.get("/:potrikaId", getPotrikaHeader);

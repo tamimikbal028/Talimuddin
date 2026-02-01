@@ -3,12 +3,12 @@ import {
   PotrikaPosts,
   CreatePotrikaPost,
   PotrikaNotFound,
-} from "../components/Potrika";
-import { authHooks } from "../hooks/useAuth";
-import { potrikaHooks } from "../hooks/usePotrika";
-import ProfileHeaderSkeleton from "../components/shared/skeletons/ProfileHeaderSkeleton";
+} from "../../components/Potrika";
+import { authHooks } from "../../hooks/useAuth";
+import { potrikaHooks } from "../../hooks/usePotrika";
+import ProfileHeaderSkeleton from "../../components/shared/skeletons/ProfileHeaderSkeleton";
 
-const Potrika = () => {
+const PotrikaDetail = () => {
   const { isAppAdmin } = authHooks.useUser();
 
   const { data, isLoading, error } = potrikaHooks.usePotrikaHeader();
@@ -29,7 +29,7 @@ const Potrika = () => {
   const { potrika } = data;
 
   return (
-    <>
+    <div className="space-y-4">
       <PotrikaHeader data={potrika} />
 
       <div className="space-y-3">
@@ -40,8 +40,8 @@ const Potrika = () => {
         )}
         <PotrikaPosts potrikaId={potrika._id} />
       </div>
-    </>
+    </div>
   );
 };
 
-export default Potrika;
+export default PotrikaDetail;

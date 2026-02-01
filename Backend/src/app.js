@@ -33,7 +33,7 @@ import potrikaRouter from "./routes/potrika.routes.js";
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/profile", profileRouter);
 app.use("/api/v1/branches", branchRouter);
-app.use("/api/v1/potrika", potrikaRouter);
+app.use("/api/v1/potrikas", potrikaRouter);
 
 // Global Error Handling Middleware
 app.use(errorHandler);

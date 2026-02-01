@@ -8,3 +8,10 @@ export interface Potrika {
   createdAt: string;
   updatedAt: string;
 }
+export interface PotrikaHeaderResponse {
+  potrika: Potrika;
+}
+
+export interface AllPotrikasResponse {
+  potrikas: Potrika[];
+}
