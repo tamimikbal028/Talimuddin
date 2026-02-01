@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      unique: true,
       lowercase: true,
       trim: true,
     },
@@ -41,6 +40,11 @@ const userSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
+    },
+    bio: {
+      type: String,
+      trim: true,
+      maxlength: 500,
     },
     gender: { type: String, enum: Object.values(GENDERS) },
     userType: {
@@ -75,7 +79,6 @@ userSchema.methods.generateAccessToken = function () {
     {
       _id: this._id,
       phoneNumber: this.phoneNumber,
-      email: this.email,
       userName: this.userName,
       userType: this.userType,
     },

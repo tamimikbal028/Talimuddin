@@ -53,7 +53,6 @@ export interface User {
   gender?: Gender;
 
   // Stats (from backend model)
-  postsCount: number;
   connectionsCount: number;
   publicFilesCount: number;
 

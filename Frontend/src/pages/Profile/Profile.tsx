@@ -36,7 +36,7 @@ const Profile = () => {
       <ProfileHeader data={profileData} />
 
       <div className="space-y-3">
-        {!isAppAdmin ? (
+        {isAppAdmin ? (
           <>
             {isOwnProfile && (
               <div className="mb-4">

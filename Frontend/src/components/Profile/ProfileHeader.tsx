@@ -22,18 +22,13 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
 
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-4">
-              <div>
+              <div className="flex-1">
                 <h1 className="text-2xl font-bold text-gray-900">
                   {userData.fullName}
-                </h1>
-                <div className="mt-1 inline-flex items-center gap-1 text-gray-600">
-                  <span className="font-semibold">
-                    {userData.postsCount || 0}
-                  </span>
-                  <span className="text-sm font-medium">
-                    {userData.postsCount <= 1 ? "Post" : "Posts"}
-                  </span>
-                </div>
+                </h1>{" "}
+                <p className="mt-2 text-sm leading-relaxed font-medium text-gray-600">
+                  {userData.bio ? `${userData.bio}` : "No bio added yet."}
+                </p>
               </div>
 
               {isOwnProfile && (
@@ -48,20 +43,6 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
             </div>
           </div>
         </div>
-
-        {/* Bio */}
-        {(userData.bio || isOwnProfile) && (
-          <div className="mt-4">
-            <p className="text-sm leading-relaxed font-medium text-gray-600">
-              {userData.bio ||
-                (isOwnProfile && (
-                  <span className="text-gray-600">
-                    Add a bio to tell people about yourself
-                  </span>
-                ))}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
