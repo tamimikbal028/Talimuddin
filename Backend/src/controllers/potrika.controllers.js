@@ -5,15 +5,10 @@ import potrikaServices from "../services/potrika.service.js";
 // Get potrika header
 const getPotrikaHeader = asyncHandler(async (req, res) => {
   const { potrikaId } = req.params;
-  const { potrika, meta } = await potrikaServices.getPotrikaHeaderService(
-    potrikaId,
-    req.user?._id
-  );
+  const { potrika } = await potrikaServices.getPotrikaHeaderService(potrikaId);
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, { potrika, meta }, "Potrika fetched successfully")
-    );
+    .json(new ApiResponse(200, { potrika }, "Potrika fetched successfully"));
 });
 
 // Get potrika posts

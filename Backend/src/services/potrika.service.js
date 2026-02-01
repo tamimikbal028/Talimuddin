@@ -3,23 +3,25 @@ import { Post } from "../models/post.model.js";
 import { ReadPost } from "../models/readPost.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { POST_TARGET_MODELS } from "../constants/index.js";
+import mongoose from "mongoose";
 
 /**
  * Get potrika header information
  */
-const getPotrikaHeaderService = async (potrikaId, currentUserId) => {
+const getPotrikaHeaderService = async (potrikaId) => {
+  console.log("DEBUG: getPotrikaHeaderService called with ID:", potrikaId);
+  if (!mongoose.Types.ObjectId.isValid(potrikaId)) {
+    console.log("DEBUG: Invalid ObjectId format:", potrikaId);
+    throw new ApiError(400, "Invalid Potrika ID format");
+  }
   const potrika = await Potrika.findById(potrikaId).lean();
+  console.log("DEBUG: Potrika found:", potrika ? potrika.name : "NULL");
 
   if (!potrika) {
     throw new ApiError(404, "Potrika not found");
   }
 
-  return {
-    potrika,
-    meta: {
-      postsCount: potrika.postsCount || 0,
-    },
-  };
+  return { potrika };
 };
 
 /**
@@ -38,7 +40,7 @@ const getPotrikaPostsService = async (potrikaId, currentUserId, query = {}) => {
 
   // Get posts for this potrika
   const posts = await Post.find({
-    postOn: potrikaId,
+    postOnId: potrikaId,
     postOnModel: POST_TARGET_MODELS.POTRIKA,
     isDeleted: false,
   })
@@ -49,7 +51,7 @@ const getPotrikaPostsService = async (potrikaId, currentUserId, query = {}) => {
     .lean();
 
   const totalPosts = await Post.countDocuments({
-    postOn: potrikaId,
+    postOnId: potrikaId,
     postOnModel: POST_TARGET_MODELS.POTRIKA,
     isDeleted: false,
   });

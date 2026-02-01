@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { POST_VISIBILITY, POST_TARGET_MODELS } from "../../constants/post";
 import { authHooks } from "../../hooks/useAuth";
-import { potrikaHooks } from "../../hooks/usePotrika";
+import { postHooks } from "../../hooks/common/usePost";
 import { useParams } from "react-router-dom";
 
 const createPotrikaPostSchema = z.object({
@@ -33,11 +33,17 @@ const createPotrikaPostSchema = z.object({
 
 type CreatePotrikaPostFormData = z.infer<typeof createPotrikaPostSchema>;
 
-const CreatePotrikaPost: React.FC = () => {
+const CreatePotrikaPost = () => {
   const { potrikaId } = useParams();
   const { user: currentUser } = authHooks.useUser();
-  const { mutate: createPotrikaPost, isPending } =
-    potrikaHooks.useCreatePotrikaPost();
+
+  const { mutate: createPotrikaPost, isPending } = postHooks.useCreatePost({
+    queryKey: ["potrika", "posts", potrikaId],
+    invalidateKey: [
+      ["potrika", "posts", potrikaId],
+      ["potrika", "header", potrikaId],
+    ],
+  });
   const [isExpanded, setIsExpanded] = useState(false);
 
   const {

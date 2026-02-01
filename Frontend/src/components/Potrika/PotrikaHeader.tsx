@@ -1,20 +1,8 @@
 import React from "react";
 
-interface PotrikaHeaderData {
-  potrika: {
-    _id: string;
-    name: string;
-    description?: string;
-    avatar?: string;
-    coverImage?: string;
-    postsCount: number;
-  };
-  meta: {
-    postsCount: number;
-  };
-}
+import type { PotrikaHeaderResponse } from "../../types";
 
-const PotrikaHeader: React.FC<{ data: PotrikaHeaderData }> = ({ data }) => {
+const PotrikaHeader: React.FC<{ data: PotrikaHeaderResponse }> = ({ data }) => {
   const { potrika } = data;
 
   return (
