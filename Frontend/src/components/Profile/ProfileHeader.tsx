@@ -4,10 +4,13 @@ import { FaEdit, FaInfoCircle, FaEllipsisV, FaLink } from "react-icons/fa";
 import type { ProfileHeaderData } from "../../types";
 import { toast } from "sonner";
 import { useDropdown } from "../../hooks/useDropdown";
+import { authHooks } from "../../hooks/useAuth";
 
 const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
-  const { user: userData, meta } = data;
-  const { isOwnProfile } = meta;
+  const { user: userData } = data;
+  const { user: currentUser } = authHooks.useUser();
+  const isOwnProfile = currentUser?._id === userData._id;
+
   const {
     isOpen: showMenu,
     openUpward,
@@ -24,7 +27,7 @@ const ProfileHeader: React.FC<{ data: ProfileHeaderData }> = ({ data }) => {
     closeMenu();
   };
 
-  // Render action buttons based on relationStatus
+  // Render action buttons
   const renderActionButtons = () => {
     if (isOwnProfile) {
       return (

@@ -351,10 +351,7 @@ export const updateAccountDetailsService = async (userId, updateData) => {
 // ==========================================
 // 🚀 11. GET USER PROFILE HEADER SERVICE
 // ==========================================
-export const getUserProfileHeaderService = async (
-  targetUsername,
-  currentUserId
-) => {
+export const getUserProfileHeaderService = async (targetUsername) => {
   if (!targetUsername) {
     throw new ApiError(400, "Username is required");
   }
@@ -367,41 +364,7 @@ export const getUserProfileHeaderService = async (
     throw new ApiError(404, "User not found");
   }
 
-  const isSelf =
-    currentUserId && currentUserId.toString() === user._id.toString();
-  let relationStatus = USER_RELATION_STATUS.NONE;
-
-  if (isSelf) {
-    relationStatus = USER_RELATION_STATUS.SELF;
-  } else if (currentUserId) {
-    // Friendship Status
-    const friendship = await Friendship.findOne({
-      $or: [
-        { requester: currentUserId, recipient: user._id },
-        { requester: user._id, recipient: currentUserId },
-      ],
-    });
-
-    if (friendship) {
-      if (friendship.status === FRIENDSHIP_STATUS.ACCEPTED) {
-        relationStatus = USER_RELATION_STATUS.FRIEND;
-      } else if (friendship.status === FRIENDSHIP_STATUS.PENDING) {
-        if (friendship.requester.toString() === currentUserId.toString()) {
-          relationStatus = USER_RELATION_STATUS.REQUEST_SENT;
-        } else {
-          relationStatus = USER_RELATION_STATUS.REQUEST_RECEIVED;
-        }
-      }
-    }
-  }
-
-  return {
-    user,
-    meta: {
-      user_relation_status: relationStatus,
-      isOwnProfile: isSelf,
-    },
-  };
+  return { user };
 };
 
 // ==========================================
