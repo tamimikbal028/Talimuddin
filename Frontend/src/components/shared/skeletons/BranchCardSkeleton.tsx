@@ -1,4 +1,4 @@
-const RoomCardSkeleton = () => {
+const BranchCardSkeleton = () => {
   return (
     <div className="animate-pulse overflow-hidden rounded-lg shadow-sm">
       <div className="relative block h-36 w-full bg-gray-200">
@@ -14,4 +14,4 @@ const RoomCardSkeleton = () => {
   );
 };
 
-export default RoomCardSkeleton;
+export default BranchCardSkeleton;

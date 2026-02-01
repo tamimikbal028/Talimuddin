@@ -1,7 +1,6 @@
-import React from "react";
 import BranchPostSkeleton from "./BranchPostSkeleton";
 
-const BranchDetailsSkeleton: React.FC = () => {
+const BranchDetailsSkeleton = () => {
   return (
     <div className="space-y-5 overflow-hidden">
       {/* Header Skeleton Matching RoomHeader */}
