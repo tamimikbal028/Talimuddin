@@ -5,6 +5,7 @@ import { POST_TARGET_MODELS, POST_VISIBILITY } from "../../constants/index.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { Branch } from "../../models/branch.model.js";
 import { BranchMembership } from "../../models/branchMembership.model.js";
+import { Potrika } from "../../models/potrika.model.js";
 
 export const createPostService = async (postData, authorId) => {
   const { content, attachments, postOnModel, postOnId, visibility, tags } =
@@ -53,6 +54,9 @@ export const createPostService = async (postData, authorId) => {
       break;
     case POST_TARGET_MODELS.BRANCH:
       await Branch.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
+      break;
+    case POST_TARGET_MODELS.POTRIKA:
+      await Potrika.findByIdAndUpdate(postOnId, { $inc: { postsCount: 1 } });
       break;
     default:
       break;
@@ -213,6 +217,11 @@ export const deletePostService = async (postId, userId) => {
           break;
         case POST_TARGET_MODELS.BRANCH:
           await Branch.findByIdAndUpdate(post.postOnId, {
+            $inc: { postsCount: -1 },
+          });
+          break;
+        case POST_TARGET_MODELS.POTRIKA:
+          await Potrika.findByIdAndUpdate(post.postOnId, {
             $inc: { postsCount: -1 },
           });
           break;

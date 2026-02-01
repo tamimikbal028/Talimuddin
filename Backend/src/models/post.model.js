@@ -28,7 +28,6 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: Object.values(POST_TARGET_MODELS),
-      required: true,
       index: true,
     },
     postOnId: {
