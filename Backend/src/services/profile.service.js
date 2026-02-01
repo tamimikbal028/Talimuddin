@@ -22,16 +22,16 @@ export const getUserProfilePostsService = async (
 
   const isOwnProfile = currentUserId?.toString() === targetUser._id.toString();
 
-  // Build visibility query
-  let visibilityQuery = {
+  // Build query - only show PUBLIC posts
+  let postQuery = {
     postOnId: targetUser._id,
     postOnModel: POST_TARGET_MODELS.USER,
+    visibility: POST_VISIBILITY.PUBLIC,
     isDeleted: false,
-    isArchived: false,
   };
 
   // Fetch posts with pagination
-  const posts = await Post.find(visibilityQuery)
+  const posts = await Post.find(postQuery)
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
@@ -63,7 +63,7 @@ export const getUserProfilePostsService = async (
   }));
 
   // Count total documents for pagination
-  const totalDocs = await Post.countDocuments(visibilityQuery);
+  const totalDocs = await Post.countDocuments(postQuery);
   const totalPages = Math.ceil(totalDocs / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
