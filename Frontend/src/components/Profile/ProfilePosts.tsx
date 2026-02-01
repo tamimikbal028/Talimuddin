@@ -4,11 +4,10 @@ import PostSkeleton from "../shared/skeletons/PostSkeleton";
 import type { ProfilePostsProps, ApiError } from "../../types";
 import type { AxiosError } from "axios";
 import { profileHooks } from "../../hooks/useProfile";
+import { authHooks } from "../../hooks/useAuth";
 
-const ProfilePosts: React.FC<ProfilePostsProps> = ({
-  username,
-  isOwnProfile,
-}) => {
+const ProfilePosts: React.FC<ProfilePostsProps> = ({ username }) => {
+  const { isAppAdmin } = authHooks.useUser();
   const {
     data: postsData,
     isLoading,
@@ -61,9 +60,7 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({
       ) : (
         <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow">
           <p className="text-gray-500">
-            {isOwnProfile
-              ? "You haven't posted anything yet."
-              : "No posts to show."}
+            {!isAppAdmin && "Only selected people can post"}
           </p>
         </div>
       )}
@@ -82,5 +79,3 @@ const ProfilePosts: React.FC<ProfilePostsProps> = ({
 };
 
 export default ProfilePosts;
-
-

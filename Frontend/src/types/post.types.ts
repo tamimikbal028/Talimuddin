@@ -77,7 +77,6 @@ export interface ProfilePostsResponse {
 
 export interface ProfilePostsProps {
   username: string;
-  isOwnProfile: boolean;
 }
 
 export interface CreatePostRequest {
