@@ -351,7 +351,10 @@ export const updateAccountDetailsService = async (userId, updateData) => {
 // ==========================================
 // 🚀 11. GET USER PROFILE HEADER SERVICE
 // ==========================================
-export const getUserProfileHeaderService = async (targetUsername) => {
+export const getUserProfileHeaderService = async (
+  targetUsername,
+  currentUserId
+) => {
   if (!targetUsername) {
     throw new ApiError(400, "Username is required");
   }
@@ -364,23 +367,13 @@ export const getUserProfileHeaderService = async (targetUsername) => {
     throw new ApiError(404, "User not found");
   }
 
-  return { user };
-};
+  const isOwnProfile =
+    currentUserId && currentUserId.toString() === user._id.toString();
 
-// ==========================================
-// 🚀 12. GET USER DETAILS SERVICE
-// ==========================================
-export const getUserDetailsService = async (username) => {
-  const user = await User.findOne({ userName: username })
-    .select("-password -refreshToken")
-    .populate([
-      { path: "institution", select: "name code logo" },
-      { path: "academicInfo.department", select: "name code logo" },
-    ]);
-
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-
-  return { user };
+  return {
+    user,
+    meta: {
+      isOwnProfile,
+    },
+  };
 };

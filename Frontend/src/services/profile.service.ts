@@ -21,16 +21,6 @@ export const profileService = {
     return response.data;
   },
 
-  // Get Profile Details by Username
-  getProfileDetails: async (
-    username: string
-  ): Promise<ApiResponse<{ user: User }>> => {
-    const response = await api.get<ApiResponse<{ user: User }>>(
-      `/profile/details/${username}`
-    );
-    return response.data;
-  },
-
   // Update General Info
   updateGeneral: async (
     data: UpdateGeneralData

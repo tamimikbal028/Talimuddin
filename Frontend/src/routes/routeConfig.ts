@@ -80,14 +80,6 @@ export const routes: RouteConfig[] = [
     meta: { description: "Edit your profile information" },
   },
   {
-    path: "/profile/:username/details",
-    component: lazy(() => import("../pages/Profile/ProfileDetails")),
-    requireAuth: true,
-    title: "Profile Details",
-    category: "profile",
-    meta: { description: "View detailed profile information" },
-  },
-  {
     path: "/profile/:username",
     component: lazy(() => import("../pages/Profile/Profile")),
     requireAuth: true,

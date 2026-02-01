@@ -40,20 +40,6 @@ const useProfileHeader = () => {
   });
 };
 
-const useProfileDetails = () => {
-  const { username } = useParams();
-  return useQuery({
-    queryKey: ["profileDetails", username],
-    queryFn: async () => {
-      const response = await profileService.getProfileDetails(
-        username as string
-      );
-      return response.data;
-    },
-    ...defaultProfileQueryOptions,
-  });
-};
-
 // Update hooks
 const useUpdateGeneral = () => {
   const queryClient = useQueryClient();
@@ -184,7 +170,6 @@ const useTogglePinProfilePost = () => {
 
 const profileHooks = {
   useProfileHeader,
-  useProfileDetails,
   useUpdateGeneral,
   useUpdateAvatar,
   useUpdateCoverImage,
