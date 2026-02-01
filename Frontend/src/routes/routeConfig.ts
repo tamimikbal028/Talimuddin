@@ -97,7 +97,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: "/potrika/:potrikaId",
-    component: lazy(() => import("../pages/Potrika/Potrika")),
+    component: lazy(() => import("../pages/Potrika")),
     requireAuth: true,
     title: "Potrika",
     category: "main",

@@ -3,10 +3,10 @@ import {
   PotrikaPosts,
   CreatePotrikaPost,
   PotrikaNotFound,
-} from "../../components/Potrika";
-import { authHooks } from "../../hooks/useAuth";
-import { potrikaHooks } from "../../hooks/usePotrika";
-import ProfileHeaderSkeleton from "../../components/shared/skeletons/ProfileHeaderSkeleton";
+} from "../components/Potrika";
+import { authHooks } from "../hooks/useAuth";
+import { potrikaHooks } from "../hooks/usePotrika";
+import ProfileHeaderSkeleton from "../components/shared/skeletons/ProfileHeaderSkeleton";
 
 const Potrika = () => {
   const { isAppAdmin } = authHooks.useUser();
