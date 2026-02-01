@@ -57,9 +57,6 @@ export interface User {
   connectionsCount: number;
   publicFilesCount: number;
 
-  // Friendship
-  profile_relation_status?: string;
-
   // User Type
   userType: UserType;
 

@@ -30,34 +30,6 @@ export const getUserProfilePostsService = async (
     isArchived: false,
   };
 
-  if (isOwnProfile) {
-    // Own Profile: See everything
-  } else {
-    // Visitor: Check relationship
-    let isFriend = false;
-
-    if (currentUserId) {
-      const friendship = await Friendship.findOne({
-        $or: [
-          { requester: currentUserId, recipient: targetUser._id },
-          { requester: targetUser._id, recipient: currentUserId },
-        ],
-        status: FRIENDSHIP_STATUS.ACCEPTED,
-      });
-      if (friendship) isFriend = true;
-    }
-
-    if (isFriend) {
-      // Friend: See Public + Connections
-      visibilityQuery.visibility = {
-        $in: [POST_VISIBILITY.PUBLIC, POST_VISIBILITY.CONNECTIONS],
-      };
-    } else {
-      // Public User: See only Public
-      visibilityQuery.visibility = POST_VISIBILITY.PUBLIC;
-    }
-  }
-
   // Fetch posts with pagination
   const posts = await Post.find(visibilityQuery)
     .sort({ createdAt: -1 })
@@ -66,9 +38,8 @@ export const getUserProfilePostsService = async (
     .populate("author", "fullName avatar userName")
     .lean();
 
-  // Add context (isLiked, isSaved, isRead)
+  // Add context (isSaved, isRead)
   let viewedPostIds = new Set();
-  let likedPostIds = new Set();
   const postIds = posts.map((p) => p._id);
 
   if (currentUserId && posts.length > 0) {
@@ -79,23 +50,13 @@ export const getUserProfilePostsService = async (
     }).select("post");
 
     viewedPostIds = new Set(viewedPosts.map((vp) => vp.post.toString()));
-
-    // Fetch like status
-    const likedPosts = await Reaction.find({
-      user: currentUserId,
-      targetModel: REACTION_TARGET_MODELS.POST,
-      targetId: { $in: postIds },
-    }).select("targetId");
-
-    likedPostIds = new Set(likedPosts.map((r) => r.targetId.toString()));
   }
 
   // Format posts with context
   const postsWithContext = posts.map((post) => ({
     post,
     meta: {
-      isLiked: likedPostIds.has(post._id.toString()),
-      isSaved: false, // TODO: Check if currentUser saved this post
+      isSaved: false,
       isMine: isOwnProfile,
       isRead: viewedPostIds.has(post._id.toString()),
     },
