@@ -69,6 +69,14 @@ export const routes: RouteConfig[] = [
     category: "social",
     meta: { description: "Your notifications and updates" },
   },
+  {
+    path: "/saved",
+    component: lazy(() => import("../pages/Saved")),
+    requireAuth: true,
+    title: "Saved",
+    category: "social",
+    meta: { description: "Your saved posts and content" },
+  },
 
   // Profile routes
   {

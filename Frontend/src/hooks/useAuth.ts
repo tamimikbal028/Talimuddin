@@ -9,6 +9,7 @@ import type {
   RegisterData,
 } from "../types";
 import type { AxiosError } from "axios";
+import { USER_TYPES } from "../constants";
 
 // Query Keys
 const AUTH_KEYS = {
@@ -43,6 +44,9 @@ const useUser = (): AuthState => {
     user: user ?? null,
     isAuthenticated: Boolean(user),
     isCheckingAuth: isLoading,
+    isAppAdmin:
+      user?.userType === USER_TYPES.OWNER ||
+      user?.userType === USER_TYPES.ADMIN,
   };
 };
 

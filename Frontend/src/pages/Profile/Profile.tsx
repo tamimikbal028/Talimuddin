@@ -1,10 +1,7 @@
-import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   ProfileHeader,
   ProfilePosts,
-  PublicFiles,
-  ProfileTabs,
   CreateProfilePost,
   ProfileNotFound,
 } from "../../components/Profile";
@@ -12,11 +9,10 @@ import { authHooks } from "../../hooks/useAuth";
 import { profileHooks } from "../../hooks/useProfile";
 import ProfileHeaderSkeleton from "../../components/shared/skeletons/ProfileHeaderSkeleton";
 
-const Profile: React.FC = () => {
+const Profile = () => {
   const { username } = useParams<{ username: string }>();
-  const [activeTab, setActiveTab] = useState<"posts" | "files">("posts");
 
-  const { user: currentUser } = authHooks.useUser();
+  const { user: currentUser, isAppAdmin } = authHooks.useUser();
 
   const {
     data: profileData,
@@ -32,26 +28,17 @@ const Profile: React.FC = () => {
     return <ProfileNotFound />;
   }
 
-  const { user, meta } = profileData;
-  const isOwnProfile = meta?.isOwnProfile ?? username === currentUser?.userName;
+  const { user } = profileData;
+  const isOwnProfile = username === currentUser?.userName;
 
   return (
     <>
       <ProfileHeader data={profileData} />
 
-      <ProfileTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isOwnProfile={isOwnProfile}
-        data={profileData}
-      />
-
-      {/* Tab Content */}
-      <div>
-        {activeTab === "posts" && (
-          <div className="space-y-3">
-            {/* Create Post Section (Only for Own Profile) */}
-            {isOwnProfile && currentUser?._id && (
+      <div className="space-y-3">
+        {!isAppAdmin ? (
+          <>
+            {isOwnProfile && (
               <div className="mb-4">
                 <CreateProfilePost />
               </div>
@@ -60,12 +47,10 @@ const Profile: React.FC = () => {
               username={user.userName}
               isOwnProfile={isOwnProfile}
             />
-          </div>
-        )}
-
-        {activeTab === "files" && (
-          <div className="space-y-3">
-            <PublicFiles username={user.userName} isOwnProfile={isOwnProfile} />
+          </>
+        ) : (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-8 text-center shadow-sm">
+            <p>You are not authorized to create posts.</p>
           </div>
         )}
       </div>

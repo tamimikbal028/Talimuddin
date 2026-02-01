@@ -10,11 +10,7 @@ import {
   FaCheckDouble,
   FaThumbtack,
 } from "react-icons/fa";
-import {
-  formatPostDate,
-  formatPostClock,
-  formatPostDateTime,
-} from "../../utils/dateUtils";
+import { formatPostDate, formatPostClock } from "../../utils/dateUtils";
 import SeparatorDot from "../shared/SeparatorDot";
 import PostContent from "../shared/PostContent";
 import type { Post, PostMeta } from "../../types";
@@ -124,6 +120,12 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
               <span>{formatPostDate(post.createdAt)}</span>
               <SeparatorDot ariaHidden />
               <span>{formatPostClock(post.createdAt)}</span>
+              {post.isEdited && post.editedAt && (
+                <>
+                  <SeparatorDot ariaHidden />
+                  <span className="text-gray-400 italic">Edited</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -287,23 +289,6 @@ const ProfilePostCard: React.FC<ProfilePostCardProps> = ({ post, meta }) => {
             </div>
           </div>
         )}
-      </div>
-
-      <div className="border-t border-gray-100 px-4 py-2">
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-3">
-            {post.isEdited && post.editedAt && (
-              <>
-                <SeparatorDot />
-                <span className="text-gray-400 italic">Edited</span>
-                <SeparatorDot ariaHidden />
-                <span className="text-gray-400 italic">
-                  {post.editedAt && formatPostDateTime(post.editedAt)}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );

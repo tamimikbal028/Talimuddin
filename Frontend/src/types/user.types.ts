@@ -78,6 +78,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isCheckingAuth: boolean;
+  isAppAdmin: boolean;
 }
 
 export interface AuthResponse {

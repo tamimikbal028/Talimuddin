@@ -8,6 +8,7 @@ import {
   FaEllipsisH,
   FaSignOutAlt,
   FaDoorOpen,
+  FaBookmark,
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
@@ -33,7 +34,12 @@ const Sidebar: React.FC = () => {
       path: "/branch/all",
       active: location.pathname === "/branch/all",
     },
-
+    {
+      icon: FaBookmark,
+      label: "Saved",
+      path: "/saved",
+      active: location.pathname.startsWith("/saved"),
+    },
     {
       icon: FaBell,
       label: "Notifications",
