@@ -2,7 +2,6 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import potrikaService from "../services/potrika.service";
 
-// Hook to get potrika header
 export const usePotrikaHeader = () => {
   const { potrikaId } = useParams();
 
@@ -10,15 +9,14 @@ export const usePotrikaHeader = () => {
     queryKey: ["potrika", "header", potrikaId],
     queryFn: async () => {
       const response = await potrikaService.getPotrikaHeader(potrikaId!);
-      return response;
+      return response.data;
     },
     enabled: !!potrikaId,
     retry: 1,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-// Hook to get potrika posts with infinite scroll
 export const usePotrikaPosts = (potrikaId?: string) => {
   const params = useParams();
   const effectivePotrikaId = potrikaId || params.potrikaId;
@@ -39,7 +37,7 @@ export const usePotrikaPosts = (potrikaId?: string) => {
       return page < totalPages ? page + 1 : undefined;
     },
     initialPageParam: 1,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 2 * 60 * 1000,
   });
 };
 

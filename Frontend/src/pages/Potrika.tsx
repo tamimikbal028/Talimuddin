@@ -11,11 +11,7 @@ import ProfileHeaderSkeleton from "../components/shared/skeletons/ProfileHeaderS
 const Potrika = () => {
   const { isAppAdmin } = authHooks.useUser();
 
-  const {
-    data: potrikaData,
-    isLoading,
-    error,
-  } = potrikaHooks.usePotrikaHeader();
+  const { data, isLoading, error } = potrikaHooks.usePotrikaHeader();
 
   // Show loading state
   if (isLoading) {
@@ -23,18 +19,18 @@ const Potrika = () => {
   }
 
   // Show error state
-  if (error || !potrikaData) {
+  if (error || !data) {
     return <PotrikaNotFound />;
   }
-
-  const { potrika } = potrikaData.data;
 
   // Only app owner and admin can create posts
   const canCreatePost = isAppAdmin;
 
+  const { potrika } = data;
+
   return (
     <>
-      <PotrikaHeader data={potrikaData.data} />
+      <PotrikaHeader data={potrika} />
 
       <div className="space-y-3">
         {canCreatePost && (

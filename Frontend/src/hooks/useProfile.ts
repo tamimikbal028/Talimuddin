@@ -17,8 +17,6 @@ import { postHooks } from "./common/usePost";
 import { useParams } from "react-router-dom";
 import { AUTH_KEYS } from "./useAuth";
 
-// Import Generic Utils
-
 const FIVE_MIN = 1000 * 60 * 5;
 
 const defaultProfileQueryOptions = {

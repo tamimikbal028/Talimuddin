@@ -9,13 +9,10 @@ import mongoose from "mongoose";
  * Get potrika header information
  */
 const getPotrikaHeaderService = async (potrikaId) => {
-  console.log("DEBUG: getPotrikaHeaderService called with ID:", potrikaId);
   if (!mongoose.Types.ObjectId.isValid(potrikaId)) {
-    console.log("DEBUG: Invalid ObjectId format:", potrikaId);
     throw new ApiError(400, "Invalid Potrika ID format");
   }
   const potrika = await Potrika.findById(potrikaId).lean();
-  console.log("DEBUG: Potrika found:", potrika ? potrika.name : "NULL");
 
   if (!potrika) {
     throw new ApiError(404, "Potrika not found");
