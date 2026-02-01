@@ -1,23 +1,18 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { getUserProfilePostsService } from "../services/profile.service.js";
-import {
-  updateUserAvatarService,
-  updateUserCoverImageService,
-  updateAccountDetailsService,
-  getUserProfileHeaderService,
-} from "../services/auth.service.js";
+import profileServices from "../services/profile.service.js";
 
 // -----------------------------
 // Profile Posts
 // -----------------------------
 const getUserProfilePosts = asyncHandler(async (req, res) => {
   const { username } = req.params;
-  const { posts, pagination } = await getUserProfilePostsService(
-    username,
-    req.user?._id,
-    req.query
-  );
+  const { posts, pagination } =
+    await profileServices.getUserProfilePostsService(
+      username,
+      req.user?._id,
+      req.query
+    );
   return res
     .status(200)
     .json(
@@ -34,7 +29,10 @@ const getUserProfilePosts = asyncHandler(async (req, res) => {
 // -----------------------------
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
-  const { user } = await updateUserAvatarService(req.user._id, avatarLocalPath);
+  const { user } = await profileServices.updateUserAvatarService(
+    req.user._id,
+    avatarLocalPath
+  );
   return res
     .status(200)
     .json(new ApiResponse(200, { user }, "Avatar updated successfully"));
@@ -42,7 +40,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
-  const { user } = await updateUserCoverImageService(
+  const { user } = await profileServices.updateUserCoverImageService(
     req.user._id,
     coverImageLocalPath
   );
@@ -52,7 +50,10 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { user } = await updateAccountDetailsService(req.user._id, req.body);
+  const { user } = await profileServices.updateAccountDetailsService(
+    req.user._id,
+    req.body
+  );
   return res
     .status(200)
     .json(
@@ -65,7 +66,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 // -----------------------------
 const getUserProfileHeader = asyncHandler(async (req, res) => {
   const { username } = req.params;
-  const { user, meta } = await getUserProfileHeaderService(
+  const { user, meta } = await profileServices.getUserProfileHeaderService(
     username,
     req.user?._id
   );

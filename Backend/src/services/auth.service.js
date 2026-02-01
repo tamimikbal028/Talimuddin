@@ -1,6 +1,5 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
-import { uploadFile, deleteFile } from "../utils/cloudinaryFileUpload.js";
 import { USER_TYPES } from "../constants/index.js";
 import jwt from "jsonwebtoken";
 
@@ -27,7 +26,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 // ==========================================
 // 🚀 1. REGISTER USER SERVICE
 // ==========================================
-export const registerUserService = async (userData) => {
+const registerUserService = async (userData) => {
   const { fullName, phoneNumber, password, userName, agreeToTerms } = userData;
 
   // Always set userType to USER
@@ -77,7 +76,7 @@ export const registerUserService = async (userData) => {
 // ==========================================
 // 🚀 2. LOGIN USER SERVICE
 // ==========================================
-export const loginUserService = async ({ email, userName, password }) => {
+const loginUserService = async ({ email, userName, password }) => {
   if (!email && !userName) {
     throw new ApiError(400, "Username or email is required");
   }
@@ -110,7 +109,7 @@ export const loginUserService = async ({ email, userName, password }) => {
 // ==========================================
 // 🚀 3. LOGOUT USER SERVICE
 // ==========================================
-export const logoutUserService = async (userId) => {
+const logoutUserService = async (userId) => {
   await User.findByIdAndUpdate(
     userId,
     { $unset: { refreshToken: 1 } },
@@ -122,7 +121,7 @@ export const logoutUserService = async (userId) => {
 // ==========================================
 // 🚀 4. REFRESH TOKEN SERVICE
 // ==========================================
-export const refreshAccessTokenService = async (incomingRefreshToken) => {
+const refreshAccessTokenService = async (incomingRefreshToken) => {
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized request");
   }
@@ -150,7 +149,7 @@ export const refreshAccessTokenService = async (incomingRefreshToken) => {
 // ==========================================
 // 🚀 5. CHANGE PASSWORD SERVICE
 // ==========================================
-export const changePasswordService = async (
+const changePasswordService = async (
   userId,
   oldPassword,
   newPassword
@@ -169,211 +168,12 @@ export const changePasswordService = async (
   return {};
 };
 
-// ==========================================
-// 🚀 7. UPDATE ACADEMIC PROFILE SERVICE
-// ==========================================
-export const updateAcademicProfileService = async (
-  userId,
-  userType,
-  updateData
-) => {
-  const {
-    institution: institutionId,
-    department: departmentId,
-    session,
-    section,
-    studentId,
-    teacherId,
-    rank,
-    officeHours,
-  } = updateData;
-
-  const existingUser = await User.findById(userId);
-  if (!existingUser) throw new ApiError(404, "User not found");
-
-  // Verify and set Institution
-  let effectiveInstitution = existingUser.institution;
-  if (institutionId) {
-    const inst = await Institution.findById(institutionId);
-    if (!inst)
-      throw new ApiError(404, "Institution not found with provided ID");
-    effectiveInstitution = institutionId;
-  }
-
-  // Verify and set Department
-  let effectiveDepartment = existingUser.academicInfo?.department;
-  if (departmentId) {
-    const dept = await Department.findById(departmentId);
-    if (!dept) throw new ApiError(404, "Department not found with provided ID");
-    effectiveDepartment = departmentId;
-  }
-
-  if (!effectiveInstitution || !effectiveDepartment) {
-    throw new ApiError(400, "Institution and Department are required");
-  }
-
-  let academicInfoPayload = {
-    ...(existingUser.academicInfo ? existingUser.academicInfo.toObject() : {}),
-    department: effectiveDepartment,
-  };
-
-  // Since all users are now USER type, we handle all academic info fields
-  if (session) academicInfoPayload.session = session;
-  if (section !== undefined) academicInfoPayload.section = section;
-  if (studentId !== undefined) academicInfoPayload.studentId = studentId;
-  if (teacherId !== undefined) academicInfoPayload.teacherId = teacherId;
-  if (rank !== undefined) academicInfoPayload.rank = rank;
-  if (officeHours !== undefined) academicInfoPayload.officeHours = officeHours;
-
-  const user = await User.findByIdAndUpdate(
-    userId,
-    {
-      $set: {
-        institution: effectiveInstitution,
-        academicInfo: academicInfoPayload,
-      },
-    },
-    { new: true }
-  )
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo")
-    .select("-password -refreshToken");
-
-  return { user };
+const authServices = {
+  registerUserService,
+  loginUserService,
+  logoutUserService,
+  refreshAccessTokenService,
+  changePasswordService,
 };
 
-// ==========================================
-// 🚀 8. UPDATE AVATAR SERVICE
-// ==========================================
-export const updateUserAvatarService = async (userId, avatarLocalPath) => {
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
-  }
-
-  // Get user to check old avatar
-  const existingUser = await User.findById(userId);
-  if (!existingUser) {
-    throw new ApiError(404, "User not found");
-  }
-
-  const avatar = await uploadFile(avatarLocalPath);
-
-  if (!avatar.url) {
-    throw new ApiError(500, "Error uploading avatar");
-  }
-
-  // Delete old avatar from Cloudinary if exists
-  if (existingUser.avatar && existingUser.avatar.includes("cloudinary")) {
-    const publicId = existingUser.avatar.split("/").pop().split(".")[0];
-    await deleteFile(publicId);
-  }
-
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { $set: { avatar: avatar.url } },
-    { new: true }
-  )
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo")
-    .select("-password");
-
-  return { user };
-};
-
-// ==========================================
-// 🚀 9. UPDATE COVER IMAGE SERVICE
-// ==========================================
-export const updateUserCoverImageService = async (
-  userId,
-  coverImageLocalPath
-) => {
-  if (!coverImageLocalPath) {
-    throw new ApiError(400, "Cover image file is missing");
-  }
-
-  // Get user to check old cover image
-  const existingUser = await User.findById(userId);
-  if (!existingUser) {
-    throw new ApiError(404, "User not found");
-  }
-
-  const coverImage = await uploadFile(coverImageLocalPath);
-
-  if (!coverImage.url) {
-    throw new ApiError(500, "Error uploading cover image");
-  }
-
-  // Delete old cover image from Cloudinary if exists
-  if (
-    existingUser.coverImage &&
-    existingUser.coverImage.includes("cloudinary")
-  ) {
-    const publicId = existingUser.coverImage.split("/").pop().split(".")[0];
-    await deleteFile(publicId);
-  }
-
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { $set: { coverImage: coverImage.url } },
-    { new: true }
-  )
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo")
-    .select("-password");
-
-  return { user };
-};
-
-// ==========================================
-// 🚀 10. UPDATE ACCOUNT DETAILS SERVICE
-// ==========================================
-export const updateAccountDetailsService = async (userId, updateData) => {
-  if (updateData.userName) {
-    throw new ApiError(400, "Username cannot be changed.");
-  }
-
-  if (Object.keys(updateData).length === 0) {
-    throw new ApiError(400, "At least one field is required to update");
-  }
-
-  const user = await User.findByIdAndUpdate(
-    userId,
-    { $set: updateData },
-    { new: true }
-  )
-    .populate("institution", "name code logo")
-    .populate("academicInfo.department", "name code logo")
-    .select("-password -refreshToken");
-
-  return { user };
-};
-
-// ==========================================
-// 🚀 11. GET USER PROFILE HEADER SERVICE
-// ==========================================
-export const getUserProfileHeaderService = async (
-  targetUsername,
-  currentUserId
-) => {
-  if (!targetUsername) {
-    throw new ApiError(400, "Username is required");
-  }
-
-  const user = await User.findOne({ userName: targetUsername }).select(
-    "-password -refreshToken"
-  );
-
-  if (!user) {
-    throw new ApiError(404, "User not found");
-  }
-
-  const isOwnProfile =
-    currentUserId && currentUserId.toString() === user._id.toString();
-
-  return {
-    user,
-    meta: {
-      isOwnProfile,
-    },
-  };
-};
+export default authServices;

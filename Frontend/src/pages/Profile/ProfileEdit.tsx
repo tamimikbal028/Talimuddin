@@ -1,20 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaCamera, FaUser, FaGraduationCap, FaArrowLeft } from "react-icons/fa";
+import { FaCamera, FaUser, FaArrowLeft } from "react-icons/fa";
 
 import PageLoader from "../Fallbacks/PageLoader";
 import { authHooks } from "../../hooks/useAuth";
-import {
-  PhotosTab,
-  GeneralTab,
-  AcademicTab,
-} from "../../components/ProfileEdit";
+import { PhotosTab, GeneralTab } from "../../components/ProfileEdit";
 
 // ====================================
 // TAB TYPES
 // ====================================
 
-type TabType = "photos" | "general" | "academic";
+type TabType = "photos" | "general";
 
 interface Tab {
   id: TabType;
@@ -25,14 +21,13 @@ interface Tab {
 const TABS: Tab[] = [
   { id: "photos", label: "Photos", icon: <FaCamera /> },
   { id: "general", label: "General", icon: <FaUser /> },
-  { id: "academic", label: "Academic", icon: <FaGraduationCap /> },
 ];
 
 // ====================================
 // COMPONENT
 // ====================================
 
-const ProfileEdit: React.FC = () => {
+const ProfileEdit = () => {
   const navigate = useNavigate();
   const { user, isCheckingAuth } = authHooks.useUser();
   const [activeTab, setActiveTab] = useState<TabType>("photos");
@@ -87,13 +82,9 @@ const ProfileEdit: React.FC = () => {
         )}
 
         {activeTab === "general" && <GeneralTab user={user} />}
-
-        {activeTab === "academic" && <AcademicTab user={user} />}
       </div>
     </div>
   );
 };
 
 export default ProfileEdit;
-
-

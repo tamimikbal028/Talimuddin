@@ -1,20 +1,13 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import {
-  registerUserService,
-  loginUserService,
-  logoutUserService,
-  refreshAccessTokenService,
-  changePasswordService,
-} from "../services/auth.service.js";
+import authServices from "../services/auth.service.js";
 
 // -----------------------------
 // Auth & Session
 // -----------------------------
 const registerUser = asyncHandler(async (req, res) => {
-  const { user, accessToken, refreshToken } = await registerUserService(
-    req.body
-  );
+  const { user, accessToken, refreshToken } =
+    await authServices.registerUserService(req.body);
 
   const options = {
     httpOnly: true,
@@ -29,7 +22,8 @@ const registerUser = asyncHandler(async (req, res) => {
 });
 
 const loginUser = asyncHandler(async (req, res) => {
-  const { user, accessToken, refreshToken } = await loginUserService(req.body);
+  const { user, accessToken, refreshToken } =
+    await authServices.loginUserService(req.body);
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -43,7 +37,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  await logoutUserService(req.user._id);
+  await authServices.logoutUserService(req.user._id);
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -60,7 +54,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
     req.cookies.refreshToken || req.body.refreshToken;
   const { accessToken, refreshToken } =
-    await refreshAccessTokenService(incomingRefreshToken);
+    await authServices.refreshAccessTokenService(incomingRefreshToken);
   const options = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -75,7 +69,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  await changePasswordService(req.user._id, oldPassword, newPassword);
+  await authServices.changePasswordService(
+    req.user._id,
+    oldPassword,
+    newPassword
+  );
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Password changed successfully."));
