@@ -9,9 +9,11 @@ import {
   FaSignOutAlt,
   FaDoorOpen,
   FaBookmark,
+  FaNewspaper,
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
+import { DEFAULT_POTRIKA_ID } from "../constants";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -33,6 +35,12 @@ const Sidebar: React.FC = () => {
       label: "All Branches",
       path: "/branch/all",
       active: location.pathname === "/branch/all",
+    },
+    {
+      icon: FaNewspaper,
+      label: "Potrika",
+      path: `/potrika/${DEFAULT_POTRIKA_ID}`,
+      active: location.pathname.startsWith("/potrika"),
     },
     {
       icon: FaBookmark,

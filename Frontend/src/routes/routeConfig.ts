@@ -54,9 +54,9 @@ export const routes: RouteConfig[] = [
 
   {
     path: "/branch/*",
-    component: lazy(() => import("../pages/Branch")),
+    component: lazy(() => import("../pages/Branch/Branch")),
     requireAuth: true,
-    title: "ClassRoom",
+    title: "Branch",
     category: "education",
     meta: { description: "Attend and manage live online classes" },
   },
@@ -94,6 +94,14 @@ export const routes: RouteConfig[] = [
     title: "Profile",
     category: "profile",
     meta: { description: "View profile" },
+  },
+  {
+    path: "/potrika/:potrikaId",
+    component: lazy(() => import("../pages/Potrika/Potrika")),
+    requireAuth: true,
+    title: "Potrika",
+    category: "main",
+    meta: { description: "View Potrika publications and posts" },
   },
   {
     path: "/settings",

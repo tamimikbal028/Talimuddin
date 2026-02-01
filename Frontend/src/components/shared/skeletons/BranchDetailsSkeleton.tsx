@@ -1,7 +1,7 @@
 import React from "react";
-import RoomPostSkeleton from "./RoomPostSkeleton";
+import BranchPostSkeleton from "./BranchPostSkeleton";
 
-const RoomDetailsSkeleton: React.FC = () => {
+const BranchDetailsSkeleton: React.FC = () => {
   return (
     <div className="space-y-5 overflow-hidden">
       {/* Header Skeleton Matching RoomHeader */}
@@ -63,7 +63,7 @@ const RoomDetailsSkeleton: React.FC = () => {
       <div className="mx-auto max-w-5xl">
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <RoomPostSkeleton key={i} />
+            <BranchPostSkeleton key={i} />
           ))}
         </div>
       </div>
@@ -71,4 +71,4 @@ const RoomDetailsSkeleton: React.FC = () => {
   );
 };
 
-export default RoomDetailsSkeleton;
+export default BranchDetailsSkeleton;

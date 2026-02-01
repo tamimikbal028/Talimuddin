@@ -1,6 +1,7 @@
 export const POST_TARGET_MODELS = {
   BRANCH: "Branch",
   USER: "User",
+  POTRIKA: "Potrika",
 } as const;
 
 export const POST_VISIBILITY = {

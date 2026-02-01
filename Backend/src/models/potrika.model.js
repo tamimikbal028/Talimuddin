@@ -12,6 +12,12 @@ const potrikaSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    avatar: {
+      type: String,
+    },
+    coverImage: {
+      type: String,
+    },
     postsCount: {
       type: Number,
       default: 0,

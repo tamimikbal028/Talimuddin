@@ -1,4 +1,4 @@
-const RoomPostSkeleton = () => {
+const BranchPostSkeleton = () => {
   return (
     <div className="animate-pulse rounded border border-gray-400 bg-white shadow">
       {/* Post Header Skeleton */}
@@ -44,4 +44,4 @@ const RoomPostSkeleton = () => {
   );
 };
 
-export default RoomPostSkeleton;
+export default BranchPostSkeleton;

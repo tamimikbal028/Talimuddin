@@ -1,15 +1,15 @@
 import React, { Suspense, lazy } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
-import Header from "../components/Branch/BranchHeader";
-import Branches from "./Branch/Branches";
-import PageLoader from "./Fallbacks/PageLoader";
+import Branches from "./Branches";
+import Header from "../../components/Branch/BranchHeader";
+import PageLoader from "../Fallbacks/PageLoader";
 
 // Lazy load pages
-const BranchDetails = lazy(() => import("./Branch/BranchDetails"));
-const CreateBranchPage = lazy(() => import("./Branch/CreateBranchPage"));
-const JoinBranchPage = lazy(() => import("./Branch/JoinBranchPage"));
-const EditBranchPage = lazy(() => import("./Branch/EditBranchPage"));
-const AllBranches = lazy(() => import("./Branch/AllBranches"));
+const BranchDetails = lazy(() => import("./BranchDetails"));  
+const CreateBranchPage = lazy(() => import("./CreateBranchPage"));
+const JoinBranchPage = lazy(() => import("./JoinBranchPage"));
+const EditBranchPage = lazy(() => import("./EditBranchPage"));
+const AllBranches = lazy(() => import("./AllBranches"));
 
 const BranchLayout: React.FC = () => {
   return (

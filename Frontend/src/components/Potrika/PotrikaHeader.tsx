@@ -1,0 +1,76 @@
+import React from "react";
+
+interface PotrikaHeaderData {
+  potrika: {
+    _id: string;
+    name: string;
+    description?: string;
+    avatar?: string;
+    coverImage?: string;
+    postsCount: number;
+  };
+  meta: {
+    postsCount: number;
+  };
+}
+
+const PotrikaHeader: React.FC<{ data: PotrikaHeaderData }> = ({ data }) => {
+  const { potrika } = data;
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+      {/* Cover Image */}
+      {potrika.coverImage && (
+        <div className="h-48 w-full overflow-hidden rounded-t-lg">
+          <img
+            src={potrika.coverImage}
+            alt={`${potrika.name} cover`}
+            className="h-full w-full object-cover"
+          />
+        </div>
+      )}
+
+      <div className="relative px-5 pb-5">
+        {/* Avatar, Name and Description */}
+        <div className="flex items-start gap-4">
+          {potrika.avatar && (
+            <div
+              className={`${potrika.coverImage ? "-mt-12" : "mt-0"} relative z-10`}
+            >
+              <img
+                src={potrika.avatar}
+                alt={potrika.name}
+                className="h-28 w-28 rounded-xl border-4 border-white bg-white object-cover shadow-md"
+              />
+            </div>
+          )}
+
+          <div
+            className={`min-w-0 flex-1 ${potrika.avatar && potrika.coverImage ? "pt-2" : "pt-0"}`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {potrika.name}
+                </h1>
+                <p className="mt-1 text-sm leading-relaxed font-medium text-gray-600">
+                  {potrika.description || "No description added yet."}
+                </p>
+
+                {/* Post Count */}
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-700/10 ring-inset">
+                    {potrika.postsCount || 0}{" "}
+                    {potrika.postsCount === 1 ? "Post" : "Posts"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PotrikaHeader;
