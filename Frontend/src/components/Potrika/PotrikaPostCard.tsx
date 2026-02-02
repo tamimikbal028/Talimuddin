@@ -18,6 +18,7 @@ import { useParams } from "react-router-dom";
 import confirm from "../../utils/sweetAlert";
 import { useDropdown } from "../../hooks/useDropdown";
 import { postHooks } from "../../hooks/common/usePost";
+import { POST_TARGET_MODELS } from "../../constants";
 
 interface PotrikaPostCardProps {
   post: Post;
@@ -119,13 +120,26 @@ const PotrikaPostCard: React.FC<PotrikaPostCardProps> = ({ post, meta }) => {
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
           <img
-            src={post.author.avatar}
-            alt={post.author.fullName}
+            src={
+              post.postOnModel !== POST_TARGET_MODELS.POTRIKA ||
+              typeof post.postOnId === "string"
+                ? post.author.avatar
+                : post.postOnId.avatar
+            }
+            alt={
+              post.postOnModel !== POST_TARGET_MODELS.POTRIKA ||
+              typeof post.postOnId === "string"
+                ? post.author.fullName
+                : post.postOnId.name
+            }
             className="h-10 w-10 rounded-full bg-gray-300 object-cover"
           />
           <div>
             <h3 className="font-semibold text-gray-900">
-              {post.author.fullName}
+              {post.postOnModel !== POST_TARGET_MODELS.POTRIKA ||
+              typeof post.postOnId === "string"
+                ? post.author.fullName
+                : post.postOnId.name}
             </h3>
             <p className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
               <span>{formatPostDate(post.createdAt)}</span>

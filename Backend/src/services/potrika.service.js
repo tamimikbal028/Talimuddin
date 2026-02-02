@@ -45,6 +45,7 @@ const getPotrikaPostsService = async (potrikaId, currentUserId, query = {}) => {
     .skip(skip)
     .limit(limit)
     .populate("author", "fullName userName avatar")
+    .populate("postOnId", "name avatar")
     .lean();
 
   const totalPosts = await Post.countDocuments({

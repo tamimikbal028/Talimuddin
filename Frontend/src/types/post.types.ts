@@ -15,7 +15,13 @@ export interface Post {
   attachments: Attachment[];
 
   postOnModel: (typeof POST_TARGET_MODELS)[keyof typeof POST_TARGET_MODELS];
-  postOnId: string;
+  postOnId:
+    | string
+    | {
+        _id: string;
+        name: string;
+        avatar: string;
+      };
   visibility: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
 
   author: {
