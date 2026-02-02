@@ -128,13 +128,105 @@ const branchActions = {
       isAdmin: false,
     });
 
-    // Increment member count
-    await Branch.findByIdAndUpdate(branch._id, { $inc: { membersCount: 1 } });
-
     return {
       branchId: branch._id,
       branchName: branch.name,
+      status: "pending",
     };
+  },
+
+  // 🚀 GET PENDING JOIN REQUESTS (Admin only)
+  getPendingRequestsService: async (branchId, userId) => {
+    const membership = await BranchMembership.findOne({
+      branch: branchId,
+      user: userId,
+    });
+
+    // Check if requester is admin or app admin
+    const user = await User.findById(userId);
+    const hasAccess =
+      membership?.isAdmin ||
+      user.userType === USER_TYPES.OWNER ||
+      user.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
+      throw new ApiError(403, "Only admins can see pending requests");
+    }
+
+    const requests = await BranchMembership.find({
+      branch: branchId,
+      isPending: true,
+    }).populate("user", "fullName userName avatar");
+
+    return requests;
+  },
+
+  // 🚀 APPROVE JOIN REQUEST (Admin only)
+  approveJoinRequestService: async (branchId, adminId, targetUserId) => {
+    const requester = await User.findById(adminId);
+    const requesterMembership = await BranchMembership.findOne({
+      branch: branchId,
+      user: adminId,
+    });
+
+    const hasAccess =
+      requesterMembership?.isAdmin ||
+      requester.userType === USER_TYPES.OWNER ||
+      requester.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
+      throw new ApiError(403, "Only admins can approve requests");
+    }
+
+    const targetMembership = await BranchMembership.findOne({
+      branch: branchId,
+      user: targetUserId,
+      isPending: true,
+    });
+
+    if (!targetMembership) {
+      throw new ApiError(404, "Pending request not found");
+    }
+
+    targetMembership.isPending = false;
+    await targetMembership.save();
+
+    // Now increment the member count
+    await Branch.findByIdAndUpdate(branchId, { $inc: { membersCount: 1 } });
+
+    return { success: true, message: "Member approved" };
+  },
+
+  // 🚀 REJECT JOIN REQUEST (Admin only)
+  rejectJoinRequestService: async (branchId, adminId, targetUserId) => {
+    const requester = await User.findById(adminId);
+    const requesterMembership = await BranchMembership.findOne({
+      branch: branchId,
+      user: adminId,
+    });
+
+    const hasAccess =
+      requesterMembership?.isAdmin ||
+      requester.userType === USER_TYPES.OWNER ||
+      requester.userType === USER_TYPES.ADMIN;
+
+    if (!hasAccess) {
+      throw new ApiError(403, "Only admins can reject requests");
+    }
+
+    const targetMembership = await BranchMembership.findOne({
+      branch: branchId,
+      user: targetUserId,
+      isPending: true,
+    });
+
+    if (!targetMembership) {
+      throw new ApiError(404, "Pending request not found");
+    }
+
+    await BranchMembership.findByIdAndDelete(targetMembership._id);
+
+    return { success: true, message: "Member rejected" };
   },
 
   // 🚀 REMOVE MEMBER (Creator or Admin)
@@ -194,10 +286,13 @@ const branchActions = {
     }
 
     // Hard delete membership
+    const wasPending = targetMembership.isPending;
     await BranchMembership.findByIdAndDelete(targetMembership._id);
 
-    // Decrement member count
-    await Branch.findByIdAndUpdate(branchId, { $inc: { membersCount: -1 } });
+    // Decrement member count only if it was an approved member
+    if (!wasPending) {
+      await Branch.findByIdAndUpdate(branchId, { $inc: { membersCount: -1 } });
+    }
 
     return { branchId: branch._id, userId: targetUserId };
   },
@@ -424,10 +519,13 @@ const branchActions = {
     }
 
     // 4. Remove membership
+    const wasPending = membership.isPending;
     await BranchMembership.findByIdAndDelete(membership._id);
 
-    // 5. Decrement member count
-    await Branch.findByIdAndUpdate(branchId, { $inc: { membersCount: -1 } });
+    // 5. Decrement member count (only if not pending)
+    if (!wasPending) {
+      await Branch.findByIdAndUpdate(branchId, { $inc: { membersCount: -1 } });
+    }
 
     return { branchId: branch._id };
   },
@@ -446,10 +544,11 @@ const branchServices = {
       isDeleted: false,
     }).distinct("_id");
 
-    // Find memberships for valid branches only
+    // Find memberships for valid branches only (approved ones)
     const memberships = await BranchMembership.find({
       user: userId,
       branch: { $in: validBranches },
+      isPending: false,
     })
       .populate({
         path: "branch",
@@ -472,6 +571,7 @@ const branchServices = {
     const totalDocs = await BranchMembership.countDocuments({
       user: userId,
       branch: { $in: validBranches },
+      isPending: false,
     });
 
     const pagination = {
@@ -528,11 +628,14 @@ const branchServices = {
 
     const isAppOwner = user.userType === USER_TYPES.OWNER;
     const isAppAdmin = user.userType === USER_TYPES.ADMIN;
-    const isBranchAdmin = membership?.isAdmin || false;
-    const isMember = !!membership;
+    const isBranchAdmin =
+      (membership && !membership.isPending && membership.isAdmin) || false;
+    const isMember = membership && !membership.isPending;
+    const isPending = membership?.isPending || false;
 
     const meta = {
       isMember,
+      isPending,
       isBranchAdmin,
       isAppOwner,
       isAppAdmin,
@@ -560,8 +663,8 @@ const getBranchPostsService = async (
     user: userId,
   });
 
-  if (!membership)
-    throw new ApiError(403, "You must be a member to view posts");
+  if (!membership || membership.isPending)
+    throw new ApiError(403, "You must be an approved member to view posts");
 
   const skip = (page - 1) * limit;
 
@@ -627,15 +730,25 @@ const getBranchMembersService = async (
     branch: branchId,
     user: userId,
   });
-  if (!membership) throw new ApiError(403, "Access denied");
+  if (!membership || membership.isPending)
+    throw new ApiError(
+      403,
+      "You must be an approved member to view the member list"
+    );
 
-  const members = await BranchMembership.find({ branch: branchId })
+  const members = await BranchMembership.find({
+    branch: branchId,
+    isPending: false,
+  })
     .populate("user", "fullName userName avatar institution")
     .sort({ isAdmin: -1, createdAt: 1 }) // Admins first
     .skip(skip)
     .limit(Number(limit));
 
-  const totalDocs = await BranchMembership.countDocuments({ branch: branchId });
+  const totalDocs = await BranchMembership.countDocuments({
+    branch: branchId,
+    isPending: false,
+  });
 
   const formattedMembers = members.map((m) => ({
     user: m.user,
