@@ -26,8 +26,8 @@ const PotrikaCard: React.FC<Props> = ({ potrika }) => {
         </div>
 
         {potrika.postsCount > 0 && (
-          <div className="absolute right-2 bottom-2 rounded bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
-            {potrika.postsCount} POSTS
+          <div className="absolute right-2 bottom-2 rounded bg-blue-600 px-1.5 py-0.5 text-[12px] font-medium text-white">
+            {potrika.postsCount} {potrika.postsCount <= 1 ? "Post" : "Posts"}
           </div>
         )}
       </Link>

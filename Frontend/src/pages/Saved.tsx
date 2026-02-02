@@ -1,7 +1,6 @@
-import React from "react";
 import { FaBookmark } from "react-icons/fa";
 
-const Saved: React.FC = () => {
+const Saved = () => {
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -12,8 +11,8 @@ const Saved: React.FC = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Saved Items</h1>
-            <p className="text-sm text-gray-500">
-              Your bookmarked posts and content
+            <p className="text-sm font-medium text-gray-500">
+              Your bookmarked posts.
             </p>
           </div>
         </div>
@@ -23,10 +22,10 @@ const Saved: React.FC = () => {
       <div className="rounded-lg border border-gray-300 bg-white p-12 text-center shadow-sm">
         <FaBookmark className="mx-auto mb-4 h-16 w-16 text-gray-300" />
         <h2 className="mb-2 text-xl font-semibold text-gray-900">
-          No saved items yet
+          No saved post yet
         </h2>
-        <p className="text-gray-500">
-          Bookmark posts to save them for later. They'll appear here.
+        <p className="font-medium text-gray-500">
+          Bookmark posts to save them for later. They&apos;ll appear here.
         </p>
       </div>
     </div>
