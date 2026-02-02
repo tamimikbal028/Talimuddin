@@ -78,6 +78,7 @@ const BranchPostCard: React.FC<BranchPostCardProps> = ({ post, meta }) => {
   };
 
   const handleUpdatePost = (data: {
+    title?: string;
     content: string;
     tags: string[];
     visibility: string;
@@ -231,6 +232,7 @@ const BranchPostCard: React.FC<BranchPostCardProps> = ({ post, meta }) => {
       {/* Post Content */}
       <div className="px-4 pb-3">
         <PostContent
+          title={post.title}
           content={post.content}
           tags={post.tags}
           visibility={post.visibility}

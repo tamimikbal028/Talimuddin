@@ -15,6 +15,7 @@ const createPotrikaPostSchema = z.object({
     .trim()
     .min(1, "Post content is required")
     .max(5000, "Post cannot exceed 5000 characters"),
+  title: z.string().optional(),
   tags: z.string().optional(),
 });
 
@@ -42,6 +43,7 @@ const CreatePotrikaPost = () => {
   } = useForm<CreatePotrikaPostFormData>({
     resolver: zodResolver(createPotrikaPostSchema),
     defaultValues: {
+      title: "",
       content: "",
       tags: "",
     },
@@ -60,6 +62,7 @@ const CreatePotrikaPost = () => {
 
     createPotrikaPost(
       {
+        title: data.title,
         content: data.content,
         visibility: POST_VISIBILITY.PUBLIC,
         postOnId: potrikaId as string,
@@ -130,6 +133,14 @@ const CreatePotrikaPost = () => {
             />
             <div className="flex-1">
               <div className="relative">
+                {isExpanded && (
+                  <input
+                    type="text"
+                    {...register("title")}
+                    placeholder="Post Title (Optional)"
+                    className="mb-2 w-full rounded-lg border border-gray-300 p-2 text-sm font-bold focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                )}
                 <textarea
                   {...register("content")}
                   onFocus={() => setIsExpanded(true)}

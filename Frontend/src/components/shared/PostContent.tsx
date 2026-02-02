@@ -13,6 +13,7 @@ const editPostSchema = z.object({
     .trim()
     .min(1, "Post content is required")
     .max(5000, "Post cannot exceed 5000 characters"),
+  title: z.string().optional(),
   tags: z.string().optional(),
   visibility: z.enum([
     POST_VISIBILITY.PUBLIC,
@@ -24,6 +25,7 @@ const editPostSchema = z.object({
 type EditPostFormData = z.infer<typeof editPostSchema>;
 
 const PostContent: React.FC<PostContentProps> = ({
+  title,
   content,
   tags = [],
   visibility,
@@ -45,6 +47,7 @@ const PostContent: React.FC<PostContentProps> = ({
   } = useForm<EditPostFormData>({
     resolver: zodResolver(editPostSchema),
     defaultValues: {
+      title,
       content,
       tags: tags.join(", "),
       visibility: visibility,
@@ -74,6 +77,7 @@ const PostContent: React.FC<PostContentProps> = ({
     }
 
     onUpdate({
+      title: data.title,
       content: data.content,
       tags: processedTags,
       visibility: data.visibility,
@@ -111,6 +115,14 @@ const PostContent: React.FC<PostContentProps> = ({
   if (isEditing) {
     return (
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        {/* Title Input */}
+        <input
+          type="text"
+          {...register("title")}
+          placeholder="Post Title (Optional)"
+          className="w-full rounded-lg border border-gray-300 p-2 text-sm font-bold focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          disabled={isUpdating}
+        />
         {/* Content Textarea */}
         <div className="relative">
           <textarea
@@ -168,6 +180,7 @@ const PostContent: React.FC<PostContentProps> = ({
             type="button"
             onClick={() => {
               reset({
+                title,
                 content,
                 tags: tags.join(", "),
                 visibility: visibility,
@@ -193,6 +206,11 @@ const PostContent: React.FC<PostContentProps> = ({
 
   return (
     <>
+      {title && (
+        <h1 className="mb-2 text-xl leading-tight font-bold text-gray-900">
+          {title}
+        </h1>
+      )}
       <div
         className={`whitespace-pre-wrap text-gray-900 ${
           !isExpanded ? "line-clamp-5" : ""

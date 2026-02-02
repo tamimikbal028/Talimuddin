@@ -10,6 +10,7 @@ export interface Attachment {
 // Post Details Type
 export interface Post {
   _id: string;
+  title?: string;
   content: string;
   attachments: Attachment[];
 
@@ -80,6 +81,7 @@ export interface ProfilePostsProps {
 }
 
 export interface CreatePostRequest {
+  title?: string;
   content: string;
   visibility: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
   postOnId: string;
@@ -89,12 +91,14 @@ export interface CreatePostRequest {
 }
 
 export interface PostContentProps {
+  title?: string;
   content: string;
   tags?: string[];
   visibility: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
   isEditing: boolean;
   isUpdating: boolean;
   onUpdate: (data: {
+    title?: string;
     content: string;
     tags: string[];
     visibility: string;

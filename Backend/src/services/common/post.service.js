@@ -8,8 +8,15 @@ import { BranchMembership } from "../../models/branchMembership.model.js";
 import { Potrika } from "../../models/potrika.model.js";
 
 export const createPostService = async (postData, authorId) => {
-  const { content, attachments, postOnModel, postOnId, visibility, tags } =
-    postData;
+  const {
+    title,
+    content,
+    attachments,
+    postOnModel,
+    postOnId,
+    visibility,
+    tags,
+  } = postData;
 
   if (!content || !postOnModel || !postOnId) {
     throw new ApiError(400, "All fields are required");
@@ -36,6 +43,7 @@ export const createPostService = async (postData, authorId) => {
 
   // Create post
   const post = await Post.create({
+    title: title || "",
     content,
     attachments: attachments || [],
     postOnModel,
@@ -245,7 +253,7 @@ export const deletePostService = async (postId, userId) => {
 
 // === Update Post Service ===
 export const updatePostService = async (postId, userId, updateData) => {
-  const { content, visibility, tags, attachments } = updateData;
+  const { title, content, visibility, tags, attachments } = updateData;
 
   const post = await Post.findById(postId);
 
@@ -268,6 +276,10 @@ export const updatePostService = async (postId, userId, updateData) => {
   // Update fields
   let isContentChanged = false;
 
+  if (title !== undefined && title !== post.title) {
+    post.title = title;
+    isContentChanged = true;
+  }
   if (content !== undefined && content !== post.content) {
     post.content = content;
     isContentChanged = true;

@@ -1,4 +1,3 @@
-import React from "react";
 import PotrikaPostCard from "./PotrikaPostCard";
 import PostSkeleton from "../shared/skeletons/PostSkeleton";
 import type { ApiError } from "../../types";
@@ -9,7 +8,7 @@ interface PotrikaPostsProps {
   potrikaId?: string;
 }
 
-const PotrikaPosts: React.FC<PotrikaPostsProps> = ({ potrikaId }) => {
+const PotrikaPosts = ({ potrikaId }: PotrikaPostsProps) => {
   const {
     data: postsData,
     isLoading,

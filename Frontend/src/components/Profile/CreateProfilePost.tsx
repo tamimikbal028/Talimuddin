@@ -22,6 +22,7 @@ const createProfilePostSchema = z.object({
     .trim()
     .min(1, "Post content is required")
     .max(5000, "Post cannot exceed 5000 characters"),
+  title: z.string().optional(),
   tags: z.string().optional(),
   visibility: z.enum([
     POST_VISIBILITY.PUBLIC,
@@ -48,6 +49,7 @@ const CreateProfilePost: React.FC = () => {
   } = useForm<CreateProfilePostFormData>({
     resolver: zodResolver(createProfilePostSchema),
     defaultValues: {
+      title: "",
       content: "",
       tags: "",
       visibility: POST_VISIBILITY.PUBLIC,
@@ -68,6 +70,7 @@ const CreateProfilePost: React.FC = () => {
 
     createProfilePost(
       {
+        title: data.title,
         content: data.content,
         visibility: data.visibility as "PUBLIC" | "CONNECTIONS" | "ONLY_ME",
         postOnId: currentUser?._id || "",
@@ -164,6 +167,14 @@ const CreateProfilePost: React.FC = () => {
             />
             <div className="flex-1">
               <div className="relative">
+                {isExpanded && (
+                  <input
+                    type="text"
+                    {...register("title")}
+                    placeholder="Post Title (Optional)"
+                    className="mb-2 w-full rounded-lg border border-gray-300 p-2 text-sm font-bold focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                )}
                 <textarea
                   {...register("content")}
                   onFocus={() => setIsExpanded(true)}

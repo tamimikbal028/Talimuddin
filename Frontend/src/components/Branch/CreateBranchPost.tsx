@@ -21,6 +21,7 @@ const createBranchPostSchema = z.object({
     .string()
     .min(1, "Post content cannot be empty")
     .max(2000, "Post content is too long"),
+  title: z.string().optional(),
   tags: z.string().optional(),
   visibility: z.string(),
 });
@@ -44,6 +45,7 @@ const CreateBranchPost: React.FC = () => {
   } = useForm<CreateBranchPostFormData>({
     resolver: zodResolver(createBranchPostSchema),
     defaultValues: {
+      title: "",
       content: "",
       tags: "",
       visibility: POST_VISIBILITY.CONNECTIONS,
@@ -158,6 +160,14 @@ const CreateBranchPost: React.FC = () => {
             />
             <div className="flex-1">
               <div className="relative">
+                {isExpanded && (
+                  <input
+                    type="text"
+                    {...register("title")}
+                    placeholder="Post Title (Optional)"
+                    className="mb-2 w-full rounded-lg border border-gray-300 p-2 text-sm font-bold focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
+                )}
                 <textarea
                   {...register("content")}
                   onFocus={() => setIsExpanded(true)}
