@@ -14,6 +14,10 @@ const branchMembershipSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    isPending: {
+      type: Boolean,
+      default: true,
+    },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -24,6 +28,7 @@ const branchMembershipSchema = new mongoose.Schema(
 
 // Unique Constraint
 branchMembershipSchema.index({ branch: 1, user: 1 }, { unique: true });
+branchMembershipSchema.index({ branch: 1, isPending: 1 });
 
 export const BranchMembership = mongoose.model(
   "BranchMembership",

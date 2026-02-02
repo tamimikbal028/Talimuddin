@@ -5,11 +5,9 @@ import { Post } from "../models/post.model.js";
 import { ReadPost } from "../models/readPost.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadFile, deleteFile } from "../utils/cloudinaryFileUpload.js";
-import { createPostService } from "./common/post.service.js";
 import {
   POST_TARGET_MODELS,
   USER_TYPES,
-  POST_VISIBILITY,
   BRANCH_TYPES,
 } from "../constants/index.js";
 
@@ -80,7 +78,7 @@ const branchActions = {
       parentBranch: parentBranchId,
       joinCode,
       isDeleted: false,
-      membersCount: 0,
+      membersCount: 1,
       postsCount: 0,
     });
 
@@ -92,6 +90,7 @@ const branchActions = {
     await BranchMembership.create({
       branch: branch._id,
       user: userId,
+      isPending: false,
       isAdmin: true,
     });
 
@@ -125,6 +124,7 @@ const branchActions = {
     await BranchMembership.create({
       branch: branch._id,
       user: userId,
+      isPending: true,
       isAdmin: false,
     });
 
