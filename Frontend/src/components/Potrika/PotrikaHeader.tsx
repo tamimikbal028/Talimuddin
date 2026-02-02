@@ -49,7 +49,7 @@ const PotrikaHeader = ({ data }: PotrikaHeaderProps) => {
                 <div className="mt-2 flex items-center gap-2">
                   <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-700/10 ring-inset">
                     {data.postsCount || 0}{" "}
-                    {data.postsCount === 1 ? "Post" : "Posts"}
+                    {data.postsCount <= 1 ? "Post" : "Posts"}
                   </span>
                 </div>
               </div>

@@ -23,17 +23,14 @@ const PotrikaDetail = () => {
     return <PotrikaNotFound />;
   }
 
-  // Only app owner and admin can create posts
-  const canCreatePost = isAppAdmin;
-
-  const { potrika } = data;
+  const { potrika } = data.data;
 
   return (
     <div className="space-y-4">
       <PotrikaHeader data={potrika} />
 
       <div className="space-y-3">
-        {canCreatePost && (
+        {isAppAdmin && (
           <div className="mb-4">
             <CreatePotrikaPost />
           </div>

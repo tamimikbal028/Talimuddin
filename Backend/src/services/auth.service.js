@@ -76,13 +76,17 @@ const registerUserService = async (userData) => {
 // ==========================================
 // 🚀 2. LOGIN USER SERVICE
 // ==========================================
-const loginUserService = async ({ email, userName, password }) => {
-  if (!email && !userName) {
-    throw new ApiError(400, "Username or email is required");
+const loginUserService = async ({ identifier, password }) => {
+  if (!identifier) {
+    throw new ApiError(400, "Username, Email, or Phone Number is required");
   }
 
   const user = await User.findOne({
-    $or: [{ email }, { userName }],
+    $or: [
+      { email: identifier },
+      { phoneNumber: identifier },
+      { userName: identifier },
+    ],
   });
 
   if (!user) {
@@ -149,11 +153,7 @@ const refreshAccessTokenService = async (incomingRefreshToken) => {
 // ==========================================
 // 🚀 5. CHANGE PASSWORD SERVICE
 // ==========================================
-const changePasswordService = async (
-  userId,
-  oldPassword,
-  newPassword
-) => {
+const changePasswordService = async (userId, oldPassword, newPassword) => {
   const user = await User.findById(userId);
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 

@@ -58,6 +58,18 @@ const createPost = asyncHandler(async (req, res) => {
       break;
     }
 
+    case POST_TARGET_MODELS.POTRIKA: {
+      // 1. Validation (Only Admins/Owners can post to Potrika)
+      const user = await User.findById(userId);
+      if (user.userType !== "ADMIN" && user.userType !== "OWNER") {
+        throw new ApiError(403, "Only admins can post to Potrika");
+      }
+
+      // 2. Create Post
+      result = await createPostService(req.body, userId);
+      break;
+    }
+
     default:
       throw new ApiError(400, "Invalid postOnModel");
   }

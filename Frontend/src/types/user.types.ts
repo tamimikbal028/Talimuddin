@@ -9,7 +9,7 @@ import { USER_TYPES, GENDERS, ACCOUNT_STATUS } from "../constants";
 
 // App users - সবাই USER
 // (ADMIN/OWNER/MODERATOR হলো internal management roles, app এ show হবে না)
-export type UserType = (typeof USER_TYPES)["USER"];
+export type UserType = (typeof USER_TYPES)[keyof typeof USER_TYPES];
 export type AccountStatus =
   (typeof ACCOUNT_STATUS)[keyof typeof ACCOUNT_STATUS];
 export type Gender = (typeof GENDERS)[keyof typeof GENDERS];
@@ -86,8 +86,7 @@ export interface AuthResponse {
 
 // Login Types
 export interface LoginCredentials {
-  email?: string;
-  userName?: string;
+  identifier?: string;
   password: string;
 }
 

@@ -8,7 +8,7 @@ import { authHooks } from "../../hooks/useAuth";
 
 // ✅ Zod Schema for Login
 const loginSchema = z.object({
-  email: z.string().min(1, "Email or Username is required"),
+  identifier: z.string().min(1, "Phone Number or Username is required"),
   password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
 });
@@ -31,22 +31,22 @@ const Login = () => {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
       rememberMe: false,
     },
   });
 
-  // ✅ Component mount এ localStorage থেকে remembered email load করা
+  // ✅ Component mount এ localStorage থেকে remembered identifier load করা
   useEffect(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
-    if (rememberedEmail) {
+    const rememberedIdentifier = localStorage.getItem("rememberedIdentifier");
+    if (rememberedIdentifier) {
       reset({
-        email: rememberedEmail,
+        identifier: rememberedIdentifier,
         password: "",
         rememberMe: true,
       });
-      // ✅ Email যদি আগে থেকেই থাকে, তাহলে সরাসরি Password field এ focus করব
+      // ✅ identifier যদি আগে থেকেই থাকে, তাহলে সরাসরি Password field এ focus করব
       setTimeout(() => passwordRef.current?.focus(), 0);
     }
   }, [reset]);
@@ -55,12 +55,14 @@ const Login = () => {
   const onSubmit = (data: LoginFormData) => {
     // Remember Me: login করার আগেই handle করি
     if (data.rememberMe) {
-      localStorage.setItem("rememberedEmail", data.email);
+      localStorage.setItem("rememberedIdentifier", data.identifier);
     } else {
-      localStorage.removeItem("rememberedEmail");
+      localStorage.removeItem("rememberedIdentifier");
     }
 
-    login({ credentials: { email: data.email, password: data.password } });
+    login({
+      credentials: { identifier: data.identifier, password: data.password },
+    });
   };
 
   return (
@@ -78,29 +80,29 @@ const Login = () => {
       <div className="w-[400px] rounded-lg border bg-white p-8 shadow-lg">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
-            {/* Email Field */}
+            {/* Identifier Field */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="identifier"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email or Username
+                Phone Number or Username
               </label>
               <input
-                id="email"
+                id="identifier"
                 type="text"
                 autoFocus // ✅ নতুন উইন্ডো লোড হলে বাই-ডিফল্ট এখানে ফোকাস থাকবে
-                {...register("email")}
+                {...register("identifier")}
                 className={`mt-1 w-full rounded-lg border px-3 py-2 transition-colors focus:ring-2 focus:outline-none ${
-                  errors.email
+                  errors.identifier
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 }`}
-                placeholder="Enter your email or username"
+                placeholder="Enter your phone number or username"
               />
-              {errors.email && (
+              {errors.identifier && (
                 <p className="mt-1 text-sm text-red-500">
-                  {errors.email.message}
+                  {errors.identifier.message}
                 </p>
               )}
             </div>
@@ -205,5 +207,3 @@ const Login = () => {
 };
 
 export default Login;
-
-

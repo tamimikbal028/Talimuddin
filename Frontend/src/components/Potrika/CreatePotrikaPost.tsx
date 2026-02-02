@@ -1,13 +1,5 @@
 import { useState } from "react";
-import {
-  FaImage,
-  FaPaperPlane,
-  FaGlobe,
-  FaUserFriends,
-  FaLock,
-  FaPoll,
-  FaVideo,
-} from "react-icons/fa";
+import { FaImage, FaPaperPlane, FaPoll, FaVideo } from "react-icons/fa";
 import type { IconType } from "react-icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,11 +16,6 @@ const createPotrikaPostSchema = z.object({
     .min(1, "Post content is required")
     .max(5000, "Post cannot exceed 5000 characters"),
   tags: z.string().optional(),
-  visibility: z.enum([
-    POST_VISIBILITY.PUBLIC,
-    POST_VISIBILITY.CONNECTIONS,
-    POST_VISIBILITY.ONLY_ME,
-  ]),
 });
 
 type CreatePotrikaPostFormData = z.infer<typeof createPotrikaPostSchema>;
@@ -49,7 +36,6 @@ const CreatePotrikaPost = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     reset,
     formState: { isValid },
@@ -58,11 +44,9 @@ const CreatePotrikaPost = () => {
     defaultValues: {
       content: "",
       tags: "",
-      visibility: POST_VISIBILITY.PUBLIC,
     },
   });
 
-  const privacy = watch("visibility");
   const postContent = watch("content");
 
   const onSubmit = (data: CreatePotrikaPostFormData) => {
@@ -77,8 +61,8 @@ const CreatePotrikaPost = () => {
     createPotrikaPost(
       {
         content: data.content,
-        visibility: data.visibility as "PUBLIC" | "CONNECTIONS" | "ONLY_ME",
-        postOnId: potrikaId || "",
+        visibility: POST_VISIBILITY.PUBLIC,
+        postOnId: potrikaId as string,
         postOnModel: POST_TARGET_MODELS.POTRIKA,
         attachments: [],
         tags: processedTags,
@@ -91,32 +75,6 @@ const CreatePotrikaPost = () => {
       }
     );
   };
-
-  const privacyOptions: Array<{
-    value: (typeof POST_VISIBILITY)[keyof typeof POST_VISIBILITY];
-    label: string;
-    Icon: IconType;
-    show: boolean;
-  }> = [
-    {
-      value: POST_VISIBILITY.PUBLIC,
-      label: "Public",
-      Icon: FaGlobe,
-      show: true,
-    },
-    {
-      value: POST_VISIBILITY.CONNECTIONS,
-      label: "Connections",
-      Icon: FaUserFriends,
-      show: true,
-    },
-    {
-      value: POST_VISIBILITY.ONLY_ME,
-      label: "Only me",
-      Icon: FaLock,
-      show: true,
-    },
-  ];
 
   const mediaOptions: Array<{
     label: string;
@@ -212,32 +170,6 @@ const CreatePotrikaPost = () => {
                         <span className="text-sm font-medium">
                           {option.label}
                         </span>
-                      </button>
-                    ))}
-                </div>
-
-                {/* Privacy Selector */}
-                <div className="flex items-center space-x-2">
-                  {privacyOptions
-                    .filter((opt) => opt.show)
-                    .map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() =>
-                          setValue("visibility", opt.value, {
-                            shouldValidate: true,
-                          })
-                        }
-                        aria-pressed={privacy === opt.value}
-                        className={`flex items-center gap-2 rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
-                          privacy === opt.value
-                            ? "bg-blue-50 text-blue-600"
-                            : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                      >
-                        <opt.Icon className="h-4 w-4" />
-                        <span className="hidden sm:inline">{opt.label}</span>
                       </button>
                     ))}
                 </div>

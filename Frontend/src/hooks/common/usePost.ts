@@ -23,7 +23,6 @@ const useCreatePost = ({ queryKey, invalidateKey }: UsePostMutationProps) => {
   return useMutation({
     mutationFn: (data: CreatePostRequest) => postService.createPost(data),
     onSuccess: (response) => {
-      // 1. যদি কোনো লিস্ট থাকে, সেখানে ম্যানুয়ালি শুরুতে নতুন পোস্ট অ্যাড করা (Optional)
       if (queryKey) {
         queryClient.setQueriesData(
           { queryKey: queryKey },

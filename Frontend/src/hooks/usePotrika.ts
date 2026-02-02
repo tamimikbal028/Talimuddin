@@ -9,7 +9,7 @@ export const usePotrikaHeader = () => {
     queryKey: ["potrika", "header", potrikaId],
     queryFn: async () => {
       const response = await potrikaService.getPotrikaHeader(potrikaId!);
-      return response.data;
+      return response;
     },
     enabled: !!potrikaId,
     retry: 1,
