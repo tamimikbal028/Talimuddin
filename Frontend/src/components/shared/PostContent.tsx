@@ -67,11 +67,17 @@ const PostContent: React.FC<PostContentProps> = ({
       : [];
 
     // Check if anything changed
+    const titleChanged = data.title !== title;
     const tagsChanged = JSON.stringify(processedTags) !== JSON.stringify(tags);
     const contentChanged = data.content !== content;
     const visibilityChanged = data.visibility !== visibility;
 
-    if (!tagsChanged && !contentChanged && !visibilityChanged) {
+    if (
+      !titleChanged &&
+      !tagsChanged &&
+      !contentChanged &&
+      !visibilityChanged
+    ) {
       onCancel();
       return;
     }
