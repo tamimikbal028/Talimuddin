@@ -3,16 +3,29 @@ import { NavLink, useParams } from "react-router-dom";
 import { FaUsers } from "react-icons/fa";
 import { BsPostcard } from "react-icons/bs";
 
-const BranchDetailsNavBar: React.FC = () => {
+import type { BranchDetailsMeta } from "../../../types";
+
+interface BranchDetailsNavBarProps {
+  meta: BranchDetailsMeta;
+}
+
+const BranchDetailsNavBar: React.FC<BranchDetailsNavBarProps> = ({ meta }) => {
   const { branchId } = useParams<{ branchId: string }>();
   const baseUrl = `/branch/branches/${branchId}`;
 
-  // Navigation tabs (Reduced as per previous step decisions, if we removed About/Files routes in BranchDetails.tsx, we should remove them here too.
-  // In Step 360 BranchDetails.tsx only has Posts and Members routes. So I should remove Files and About here.)
   const tabs = [
     { path: baseUrl, label: "Posts", icon: BsPostcard, end: true },
     { path: `${baseUrl}/members`, label: "Members", icon: FaUsers, end: true },
   ];
+
+  if (meta.isBranchAdmin || meta.isAppOwner || meta.isAppAdmin) {
+    tabs.push({
+      path: `${baseUrl}/requests`,
+      label: "Requests",
+      icon: FaUsers,
+      end: true,
+    });
+  }
 
   return (
     <div className="border-b border-gray-200 bg-white">

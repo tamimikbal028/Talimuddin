@@ -374,6 +374,64 @@ const branchHooks = {
   useRemoveBranchMember,
   usePromoteBranchMember,
   useDemoteBranchMember,
+
+  // Pending Requests Logic
+  useBranchPendingRequests: () => {
+    const { branchId } = useParams();
+    return useQuery({
+      queryKey: ["branchPendingRequests", branchId],
+      queryFn: () => branchService.getPendingRequests(branchId as string),
+      enabled: !!branchId,
+    });
+  },
+
+  useApproveJoinRequest: () => {
+    const { branchId } = useParams();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: (userId: string) =>
+        branchService.approveJoinRequest(branchId as string, userId),
+      onSuccess: (response) => {
+        toast.success(response.message);
+        queryClient.invalidateQueries({
+          queryKey: ["branchPendingRequests", branchId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["branchMembers", branchId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["branchDetails", branchId],
+        });
+      },
+      onError: (error: AxiosError<ApiError>) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to approve request"
+        );
+      },
+    });
+  },
+
+  useRejectJoinRequest: () => {
+    const { branchId } = useParams();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: (userId: string) =>
+        branchService.rejectJoinRequest(branchId as string, userId),
+      onSuccess: (response) => {
+        toast.success(response.message);
+        queryClient.invalidateQueries({
+          queryKey: ["branchPendingRequests", branchId],
+        });
+      },
+      onError: (error: AxiosError<ApiError>) => {
+        toast.error(
+          error?.response?.data?.message || "Failed to reject request"
+        );
+      },
+    });
+  },
 } as const;
 
 export { branchHooks };

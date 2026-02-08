@@ -1,21 +1,16 @@
 import React from "react";
 import FriendCardSkeleton from "../../shared/skeletons/FriendCardSkeleton";
-import { roomHooks } from "../../../hooks/useRoom";
-import RoomMemberCard from "../RoomMemberCard";
+import { branchHooks } from "../../../hooks/useBranch";
+import BranchMemberCard from "../BranchMemberCard";
 
-const RoomRequestsTab: React.FC = () => {
+const BranchRequestsTab: React.FC = () => {
   const {
-    data,
+    data: response,
     isLoading,
     error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = roomHooks.useRoomPendingRequests();
+  } = branchHooks.useBranchPendingRequests();
 
-  const requests = data?.pages.flatMap((page) => page.data.requests) || [];
-  const totalDocs =
-    data?.pages[0]?.data.pagination?.totalDocs || requests.length;
+  const requests = response?.data || [];
 
   if (isLoading) {
     return (
@@ -29,7 +24,7 @@ const RoomRequestsTab: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-red-300/50 p-8 text-center">
+      <div className="rounded-xl bg-red-300/50 p-8 text-center text-red-700">
         Failed to load join requests.
       </div>
     );
@@ -39,32 +34,25 @@ const RoomRequestsTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800">
-          Join Requests ({totalDocs})
+          Join Requests ({requests.length})
         </h2>
       </div>
 
       {requests.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-1">
           {requests.map((request) => (
-            <RoomMemberCard
-              key={request.meta.memberId}
+            <BranchMemberCard
+              key={request._id}
               member={{
                 user: request.user,
+                isAdmin: request.isAdmin,
+                joinedAt: request.createdAt,
                 meta: {
-                  memberId: request.meta.memberId,
-                  role: "MEMBER",
                   isSelf: false,
-                  isFriend: false,
-                  hasPendingRequest: false,
-                  isSentRequest: false,
-                  isBlockedByMe: false,
-                  isBlockedByThem: false,
-                  isCR: false,
-                  isAdmin: false,
-                  isCreator: false,
+                  canManage: true,
+                  memberId: request.user._id,
                 },
               }}
-              currentUserRole="CREATOR"
               isPendingRequest={true}
             />
           ))}
@@ -94,20 +82,8 @@ const RoomRequestsTab: React.FC = () => {
           </p>
         </div>
       )}
-
-      {hasNextPage && (
-        <button
-          onClick={() => fetchNextPage()}
-          disabled={isFetchingNextPage}
-          className="w-full rounded-lg bg-gray-100 py-3 font-medium text-gray-600 transition-colors hover:bg-gray-200 disabled:opacity-50"
-        >
-          {isFetchingNextPage
-            ? "Loading more requests..."
-            : "Load More Requests"}
-        </button>
-      )}
     </div>
   );
 };
 
-export default RoomRequestsTab;
+export default BranchRequestsTab;

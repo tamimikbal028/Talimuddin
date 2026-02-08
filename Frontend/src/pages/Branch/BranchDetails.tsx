@@ -4,6 +4,7 @@ import { branchHooks } from "../../hooks/useBranch";
 import BranchHeader from "../../components/Branch/details-page/BranchHeader";
 import BranchPosts from "../../components/Branch/details-page-tabs/BranchPosts";
 import BranchMembersTab from "../../components/Branch/details-page-tabs/BranchMembersTab";
+import BranchRequestsTab from "../../components/Branch/details-page-tabs/BranchRequestsTab";
 import BranchDetailsSkeleton from "../../components/shared/skeletons/BranchDetailsSkeleton";
 import { FaDoorOpen } from "react-icons/fa";
 
@@ -34,9 +35,24 @@ const BranchDetails: React.FC = () => {
   const branch = response.data.branch;
   const meta = response.data.meta;
 
-  const hasAccess = meta.isMember || meta.isAppOwner || meta.isAppAdmin;
+  const isApprovedMember = meta.isMember || meta.isAppOwner || meta.isAppAdmin;
 
-  if (!hasAccess) {
+  if (meta.isPending) {
+    return (
+      <div className="space-y-5">
+        <BranchHeader branch={branch} meta={meta} />
+        <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-10 text-center">
+          <h2 className="text-2xl font-bold text-amber-900">Request Pending</h2>
+          <p className="mt-2 text-amber-700">
+            Your request to join this branch is waiting for approval from an
+            admin.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isApprovedMember) {
     return (
       <div className="space-y-5">
         <BranchHeader branch={branch} meta={meta} />
@@ -58,20 +74,9 @@ const BranchDetails: React.FC = () => {
           <Routes>
             <Route index element={<BranchPosts />} />
             <Route path="members" element={<BranchMembersTab />} />
-            {/* Removed unused tabs: files, requests, moderation, about - per current simplified scope, or add back if files exist. 
-                Original file had RoomFiles, RoomRequestsTab, RoomModerationTab, RoomAbout. 
-                I need to check if I renamed those files. Yes I did.
-                Wait, user removed 'archive/hide/ban/pending requests' features.
-                So requests tab should go. Moderation tab might be relevant? 
-                RoomAbout is usually harmless. RoomFiles? 
-                I renamed ALL of them: 
-                BranchRequestsTab.tsx, BranchPosts.tsx, BranchModerationTab.tsx, BranchMembersTab.tsx, BranchFiles.tsx, BranchAbout.tsx.
-                So I should probably keep them if they are just renamed, BUT the user removed 'requests' from service?
-                'getRoomPendingRequests' was removed. So BranchRequestsTab will fail if it uses that hook.
-                So I should remove checking `BranchRequestsTab` and `BranchModerationTab` if they rely on removed service methods.
-                Let's stick to safe ones: Posts, Members.
-                Maybe About?
-            */}
+            {(meta.isBranchAdmin || meta.isAppOwner || meta.isAppAdmin) && (
+              <Route path="requests" element={<BranchRequestsTab />} />
+            )}
           </Routes>
         </div>
       </div>

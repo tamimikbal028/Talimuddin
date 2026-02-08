@@ -240,7 +240,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
 
         {/* Navigation Tabs */}
         <div className="mx-auto max-w-5xl px-6">
-          <BranchDetailsNavBar />
+          <BranchDetailsNavBar meta={meta} />
         </div>
       </div>
     </div>

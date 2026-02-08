@@ -51,6 +51,10 @@ export interface User {
   coverImage: string;
   bio?: string;
   gender?: Gender;
+  institution?: {
+    _id: string;
+    name: string;
+  };
 
   // Stats (from backend model)
   connectionsCount: number;

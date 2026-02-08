@@ -54,6 +54,7 @@ export interface UpdateBranchData {
 
 export interface BranchDetailsMeta {
   isMember: boolean;
+  isPending: boolean;
   isBranchAdmin: boolean;
   isAppOwner: boolean;
   isAppAdmin: boolean;
@@ -83,7 +84,25 @@ export interface JoinBranchResponse {
   data: {
     branchId: string;
     branchName: string;
+    status: string;
   };
+}
+
+export interface BranchPendingRequest {
+  _id: string;
+  branch: string;
+  user: User;
+  isPending: boolean;
+  isAdmin: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BranchPendingRequestsResponse {
+  statusCode: number;
+  success: boolean;
+  message: string;
+  data: BranchPendingRequest[];
 }
 
 export interface DeleteBranchResponse {

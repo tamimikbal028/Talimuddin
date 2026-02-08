@@ -11,6 +11,7 @@ import type {
   BranchPostsResponse,
   BranchMembersResponse,
   BaseBranchActionResponse,
+  BranchPendingRequestsResponse,
 } from "../types";
 
 export const branchService = {
@@ -172,6 +173,38 @@ export const branchService = {
   ): Promise<BaseBranchActionResponse> => {
     const response = await api.patch<BaseBranchActionResponse>(
       `/branches/${branchId}/demote/${userId}`
+    );
+    return response.data;
+  },
+
+  // Get Pending Join Requests (Admin only)
+  getPendingRequests: async (
+    branchId: string
+  ): Promise<BranchPendingRequestsResponse> => {
+    const response = await api.get<BranchPendingRequestsResponse>(
+      `/branches/${branchId}/pending-requests`
+    );
+    return response.data;
+  },
+
+  // Approve Join Request (Admin only)
+  approveJoinRequest: async (
+    branchId: string,
+    userId: string
+  ): Promise<BaseBranchActionResponse> => {
+    const response = await api.post<BaseBranchActionResponse>(
+      `/branches/${branchId}/approve/${userId}`
+    );
+    return response.data;
+  },
+
+  // Reject Join Request (Admin only)
+  rejectJoinRequest: async (
+    branchId: string,
+    userId: string
+  ): Promise<BaseBranchActionResponse> => {
+    const response = await api.post<BaseBranchActionResponse>(
+      `/branches/${branchId}/reject/${userId}`
     );
     return response.data;
   },
