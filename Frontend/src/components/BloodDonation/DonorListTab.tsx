@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { FaTint, FaUniversity, FaUsers, FaFilter } from "react-icons/fa";
-import { bloodGroups } from "../data/bloodDonationData";
+import { bloodGroups } from "./data/bloodDonationData";
 
 const universities = ["All", "BUET", "RUET", "KUET", "CUET", "HSC"];
 

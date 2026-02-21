@@ -111,18 +111,10 @@ export const routes: RouteConfig[] = [
     meta: { description: "Account and app settings" },
   },
 
-  // More section routes
+  // Blood Donation
   {
-    path: "/more",
-    component: lazy(() => import("../pages/MainMore")),
-    requireAuth: true,
-    title: "More",
-    category: "utility",
-    meta: { description: "Additional features and services" },
-  },
-  {
-    path: "/more/blood-donation",
-    component: lazy(() => import("../pages/MainMore/BloodDonation")),
+    path: "/blood-donation",
+    component: lazy(() => import("../pages/BloodDonation")),
     requireAuth: true,
     title: "Blood Donation",
     category: "utility",

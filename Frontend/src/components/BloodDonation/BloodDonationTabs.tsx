@@ -1,4 +1,3 @@
-import React from "react";
 import { FaExclamationCircle, FaUser, FaUsers } from "react-icons/fa";
 
 interface BloodDonationTabsProps {
@@ -8,12 +7,12 @@ interface BloodDonationTabsProps {
   donorsCount?: number;
 }
 
-const BloodDonationTabs: React.FC<BloodDonationTabsProps> = ({
+const BloodDonationTabs = ({
   activeTab,
   onTabChange,
   requestsCount = 0,
   donorsCount = 0,
-}) => {
+}: BloodDonationTabsProps) => {
   return (
     <div className="flex gap-2 rounded-lg border border-gray-200 bg-white p-2 shadow-sm">
       <button

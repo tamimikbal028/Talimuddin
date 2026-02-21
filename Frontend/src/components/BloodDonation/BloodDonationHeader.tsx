@@ -1,7 +1,7 @@
 import React from "react";
 import { FaTint } from "react-icons/fa";
 import { IoPerson } from "react-icons/io5";
-import { bloodGroupStats } from "../data/bloodDonationData";
+import { bloodGroupStats } from "./data/bloodDonationData";
 
 const BloodDonationHeader: React.FC = () => {
   return (

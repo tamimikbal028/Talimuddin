@@ -3,7 +3,7 @@ import {
   FaUser,
   FaCog,
   FaSchool,
-  FaEllipsisH,
+  FaHeartbeat,
   FaSignOutAlt,
   FaDoorOpen,
   FaBookmark,
@@ -47,10 +47,10 @@ const Sidebar = () => {
     },
 
     {
-      icon: FaEllipsisH,
-      label: "More",
-      path: "/more",
-      active: location.pathname.startsWith("/more"),
+      icon: FaHeartbeat,
+      label: "Blood Donation",
+      path: "/blood-donation",
+      active: location.pathname.startsWith("/blood-donation"),
     },
     {
       icon: FaCog,
