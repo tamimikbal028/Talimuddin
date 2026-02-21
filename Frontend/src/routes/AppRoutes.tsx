@@ -1,11 +1,11 @@
-import React, { Suspense, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 import { routes, getRouteByPath } from "./routeConfig";
 import PageLoader from "../pages/Fallbacks/PageLoader";
 import { prefetchOnIdle } from "./prefetch";
 
-const AppRoutes: React.FC = () => {
+const AppRoutes = () => {
   const location = useLocation();
   // Update document title based on current route
   useEffect(() => {

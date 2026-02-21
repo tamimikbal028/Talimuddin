@@ -1,11 +1,10 @@
-import { useLocation } from "react-router-dom";
 import AppRoutes from "../routes/AppRoutes";
 
-const MainContent = () => {
-  const location = useLocation();
+interface MainContentProps {
+  isAuthPage: boolean;
+}
 
-  const isAuthPage = ["/login", "/register"].includes(location.pathname);
-
+const MainContent = ({ isAuthPage }: MainContentProps) => {
   return (
     <>
       <div className={isAuthPage ? "" : "space-y-5 py-5"}>

@@ -78,7 +78,7 @@ const App = () => {
       <>
         <Toaster position="top-right" richColors closeButton />
         <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
-          <MainContent />
+          <MainContent isAuthPage={isAuthPage} />
         </div>
       </>
     );
@@ -88,14 +88,14 @@ const App = () => {
     <>
       <Toaster position="top-right" richColors closeButton />
 
-      <div className="grid h-screen grid-cols-[15rem_1fr_auto] overflow-hidden">
+      <div className="grid h-screen grid-cols-[15rem_1fr_auto] overflow-hidden bg-gray-100">
         <div className="h-full overflow-y-auto bg-gray-50">
           <Sidebar />
         </div>
 
         <div className="h-full overflow-y-auto">
           <div className="mx-auto w-[750px]">
-            <MainContent />
+            <MainContent isAuthPage={isAuthPage} />
           </div>
         </div>
       </div>
