@@ -1,8 +1,7 @@
-import React from "react";
 import { useLocation } from "react-router-dom";
 import AppRoutes from "../routes/AppRoutes";
 
-const MainContent: React.FC = () => {
+const MainContent = () => {
   const location = useLocation();
 
   const isAuthPage = ["/login", "/register"].includes(location.pathname);

@@ -64,15 +64,16 @@ const App: React.FC = () => {
 
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
 
-  // ⏳ Auth check running - Show Loading
   if (isCheckingAuth) {
     return (
       <>
         <Toaster position="top-right" richColors closeButton />
         <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
           <div className="flex flex-col items-center space-y-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            <p className="text-gray-600">Loading...</p>
+            <div className="h-20 w-20 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+            <p className="text-3xl font-semibold text-gray-600">
+              Auth checking...
+            </p>
           </div>
         </div>
       </>
