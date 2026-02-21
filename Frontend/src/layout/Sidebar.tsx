@@ -24,7 +24,7 @@ const Sidebar = () => {
   const navigationItems = [
     {
       icon: FaSchool,
-      label: "Branch",
+      label: "My Branch",
       path: "/branch",
       active: location.pathname === "/branch",
     },

@@ -63,8 +63,6 @@ const App: React.FC = () => {
   }, [queryClient]);
 
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
-  const isMessagesPage = location.pathname === "/messages";
-  const isStudyHelperPage = location.pathname === "/study-helper";
 
   // ⏳ Auth check running - Show Loading
   if (isCheckingAuth) {
@@ -105,11 +103,7 @@ const App: React.FC = () => {
 
         {/* Main Content - Middle Column */}
         <div className="h-full overflow-y-auto">
-          <div
-            className={
-              isMessagesPage || isStudyHelperPage ? "mx-5" : "mx-auto w-[750px]"
-            }
-          >
+          <div className="mx-auto w-[750px]">
             <MainContent />
           </div>
         </div>

@@ -5,7 +5,6 @@ import AppRoutes from "../routes/AppRoutes";
 const MainContent: React.FC = () => {
   const location = useLocation();
 
-  // 🔒 Auth pages এ Navbar দেখানোর দরকার নেই
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
 
   return (
