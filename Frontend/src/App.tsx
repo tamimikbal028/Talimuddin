@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
@@ -11,7 +11,7 @@ import { authHooks, AUTH_KEYS } from "./hooks/useAuth";
  * APP COMPONENT - Main Entry Point
  * ====================================
  *
- * ✅ PROPER AUTH FLOW (TanStack Query):
+ * PROPER AUTH FLOW (TanStack Query):
  *
  * 1. App Load (App.tsx mount):
  *    → authHooks.useUser() call
@@ -34,20 +34,18 @@ import { authHooks, AUTH_KEYS } from "./hooks/useAuth";
  *    → isAuthenticated = false
  *    → ProtectedRoute redirects to /login
  *
- * ⚠️ auth:logout Event:
+ * auth:logout Event:
  * Axios interceptor fires this when token expires.
  * We listen and clear the query cache to log the user out locally.
  */
 
-const App: React.FC = () => {
+const App = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  // Auth state from TanStack Query
-  // ⚠️ CRITICAL: This call triggers the initial auth check
   const { isCheckingAuth } = authHooks.useUser();
 
-  // 🔔 Global logout event listener
+  // Global logout event listener
   // Axios interceptor fires this when all tokens expire
   useEffect(() => {
     const handleLogout = () => {
@@ -68,13 +66,8 @@ const App: React.FC = () => {
     return (
       <>
         <Toaster position="top-right" richColors closeButton />
-        <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="h-20 w-20 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-            <p className="text-3xl font-semibold text-gray-600">
-              Auth checking...
-            </p>
-          </div>
+        <div className="flex h-screen w-screen items-center justify-center text-5xl font-semibold text-gray-600">
+          Checking Authentication...
         </div>
       </>
     );
@@ -84,7 +77,7 @@ const App: React.FC = () => {
     return (
       <>
         <Toaster position="top-right" richColors closeButton />
-        <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
+        <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
           <MainContent />
         </div>
       </>
@@ -93,16 +86,13 @@ const App: React.FC = () => {
 
   return (
     <>
-      {/* Toast Notifications */}
       <Toaster position="top-right" richColors closeButton />
 
       <div className="grid h-screen grid-cols-[15rem_1fr_auto] overflow-hidden">
-        {/* Left Sidebar - Navigation */}
         <div className="h-full overflow-y-auto bg-gray-50">
           <Sidebar />
         </div>
 
-        {/* Main Content - Middle Column */}
         <div className="h-full overflow-y-auto">
           <div className="mx-auto w-[750px]">
             <MainContent />
