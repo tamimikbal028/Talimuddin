@@ -60,15 +60,6 @@ export const routes: RouteConfig[] = [
     category: "education",
     meta: { description: "Attend and manage live online classes" },
   },
-
-  {
-    path: "/notifications",
-    component: lazy(() => import("../pages/Notifications")),
-    requireAuth: true,
-    title: "Notifications",
-    category: "social",
-    meta: { description: "Your notifications and updates" },
-  },
   {
     path: "/saved",
     component: lazy(() => import("../pages/Saved")),

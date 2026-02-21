@@ -2,7 +2,6 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   FaUser,
   FaCog,
-  FaBell,
   FaSchool,
   FaEllipsisH,
   FaSignOutAlt,
@@ -45,12 +44,6 @@ const Sidebar = () => {
       label: "Saved",
       path: "/saved",
       active: location.pathname.startsWith("/saved"),
-    },
-    {
-      icon: FaBell,
-      label: "Notifications",
-      path: "/notifications",
-      active: location.pathname.startsWith("/notifications"),
     },
 
     {

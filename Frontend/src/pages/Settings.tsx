@@ -2,7 +2,6 @@ import React from "react";
 import { FaSignOutAlt } from "react-icons/fa";
 import AccountSettings from "../components/Settings/AccountSettings";
 import PrivacySettings from "../components/Settings/PrivacySettings";
-import NotificationSettings from "../components/Settings/NotificationSettings";
 import AppearanceSettings from "../components/Settings/AppearanceSettings";
 import SupportSettings from "../components/Settings/SupportSettings";
 
@@ -25,7 +24,6 @@ const Settings: React.FC = () => {
       <div className="space-y-6">
         <AccountSettings />
         <PrivacySettings />
-        <NotificationSettings />
         <AppearanceSettings />
         <SupportSettings />
 

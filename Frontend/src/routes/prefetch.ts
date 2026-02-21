@@ -5,7 +5,6 @@ type Importer = () => Promise<unknown>;
 
 const pathToImporter: Record<string, Importer> = {
   "/": () => import("../pages/Home"),
-  "/notifications": () => import("../pages/Notifications"),
   "/settings": () => import("../pages/Settings"),
 };
 
