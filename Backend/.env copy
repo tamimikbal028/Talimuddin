@@ -1,5 +1,8 @@
 PORT=8000
-DB_URL=mongodb+srv://tamimpublicemail_db_user:tamim ikbal@cluster0.eerujqd.mongodb.net
+DB_URL=mongodb+srv://talimuddin_mongodb_user:T%40miM01774569287@cluster0.zvlllvz.mongodb.net
+
+The @ in your password T@miM01774569287 was URL-encoded to %40. In a MongoDB connection URI, @ is a special character used to separate username:password from the hostname, so any @ inside the password itself must be percent-encoded.
+
 CORS_ORIGIN=http://localhost:5173
 
 NODE_ENV=development
