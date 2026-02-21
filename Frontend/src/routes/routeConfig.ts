@@ -5,7 +5,7 @@ import Home from "../pages/Home";
 interface RouteConfig {
   path: string;
   component: LazyExoticComponent<ComponentType> | ComponentType;
-  requireAuth?: boolean;
+  requireAuth: boolean;
   title?: string;
   preload?: boolean;
   category?: string;
