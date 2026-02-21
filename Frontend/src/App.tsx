@@ -78,7 +78,7 @@ const App = () => {
       <>
         <Toaster position="top-right" richColors closeButton />
         <div className="flex h-screen w-screen items-center justify-center bg-gray-100">
-          <MainContent isAuthPage={isAuthPage} />
+          <MainContent />
         </div>
       </>
     );
@@ -93,10 +93,8 @@ const App = () => {
           <Sidebar />
         </div>
 
-        <div className="h-full overflow-y-auto">
-          <div className="mx-auto w-[750px]">
-            <MainContent isAuthPage={isAuthPage} />
-          </div>
+        <div className="mx-auto h-full w-[750px] space-y-5 overflow-y-auto py-5">
+          <MainContent />
         </div>
       </div>
     </>
