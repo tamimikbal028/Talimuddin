@@ -37,21 +37,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute = ({ children, requireAuth }: ProtectedRouteProps) => {
-  const { isAuthenticated, isCheckingAuth } = authHooks.useUser();
+  const { isAuthenticated } = authHooks.useUser();
   const location = useLocation();
-
-  // Auth check চলছে - Loading দেখাও
-  if (isCheckingAuth) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-          <p className="text-gray-600">Loading...</p>
-          <p className="text-gray-600">User is Not Authenticated</p>
-        </div>
-      </div>
-    );
-  }
 
   // Auth required but not logged in → Login page এ পাঠাও
   // location.state এ current path save করো যাতে login এর পর ফেরত আসতে পারে
