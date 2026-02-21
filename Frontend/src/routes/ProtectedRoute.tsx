@@ -33,17 +33,14 @@ import { authHooks } from "../hooks/useAuth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireAuth?: boolean;
+  requireAuth: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  children,
-  requireAuth = true,
-}) => {
+const ProtectedRoute = ({ children, requireAuth }: ProtectedRouteProps) => {
   const { isAuthenticated, isCheckingAuth } = authHooks.useUser();
   const location = useLocation();
 
-  // ⏳ Auth check চলছে - Loading দেখাও
+  // Auth check চলছে - Loading দেখাও
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
@@ -56,22 +53,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // 🔒 Auth required but not logged in → Login page এ পাঠাও
+  // Auth required but not logged in → Login page এ পাঠাও
   // location.state এ current path save করো যাতে login এর পর ফেরত আসতে পারে
   if (requireAuth && !isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 🚫 Already logged in but trying to access login/register → Home এ পাঠাও
+  // Already logged in but trying to access login/register → Home এ পাঠাও
   // Logged in user এর login page দেখার দরকার নেই
   if (!requireAuth && isAuthenticated) {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ All checks passed - Content দেখাও
+  // All checks passed - Content দেখাও
   return <>{children}</>;
 };
 
 export default ProtectedRoute;
-
-

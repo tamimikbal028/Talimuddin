@@ -34,7 +34,7 @@ const MainContent = () => {
               path={route.path}
               element={
                 route.requireAuth !== false ? (
-                  <ProtectedRoute>
+                  <ProtectedRoute requireAuth={true}>
                     <Component />
                   </ProtectedRoute>
                 ) : (
