@@ -1,21 +1,14 @@
 import React, { useMemo, useState } from "react";
 import { FaTint, FaUniversity, FaUsers, FaFilter } from "react-icons/fa";
 import { bloodGroups } from "./data/bloodDonationData";
+import type { BloodDonor } from "./data/bloodDonationData";
 
 const universities = ["All", "BUET", "RUET", "KUET", "CUET", "HSC"];
 
-// TODO: Replace with API data
-interface Donor {
-  id: string;
-  name: string;
-  bloodGroup: string;
-  university: string;
-  totalDonations: number;
-  [key: string]: unknown;
-}
+const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
 interface DonorListTabProps {
-  donors?: Donor[];
+  donors?: BloodDonor[];
 }
 
 const DonorListTab: React.FC<DonorListTabProps> = ({ donors = [] }) => {
@@ -97,9 +90,12 @@ const DonorListTab: React.FC<DonorListTabProps> = ({ donors = [] }) => {
           >
             {/* Avatar */}
             <img
-              src={donor.avatar}
+              src={donor.avatar || DEFAULT_AVATAR}
               alt={donor.name}
               className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = DEFAULT_AVATAR;
+              }}
             />
 
             {/* Info */}
