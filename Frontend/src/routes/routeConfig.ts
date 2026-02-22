@@ -87,14 +87,6 @@ export const routes: RouteConfig[] = [
     meta: { description: "View profile" },
   },
   {
-    path: "/potrika",
-    component: lazy(() => import("../pages/Potrika/Potrikas")),
-    requireAuth: true,
-    title: "Potrika",
-    category: "main",
-    meta: { description: "View Potrika publications" },
-  },
-  {
     path: "/potrika/:potrikaId",
     component: lazy(() => import("../pages/Potrika/PotrikaDetail")),
     requireAuth: true,

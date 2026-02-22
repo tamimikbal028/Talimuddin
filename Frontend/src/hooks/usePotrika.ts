@@ -41,21 +41,9 @@ export const usePotrikaPosts = (potrikaId?: string) => {
   });
 };
 
-export const useAllPotrikas = () => {
-  return useQuery({
-    queryKey: ["potrikas"],
-    queryFn: async () => {
-      const response = await potrikaService.getAllPotrikas();
-      return response.data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-
 export const potrikaHooks = {
   usePotrikaHeader,
   usePotrikaPosts,
-  useAllPotrikas,
 };
 
 export default potrikaHooks;

@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
+import { DEFAULT_POTRIKA_ID } from "../constants/potrika";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -36,7 +37,7 @@ const Sidebar = () => {
     {
       icon: FaNewspaper,
       label: "Potrika",
-      path: "/potrika",
+      path: `/potrika/${DEFAULT_POTRIKA_ID}`,
       active: location.pathname.startsWith("/potrika"),
     },
     {

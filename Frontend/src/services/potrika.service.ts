@@ -1,18 +1,7 @@
-import type {
-  ApiResponse,
-  Potrika,
-  ProfilePostsResponse,
-  AllPotrikasResponse,
-} from "../types";
+import type { ApiResponse, Potrika, ProfilePostsResponse } from "../types";
 import api from "../lib/axios";
 
 export const potrikaService = {
-  getAllPotrikas: async (): Promise<ApiResponse<AllPotrikasResponse>> => {
-    const response =
-      await api.get<ApiResponse<AllPotrikasResponse>>("/potrikas");
-    return response.data;
-  },
-
   getPotrikaHeader: async (
     potrikaId: string
   ): Promise<ApiResponse<{ potrika: Potrika }>> => {

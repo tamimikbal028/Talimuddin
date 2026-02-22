@@ -11,7 +11,3 @@ export interface Potrika {
 export interface PotrikaHeaderResponse {
   potrika: Potrika;
 }
-
-export interface AllPotrikasResponse {
-  potrikas: Potrika[];
-}
