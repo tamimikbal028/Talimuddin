@@ -1,15 +1,15 @@
-import React from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { FaUsers } from "react-icons/fa";
 import { BsPostcard } from "react-icons/bs";
-
+import { authHooks } from "../../../hooks/useAuth";
 import type { BranchDetailsMeta } from "../../../types";
 
 interface BranchDetailsNavBarProps {
   meta: BranchDetailsMeta;
 }
 
-const BranchDetailsNavBar: React.FC<BranchDetailsNavBarProps> = ({ meta }) => {
+const BranchDetailsNavBar = ({ meta }: BranchDetailsNavBarProps) => {
+  const { isAppAdmin } = authHooks.useUser();
   const { branchId } = useParams<{ branchId: string }>();
   const baseUrl = `/branch/branches/${branchId}`;
 
@@ -18,7 +18,7 @@ const BranchDetailsNavBar: React.FC<BranchDetailsNavBarProps> = ({ meta }) => {
     { path: `${baseUrl}/members`, label: "Members", icon: FaUsers, end: true },
   ];
 
-  if (meta.isBranchAdmin || meta.isAppOwner || meta.isAppAdmin) {
+  if (meta.isBranchAdmin || isAppAdmin) {
     tabs.push({
       path: `${baseUrl}/requests`,
       label: "Requests",

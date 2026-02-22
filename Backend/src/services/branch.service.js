@@ -624,10 +624,6 @@ const branchServices = {
       user: userId,
     });
 
-    const user = await User.findById(userId);
-
-    const isAppOwner = user.userType === USER_TYPES.OWNER;
-    const isAppAdmin = user.userType === USER_TYPES.ADMIN;
     const isBranchAdmin =
       (membership && !membership.isPending && membership.isAdmin) || false;
     const isMember = membership && !membership.isPending;
@@ -637,8 +633,6 @@ const branchServices = {
       isMember,
       isPending,
       isBranchAdmin,
-      isAppOwner,
-      isAppAdmin,
     };
 
     return { branch, meta };

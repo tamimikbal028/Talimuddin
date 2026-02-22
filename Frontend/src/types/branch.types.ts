@@ -56,8 +56,6 @@ export interface BranchDetailsMeta {
   isMember: boolean;
   isPending: boolean;
   isBranchAdmin: boolean;
-  isAppOwner: boolean;
-  isAppAdmin: boolean;
 }
 
 export interface BranchDetailsResponse {

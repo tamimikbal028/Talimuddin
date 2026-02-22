@@ -1,6 +1,6 @@
-import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { branchHooks } from "../../hooks/useBranch";
+import { authHooks } from "../../hooks/useAuth";
 import BranchHeader from "../../components/Branch/details-page/BranchHeader";
 import BranchPosts from "../../components/Branch/details-page-tabs/BranchPosts";
 import BranchMembersTab from "../../components/Branch/details-page-tabs/BranchMembersTab";
@@ -8,7 +8,8 @@ import BranchRequestsTab from "../../components/Branch/details-page-tabs/BranchR
 import BranchDetailsSkeleton from "../../components/shared/skeletons/BranchDetailsSkeleton";
 import { FaDoorOpen } from "react-icons/fa";
 
-const BranchDetails: React.FC = () => {
+const BranchDetails = () => {
+  const { isAppAdmin } = authHooks.useUser();
   const { data: response, isLoading, error } = branchHooks.useBranchDetails();
 
   if (isLoading) {
@@ -35,7 +36,7 @@ const BranchDetails: React.FC = () => {
   const branch = response.data.branch;
   const meta = response.data.meta;
 
-  const isApprovedMember = meta.isMember || meta.isAppOwner || meta.isAppAdmin;
+  const isApprovedMember = meta.isMember || isAppAdmin;
 
   if (meta.isPending) {
     return (
@@ -74,7 +75,7 @@ const BranchDetails: React.FC = () => {
           <Routes>
             <Route index element={<BranchPosts />} />
             <Route path="members" element={<BranchMembersTab />} />
-            {(meta.isBranchAdmin || meta.isAppOwner || meta.isAppAdmin) && (
+            {(meta.isBranchAdmin || isAppAdmin) && (
               <Route path="requests" element={<BranchRequestsTab />} />
             )}
           </Routes>

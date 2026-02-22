@@ -13,6 +13,7 @@ import confirm from "../../../utils/sweetAlert";
 import BranchDetailsNavBar from "./BranchDetailsNavBar";
 import { useDropdown } from "../../../hooks/useDropdown";
 import type { BranchDetailsMeta } from "../../../types/branch.types";
+import { authHooks } from "../../../hooks/useAuth";
 
 interface BranchHeaderProps {
   branch: Branch;
@@ -21,6 +22,7 @@ interface BranchHeaderProps {
 
 const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
   const navigate = useNavigate();
+  const { isAppAdmin } = authHooks.useUser();
 
   const { mutate: deleteBranch, isPending: isDeleting } =
     branchHooks.useDeleteBranch();
@@ -138,7 +140,7 @@ const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
             {/* Right: Action Buttons */}
             <div className="flex items-center gap-2">
               {/* Join Code Display */}
-              {meta.isAppOwner || meta.isAppAdmin || meta.isBranchAdmin ? (
+              {isAppAdmin || meta.isBranchAdmin ? (
                 <button
                   onClick={handleCopyJoinCode}
                   className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
@@ -174,7 +176,7 @@ const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
                     }`}
                   >
                     <div className="py-1">
-                      {!(meta.isAppOwner || meta.isAppAdmin) && (
+                      {!isAppAdmin && (
                         <>
                           <button
                             onClick={handleLeave}
@@ -189,9 +191,7 @@ const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
                         </>
                       )}
 
-                      {(meta.isAppOwner ||
-                        meta.isAppAdmin ||
-                        meta.isBranchAdmin) && (
+                      {(isAppAdmin || meta.isBranchAdmin) && (
                         <>
                           <Link
                             to={`/branch/branches/${branch._id}/edit`}
@@ -204,7 +204,7 @@ const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
                         </>
                       )}
 
-                      {(meta.isAppOwner || meta.isAppAdmin) && (
+                      {isAppAdmin && (
                         <button
                           onClick={handleDelete}
                           disabled={isDeleting}
