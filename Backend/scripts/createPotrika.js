@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Potrika } from "../src/models/potrika.model.js";
+import { User } from "../src/models/user.model.js";
 import { DB_NAME } from "../src/constants/common.js";
 import dotenv from "dotenv";
 
@@ -22,12 +23,25 @@ const createPotrika = async () => {
     const potrikaDescription =
       "Monthly Al-Kausar is a research-based Islamic magazine published by Markazud Dawah Al-Islamia Dhaka.";
 
+    // Find the owner user
+    const ownerUser = await User.findOne({ userName: "tamim_main" });
+    if (!ownerUser) {
+      console.warn(
+        "⚠️ User 'tamim_main' not found. Creating Potrika without admin."
+      );
+    }
+
     // Check if it already exists
     const existingPotrika = await Potrika.findOne({ name: potrikaName });
     if (existingPotrika) {
       console.log(
-        `Potrika "${potrikaName}" already exists with ID: ${existingPotrika._id}`
+        `Potrika "${potrikaName}" already exists. Updating admins...`
       );
+      if (ownerUser && !existingPotrika.admins.includes(ownerUser._id)) {
+        existingPotrika.admins.push(ownerUser._id);
+        await existingPotrika.save();
+        console.log("✅ Added tamim_main as admin.");
+      }
       process.exit(0);
     }
 
@@ -35,10 +49,11 @@ const createPotrika = async () => {
       name: potrikaName,
       description: potrikaDescription,
       avatar:
-        "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1738423232/alkausar_avatar.png", // Placeholder or default
+        "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1738423232/alkausar_avatar.png",
       coverImage:
-        "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1738423232/alkausar_cover.jpg", // Placeholder or default
+        "https://res.cloudinary.com/dr7xx5ch4/image/upload/v1738423232/alkausar_cover.jpg",
       postsCount: 0,
+      admins: ownerUser ? [ownerUser._id] : [],
     });
 
     console.log("✅ Potrika created successfully!");

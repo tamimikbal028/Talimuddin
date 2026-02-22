@@ -43,7 +43,7 @@ const App = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const { isCheckingAuth } = authHooks.useUser();
+  const { isCheckingAuth, isAuthenticated } = authHooks.useUser();
 
   // Global logout event listener
   // Axios interceptor fires this when all tokens expire
@@ -73,7 +73,7 @@ const App = () => {
     );
   }
 
-  if (isAuthPage) {
+  if (!isAuthenticated && isAuthPage) {
     return (
       <>
         <Toaster position="top-right" richColors closeButton />

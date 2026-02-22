@@ -46,7 +46,7 @@ const Potrikas = () => {
   if (potrikas.length === 0) {
     return (
       <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow-sm">
-        <p className="text-gray-500">No publications found.</p>
+        <p className="text-gray-500">No Potrika found</p>
       </div>
     );
   }

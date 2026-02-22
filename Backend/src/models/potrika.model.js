@@ -22,6 +22,12 @@ const potrikaSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    admins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

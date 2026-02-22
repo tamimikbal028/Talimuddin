@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { USER_TYPES } from "../constants/index.js";
 
-// ১. রেজিস্ট্রেশন স্কিমা
+// register schema
 const userRegisterSchema = Joi.object({
   fullName: Joi.string().trim().min(3).max(50).required().messages({
     "string.empty": "Full name is required",
@@ -26,7 +26,7 @@ const userRegisterSchema = Joi.object({
     .trim()
     .min(3)
     .max(30)
-    // ✅ NEW: Regular expression to allow only letters, numbers, and underscores
+    // NEW: Regular expression to allow only letters, numbers, and underscores
     .pattern(new RegExp("^[a-zA-Z0-9_]+$"))
     .required()
     .messages({
@@ -44,7 +44,7 @@ const userRegisterSchema = Joi.object({
     .messages({
       "any.only": "Invalid user type.",
     }),
-  // ✅ Real World Safety: Backend এও Terms Agreement চেক করা
+  // Real World Safety: Backend Terms Agreement check
   agreeToTerms: Joi.boolean().valid(true).required().messages({
     "any.only": "You must agree to the terms and conditions.",
     "any.required": "Agreement to terms is required.",
