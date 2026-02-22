@@ -1,46 +1,11 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import Sidebar from "./layout/Sidebar";
 import MainContent from "./layout/MainContent";
 import { authHooks, AUTH_KEYS } from "./hooks/useAuth";
 
-/**
- * ====================================
- * APP COMPONENT - Main Entry Point
- * ====================================
- *
- * PROPER AUTH FLOW (TanStack Query):
- *
- * 1. App Load (App.tsx mount):
- *    → authHooks.useUser() call
- *    → isCheckingAuth = true (isLoading)
- *    → Loading spinner show
- *
- * 2. Auth Check (Background):
- *    → GET /users/current-user API call
- *    → Cookie sent automatically
- *
- * 3. Auth Check Success:
- *    → User data cached in TanStack Query
- *    → isAuthenticated = true
- *    → isCheckingAuth = false
- *    → UI render
- *
- * 4. Auth Check Failed:
- *    → 401/403 error
- *    → User data = null
- *    → isAuthenticated = false
- *    → ProtectedRoute redirects to /login
- *
- * auth:logout Event:
- * Axios interceptor fires this when token expires.
- * We listen and clear the query cache to log the user out locally.
- */
-
 const App = () => {
-  const location = useLocation();
   const queryClient = useQueryClient();
 
   const { isCheckingAuth, isAuthenticated } = authHooks.useUser();
@@ -60,8 +25,6 @@ const App = () => {
     };
   }, [queryClient]);
 
-  const isAuthPage = ["/login", "/register"].includes(location.pathname);
-
   if (isCheckingAuth) {
     return (
       <>
@@ -73,7 +36,7 @@ const App = () => {
     );
   }
 
-  if (!isAuthenticated && isAuthPage) {
+  if (!isAuthenticated) {
     return (
       <>
         <Toaster position="top-right" richColors closeButton />
@@ -88,13 +51,15 @@ const App = () => {
     <>
       <Toaster position="top-right" richColors closeButton />
 
-      <div className="grid h-screen grid-cols-[15rem_1fr_auto] overflow-hidden bg-gray-100">
-        <div className="h-full overflow-y-auto bg-gray-50">
+      <div className="grid h-screen grid-cols-[15rem_1fr] overflow-hidden bg-gray-100">
+        <div className="h-full overflow-y-auto border-r border-gray-200 bg-gray-50">
           <Sidebar />
         </div>
 
-        <div className="mx-auto h-full w-[750px] space-y-5 overflow-y-auto py-5">
-          <MainContent />
+        <div className="h-full overflow-y-auto scroll-smooth">
+          <div className="mx-auto w-[750px] space-y-5 py-3">
+            <MainContent />
+          </div>
         </div>
       </div>
     </>

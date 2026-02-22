@@ -9,7 +9,6 @@ import {
   FaBookmark,
   FaNewspaper,
 } from "react-icons/fa";
-import { prefetchRoute } from "../routes/prefetch";
 import { authHooks } from "../hooks/useAuth";
 import { DEFAULT_POTRIKA_ID } from "../constants/potrika";
 
@@ -36,7 +35,7 @@ const Sidebar = () => {
     },
     {
       icon: FaNewspaper,
-      label: "Potrika",
+      label: "Al-Kawsar",
       path: `/potrika/${DEFAULT_POTRIKA_ID}`,
       active: location.pathname.startsWith("/potrika"),
     },
@@ -84,7 +83,6 @@ const Sidebar = () => {
             <NavLink
               key={index}
               to={item.path}
-              onMouseEnter={() => prefetchRoute(item.path)}
               className={`flex items-center justify-between rounded-xl px-4 py-3 text-base font-medium transition-all duration-200 ${
                 item.active
                   ? "bg-blue-50 text-blue-600"
@@ -111,7 +109,6 @@ const Sidebar = () => {
         <div className="flex items-center gap-2">
           <NavLink
             to={profilePath}
-            onMouseEnter={() => prefetchRoute(profilePath)}
             className={({ isActive }) =>
               `group flex flex-1 items-center rounded-xl px-4 py-3 text-base font-medium transition-all duration-200 ${
                 isActive

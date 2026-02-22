@@ -3,7 +3,6 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import ProtectedRoute from "../routes/ProtectedRoute";
 import { routes, getRouteByPath } from "../routes/routeConfig";
 import PageLoader from "../pages/Fallbacks/PageLoader";
-import { prefetchOnIdle } from "../routes/prefetch";
 
 const MainContent = () => {
   const location = useLocation();
@@ -16,11 +15,6 @@ const MainContent = () => {
       document.title = "SocialHub";
     }
   }, [location.pathname]);
-
-  // Idle prefetch a few high-traffic routes
-  useEffect(() => {
-    prefetchOnIdle(["/"]);
-  }, []);
 
   return (
     <Suspense fallback={<PageLoader />}>
