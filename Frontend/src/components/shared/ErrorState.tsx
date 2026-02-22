@@ -1,33 +1,21 @@
-import React from "react";
+import { IoWarning } from "react-icons/io5";
 
 interface ErrorStateProps {
   message?: string;
-  description?: string;
 }
 
-const ErrorState: React.FC<ErrorStateProps> = ({
-  message = "Something went wrong",
-  description = "Please try refreshing the page",
-}) => {
+const ErrorState = ({ message = "Something went wrong" }: ErrorStateProps) => {
   return (
     <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center shadow-sm">
-      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-        <svg
-          className="h-6 w-6 text-red-600"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-          />
-        </svg>
-      </div>
+      <IoWarning className="mx-auto mb-3 h-12 w-12 text-red-600" />
       <p className="font-semibold text-red-800">{message}</p>
-      <p className="mt-1 text-sm font-medium text-gray-600">{description}</p>
+
+      <button
+        className="mt-4 cursor-pointer rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+        onClick={() => window.location.reload()}
+      >
+        Try Again
+      </button>
     </div>
   );
 };

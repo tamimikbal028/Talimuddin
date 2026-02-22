@@ -46,7 +46,8 @@ const useUser = (): AuthState => {
     isCheckingAuth: isLoading,
     isAppAdmin:
       user?.userType === USER_TYPES.OWNER ||
-      user?.userType === USER_TYPES.ADMIN,
+      user?.userType === USER_TYPES.ADMIN ||
+      false,
   };
 };
 

@@ -1,17 +1,17 @@
-import React, { Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
-import Branches from "./Branches";
+import MyBranch from "../../components/Branch/MyBranch";
 import Header from "../../components/Branch/BranchHeader";
 import PageLoader from "../Fallbacks/PageLoader";
 
 // Lazy load pages
-const BranchDetails = lazy(() => import("./BranchDetails"));  
+const BranchDetails = lazy(() => import("./BranchDetails"));
 const CreateBranchPage = lazy(() => import("./CreateBranchPage"));
 const JoinBranchPage = lazy(() => import("./JoinBranchPage"));
 const EditBranchPage = lazy(() => import("./EditBranchPage"));
-const AllBranches = lazy(() => import("./AllBranches"));
+const AllBranches = lazy(() => import("../../components/Branch/AllBranches"));
 
-const BranchLayout: React.FC = () => {
+const BranchLayout = () => {
   return (
     <>
       <Header />
@@ -20,13 +20,13 @@ const BranchLayout: React.FC = () => {
   );
 };
 
-const Branch: React.FC = () => {
+const Branch = () => {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
         {/* With Header */}
         <Route element={<BranchLayout />}>
-          <Route index element={<Branches />} />
+          <Route index element={<MyBranch />} />
           <Route path="all" element={<AllBranches />} />
         </Route>
 

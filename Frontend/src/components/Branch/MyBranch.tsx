@@ -1,14 +1,15 @@
-import React from "react";
-import BranchCard from "../../components/Branch/BranchCard";
-import BranchCardSkeleton from "../../components/shared/skeletons/BranchCardSkeleton";
-import ErrorState from "../../components/shared/ErrorState";
-import EmptyState from "../../components/shared/EmptyState";
+import BranchCard from "./BranchCard";
+import BranchCardSkeleton from "../shared/skeletons/BranchCardSkeleton";
+import ErrorState from "../shared/ErrorState";
+import EmptyState from "../shared/EmptyState";
 import { branchHooks } from "../../hooks/useBranch";
+import { authHooks } from "../../hooks/useAuth";
+import { USER_TYPES } from "../../constants/user";
 import { BRANCH_LIMIT } from "../../constants";
 import type { BranchListItem } from "../../types";
 import { FaDoorOpen } from "react-icons/fa";
 
-const AllBranches: React.FC = () => {
+const MyBranch = () => {
   const {
     data,
     fetchNextPage,
@@ -16,7 +17,8 @@ const AllBranches: React.FC = () => {
     isFetchingNextPage,
     isLoading,
     isError,
-  } = branchHooks.useAllBranches();
+  } = branchHooks.useMyBranches();
+  const { user } = authHooks.useUser();
 
   const branches: BranchListItem[] =
     data?.pages.flatMap((page) => page.data.branches) || [];
@@ -46,7 +48,7 @@ const AllBranches: React.FC = () => {
       {/* header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          All Branches {totalDocs ? `(${totalDocs})` : ""}
+          Joined Branches {totalDocs ? `(${totalDocs})` : ""}
         </h2>
       </div>
 
@@ -54,7 +56,11 @@ const AllBranches: React.FC = () => {
       {branches.length === 0 ? (
         <EmptyState
           icon={FaDoorOpen}
-          message="No branches found in the system."
+          message={
+            user?.userType === USER_TYPES.OWNER
+              ? "Create or join a branch to get started."
+              : "Join a branch to get started."
+          }
         />
       ) : (
         <>
@@ -62,7 +68,7 @@ const AllBranches: React.FC = () => {
             {branches.map((b) => (
               <BranchCard key={b._id} branch={b} />
             ))}
-            {/* Loading Skeleton for Next Page */}
+            {/* Loading Skeleton for Next Page inside the same grid */}
             {isFetchingNextPage &&
               [...Array(BRANCH_LIMIT)].map((_, i) => (
                 <BranchCardSkeleton key={`skeleton-${i}`} />
@@ -87,4 +93,4 @@ const AllBranches: React.FC = () => {
   );
 };
 
-export default AllBranches;
+export default MyBranch;
