@@ -173,16 +173,10 @@ const updatePotrikaDetailsService = async (potrikaId, updates) => {
   return { potrika };
 };
 
-const getAllPotrikasService = async () => {
-  const potrikas = await Potrika.find({}).lean();
-  return { potrikas };
-};
-
 export default {
   getPotrikaHeaderService,
   getPotrikaPostsService,
   updatePotrikaAvatarService,
   updatePotrikaCoverImageService,
   updatePotrikaDetailsService,
-  getAllPotrikasService,
 };

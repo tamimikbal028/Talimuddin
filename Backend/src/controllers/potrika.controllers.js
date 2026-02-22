@@ -72,19 +72,10 @@ const updatePotrikaDetails = asyncHandler(async (req, res) => {
     );
 });
 
-// Get all potrikas
-const getAllPotrikas = asyncHandler(async (req, res) => {
-  const { potrikas } = await potrikaServices.getAllPotrikasService();
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { potrikas }, "Potrikas fetched successfully"));
-});
-
 export {
   getPotrikaHeader,
   getPotrikaPosts,
   updatePotrikaAvatar,
   updatePotrikaCoverImage,
   updatePotrikaDetails,
-  getAllPotrikas,
 };
