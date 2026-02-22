@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
   FaEllipsisH,
@@ -25,7 +25,7 @@ interface PotrikaPostCardProps {
   meta: PostMeta;
 }
 
-const PotrikaPostCard: React.FC<PotrikaPostCardProps> = ({ post, meta }) => {
+const PotrikaPostCard = ({ post, meta }: PotrikaPostCardProps) => {
   const { potrikaId } = useParams();
   const {
     isOpen: showMenu,

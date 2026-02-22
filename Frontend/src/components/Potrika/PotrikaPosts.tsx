@@ -1,7 +1,5 @@
 import PotrikaPostCard from "./PotrikaPostCard";
 import PostSkeleton from "../shared/skeletons/PostSkeleton";
-import type { ApiError } from "../../types";
-import type { AxiosError } from "axios";
 import { potrikaHooks } from "../../hooks/usePotrika";
 
 interface PotrikaPostsProps {
@@ -22,7 +20,7 @@ const PotrikaPosts = ({ potrikaId }: PotrikaPostsProps) => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         {[1, 2, 3].map((i) => (
           <PostSkeleton key={i} />
         ))}
@@ -31,40 +29,33 @@ const PotrikaPosts = ({ potrikaId }: PotrikaPostsProps) => {
   }
 
   if (error) {
-    const axiosError = error as AxiosError<ApiError>;
-    const errorMessage =
-      axiosError.response?.data?.message ||
-      error.message ||
-      "Could not load posts";
-
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-12 text-center shadow">
-        <p className="font-medium text-red-600">{errorMessage}</p>
+        <p className="font-medium text-red-600">{error.message}</p>
+      </div>
+    );
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow">
+        <p className="text-gray-500">Create first post on Al-Kausar!</p>
       </div>
     );
   }
 
   return (
     <>
-      {/* Posts List */}
-      {posts.length > 0 ? (
-        <div className="space-y-3">
-          {posts.map((item) => (
-            <PotrikaPostCard
-              key={item.post._id}
-              post={item.post}
-              meta={item.meta}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-lg border border-gray-200 bg-white p-12 text-center shadow">
-          <p className="text-gray-500">
-            No posts yet. Be the first to post on Potrika!
-          </p>
-        </div>
-      )}
-      {/* Load More Button */}
+      <div className="space-y-3">
+        {posts.map((item) => (
+          <PotrikaPostCard
+            key={item.post._id}
+            post={item.post}
+            meta={item.meta}
+          />
+        ))}
+      </div>
+
       {hasNextPage && (
         <button
           onClick={() => fetchNextPage()}

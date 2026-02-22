@@ -44,26 +44,6 @@ const PostSkeleton = () => {
       <div className="px-4 pb-3">
         <div className="h-64 w-full rounded-lg bg-gray-300"></div>
       </div>
-
-      {/* Stats Bar Skeleton */}
-      <div className="border-t border-gray-100 px-4 py-2">
-        <div className="flex items-center space-x-3">
-          <div className="h-4 w-16 rounded bg-gray-300"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-300"></div>
-          <div className="h-4 w-20 rounded bg-gray-300"></div>
-          <div className="h-1 w-1 rounded-full bg-gray-300"></div>
-          <div className="h-4 w-16 rounded bg-gray-300"></div>
-        </div>
-      </div>
-
-      {/* Action Buttons Skeleton */}
-      <div className="border-t border-gray-100 px-4 py-3">
-        <div className="grid grid-cols-3 gap-2">
-          <div className="h-9 rounded-lg bg-gray-300"></div>
-          <div className="h-9 rounded-lg bg-gray-300"></div>
-          <div className="h-9 rounded-lg bg-gray-300"></div>
-        </div>
-      </div>
     </div>
   );
 };
