@@ -1,4 +1,3 @@
-import React from "react";
 import {
   FaEllipsisH,
   FaEdit,
@@ -20,7 +19,7 @@ interface BranchHeaderProps {
   meta: BranchDetailsMeta;
 }
 
-const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
+const BranchHeader = ({ branch, meta }: BranchHeaderProps) => {
   const navigate = useNavigate();
 
   const { mutate: deleteBranch, isPending: isDeleting } =
@@ -145,7 +144,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({ branch, meta }) => {
                   className="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
                   title="Click to copy join code"
                 >
-                  <span className="font-mono text-sm font-semibold text-gray-700">
+                  <span className="font-mono text-sm font-semibold tracking-widest text-gray-700">
                     {branch.joinCode}
                   </span>
                 </button>
