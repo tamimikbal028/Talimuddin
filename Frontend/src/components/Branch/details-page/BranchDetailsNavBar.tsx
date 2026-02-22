@@ -30,7 +30,7 @@ const BranchDetailsNavBar = ({ meta }: BranchDetailsNavBarProps) => {
   return (
     <div className="border-b border-gray-200 bg-white">
       <div className="no-scrollbar flex items-center justify-between overflow-x-auto px-6 sm:gap-4 md:gap-8">
-        {/* Nav Tabs */}
+        {/* nav tabs */}
         {tabs.map((tab) => (
           <NavLink
             key={tab.path}
